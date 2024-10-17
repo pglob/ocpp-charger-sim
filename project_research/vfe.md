@@ -9,6 +9,7 @@
   - [3.2. Issues with adding or editing hotspots](#32-issues-with-adding-or-editing-hotspots)
   - [3.3. Nested Hotspot Concerns](#33-nested-hotspot-concerns)
   - [3.4. General UI concerns](#34-general-ui-concerns)
+  - [Coherent design](#coherent-design)
   - [3.5. Gamification](#35-gamification)
   - [3.6. Iconography](#36-iconography)
   - [3.7. Too many elements.](#37-too-many-elements)
@@ -48,41 +49,44 @@ The previous work on the UIX seems workable but has many issues in terms of usab
 
 ## 3.1. Adding Photo Spheres
 
-![](vfe_images/image3.png)
+![](vfe_images/image3.png)  
 Adding a new photosphere is shown by a popup, with selecting the location being a separate pop-up. This isn’t very intuitive or nice to use. 
 
-![](vfe_images/image7.png)
+![](vfe_images/image7.png)  
 Not a huge fan of this personally.
 
 ## 3.2. Issues with adding or editing hotspots
 
 
-![](vfe_images/image5.png)
+![](vfe_images/image5.png)  
 Adding a hotspot is not that great, while it allows you to click on the viewer to add a hotspot and pick and choose where it is, I feel this is more information than needs to be shown to the user. Having to click an Add Feature button, then an add hotspot button could cause friction in having to add a ton of content to your VFE. 
 
 
-![](vfe_images/image1.png)
+![](vfe_images/image1.png)  
 Also without fully understanding the gamification aspect of the editor, the level field is confusing and unclear in what it does. I feel this UI is very much unneeded as it could just be merged into the normal edit UI and just change how people place hotspots into their photospheres.
 I understand the choices made here but I’m not a fan of a lot of the decisions here. I don’t like how I can only choose to either have an image, text or any other type. There is no way to have an image and have text to the side to explain it.  I think maybe incorporating some kind of rich text system where you can input links, images or other things inside of a text window. 
 
 ## 3.3. Nested Hotspot Concerns
 
-![](vfe_images/image13.png)
+![](vfe_images/image13.png)  
 
 This UI works for adding nested hot spots but having a separate pop up to decide where to place a hotspot is not at all intuitive and this system prevents you from making a hotspot of any size you wish.
 
-![](vfe_images/image4.png)
+![](vfe_images/image4.png)  
 After adding a nested hotspot there is no way to immediately edit this nested hotspot to add the content you wish. Instead you MUST save and reopen the hotspot to edit the nested hotspot. This causes some friction with working with the editor. 
 I would say it’s not clear what these squares are to the user exactly, without me watching the video I may have assumed they were just pointing out details rather than being a clickable portal to another hotspot. Maybe always show the label to help point out that this is an element to be clicked on and not just a picture. 
 
 
 ## 3.4. General UI concerns
-![](vfe_images/image9.png)
+![](vfe_images/image9.png)  
 
 Having the Map rotation option at the top is not at all intuitive, they described the functionality in the video but it took me a bit to find it due to it’s odd position. On the bottom right of this viewer there is a download button, this does NOT download the current project but instead only downloads the image for the current photosphere. This is not at all intuitive and I’d imagine would only lead to issues and confusion in the future. 
 
-![](vfe_images/image12.png) Instead you must download your project by clicking export here.
+![](vfe_images/image12.png)  
+Instead you must download your project by clicking export here.
 One thing I wish was implemented is a way to go into user mode while in the editor. This would allow you to view the VFE in the way a user would without having to exit and open the file in the viewer. 
+
+## Coherent design
 There is also a lack of coherent UIX design, the photosphere viewer has its own UIX which does not match any of the custom UIX designed for the VFE viewer. They should have matching UIX design and language. 
 
 ## 3.5. Gamification
@@ -90,23 +94,24 @@ The start of the gamification can be seen in the project but feels very limited 
 
 ## 3.6. Iconography
 
-![](vfe_images/image11.png)
+![](vfe_images/image11.png)  
 I don’t enjoy some of the icons shown to the user. The only option to be shown is just generic arrows in two different colors. This does not at all convey to the user what these hotspots contain or if they are important. It would be nice if they related to the content they contain. This would improve the gamification aspect of the project as it’s unclear otherwise which spheres have quizzes you must answer to progress. 
 
-![](vfe_images/image8.png)
+![](vfe_images/image8.png)  
 This icon implies it downloads your project, it does not, it downloads the photosphere image instead.
 
 ## 3.7. Too many elements.
-![](vfe_images/image2.png)
+
+![](vfe_images/image2.png)  
 The amount of elements presented here are not clear to the user, Having two different kinds of zoom is weird to me. Also the button on the bottom left is unclear on what it does (just rotates the photosphere automatically), it feels like a feature of the viewer which should have been removed for the final project.
 
 ## 3.8. Editing NavMesh
-![](vfe_images/image6.png)
+
+![](vfe_images/image6.png)  
 This UI is not at all intuitive and a lot more clicking than should be required. My brain wants me to just be able to click and move around the dots, but instead moving a dot requires selecting which one you want to change from the dropdown and then clicking on the map. The current dot does NOT light up at all even to let you know which one you’ll be moving so you are forced to just memorize where you put each photosphere. There’s no way to view what each dot is inside of this UI; it just draws dots and gives the user no other information.
 
 ## 3.9. Cannot move hotspots after placement
 There is no way to move hotspots after placing them, they have to be removed and re-added to move them.
 
-
 ## 3.10. Bugs
-![](vfe_images/image10.png)
+![](vfe_images/image10.png)  
