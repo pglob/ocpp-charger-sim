@@ -70,11 +70,11 @@ Not a huge fan of this personally.
 
 ![](vfe_images/image5.png)  
 Adding a hotspot is not that great, while it allows you to click on the viewer to add a hotspot and pick and choose where it is, I feel this is more information than needs to be shown to the user. Having to click an Add Feature button, then an add hotspot button could cause friction in having to add a ton of content to your VFE. 
-
+Also without fully understanding the gamification aspect of the editor, the level field is confusing and unclear in what it does. I feel this UI is very much unneeded as it could just be merged into the normal edit UI and just change how people place hotspots into their photospheres.
 
 ![](vfe_images/image1.png)  
-Also without fully understanding the gamification aspect of the editor, the level field is confusing and unclear in what it does. I feel this UI is very much unneeded as it could just be merged into the normal edit UI and just change how people place hotspots into their photospheres.
 I understand the choices made here but I’m not a fan of a lot of the decisions here. I don’t like how I can only choose to either have an image, text or any other type. There is no way to have an image and have text to the side to explain it.  I think maybe incorporating some kind of rich text system where you can input links, images or other things inside of a text window. 
+
 
 ## 3.3. Nested Hotspot Concerns
 
