@@ -28,7 +28,8 @@ Department of Geology, Portland State University
 # 2. What will we be doing?
 
 ## 2.1. Summary
-We will be modifying a previous project made by a capstoneteam. We will mainly be fixing and modifying the UI to be moreintuitive to use and in general reduce friction inside of the editor.
+
+The project is working on a virtual field enviroment editor and viewer for designing field trips using a Google Street View style viewer. This will be used by Geology capstone students to create a virtual field trip for use in elementary and high school education. This editor allows you to place hotspots to give more information about areas in the photosphere, linked photospheres and other features that would assist in creating a virtual field trip. While a previous team worked on this before, the current editor and viewer suffers from unintuitive UI, and many issues that make working with such a program harder. We will mainly be fixing and modifying the UI to be more intuitive to use and in general reduce friction inside of the editor. 
 
 ## 2.2. Wanted Features
 
@@ -39,7 +40,7 @@ We will be modifying a previous project made by a capstoneteam. We will mainly b
 
 ## 2.3. Previous Work
 
-The previous work on the UIX seems workable but has many issues in terms of usability and accessibility. I feel a lot of the UIX elements are not at all intuitive to use or clear. The current viewer and editor are written in react and are completely serverless in how it runs. It uses a service called vercel to host their website but it does nothing more than justserver the html.
+The previous work on the UIX seems workable but has many issues in terms of usability and accessibility. I feel a lot of the UIX elements are not at all intuitive to use or clear. The current viewer and editor are written in react and are completely serverless in how it runs. It uses a service called vercel to host their website but it does nothing more than justserver the html. To start the editor you must drag and drop a .vfe file (just a renamed zip) that contains the various images, hotspots, and photosphere data.
 
 ## 2.4. Current Tech
 - React.JS
