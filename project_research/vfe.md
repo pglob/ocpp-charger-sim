@@ -4,18 +4,19 @@
   - [2.2. Wanted Features](#22-wanted-features)
   - [2.3. Previous Work](#23-previous-work)
   - [2.4. Current Tech](#24-current-tech)
+  - [2.5. Related Links](#25-related-links)
 - [3. Issues](#3-issues)
   - [3.1. Adding Photo Spheres](#31-adding-photo-spheres)
   - [3.2. Issues with adding or editing hotspots](#32-issues-with-adding-or-editing-hotspots)
   - [3.3. Nested Hotspot Concerns](#33-nested-hotspot-concerns)
   - [3.4. General UI concerns](#34-general-ui-concerns)
-  - [Coherent design](#coherent-design)
-  - [3.5. Gamification](#35-gamification)
-  - [3.6. Iconography](#36-iconography)
-  - [3.7. Too many elements.](#37-too-many-elements)
-  - [3.8. Editing NavMesh](#38-editing-navmesh)
-  - [3.9. Cannot move hotspots after placement](#39-cannot-move-hotspots-after-placement)
-  - [3.10. Bugs](#310-bugs)
+  - [3.5. Coherent design](#35-coherent-design)
+  - [3.6. Gamification](#36-gamification)
+  - [3.7. Iconography](#37-iconography)
+  - [3.8. Too many elements.](#38-too-many-elements)
+  - [3.9. Editing NavMesh](#39-editing-navmesh)
+  - [3.10. Cannot move hotspots after placement](#310-cannot-move-hotspots-after-placement)
+  - [3.11. Bugs](#311-bugs)
 
 # 1. The Sponsor
 
@@ -44,6 +45,15 @@ The previous work on the UIX seems workable but has many issues in terms of usab
 - React.JS
 - Vercel
 - [Photo Sphere Viewer](https://photo-sphere-viewer.js.org)
+
+
+## 2.5. Related Links
+
+- [Current VFE Application](https://virtual-field-environments.vercel.app)
+- [Current Source Code](https://github.com/kingsawpdx/virtualFieldEnvironments)
+- [Proposal](https://docs.google.com/document/d/1EVQt-meafmD1kn-RcqmmQ_sJXN3WAMge/edit?rtpof=true)
+- [Notes](https://docs.google.com/document/d/1ZCQPYToDrPnujKdvv08zzDpyTzMeU_r2OVcmdy9P1c4/edit)
+- [Previous Presentation](https://www.youtube.com/watch?v=UG7JK46kwoo)
 
 # 3. Issues
 
@@ -86,13 +96,13 @@ Having the Map rotation option at the top is not at all intuitive, they describe
 Instead you must download your project by clicking export here.
 One thing I wish was implemented is a way to go into user mode while in the editor. This would allow you to view the VFE in the way a user would without having to exit and open the file in the viewer. 
 
-## Coherent design
+## 3.5. Coherent design
 There is also a lack of coherent UIX design, the photosphere viewer has its own UIX which does not match any of the custom UIX designed for the VFE viewer. They should have matching UIX design and language. 
 
-## 3.5. Gamification
+## 3.6. Gamification
 The start of the gamification can be seen in the project but feels very limited in scope, as users can only add one quiz question per photosphere and I don’t see a good way to try and link multiple questions together. 
 
-## 3.6. Iconography
+## 3.7. Iconography
 
 ![](vfe_images/image11.png)  
 I don’t enjoy some of the icons shown to the user. The only option to be shown is just generic arrows in two different colors. This does not at all convey to the user what these hotspots contain or if they are important. It would be nice if they related to the content they contain. This would improve the gamification aspect of the project as it’s unclear otherwise which spheres have quizzes you must answer to progress. 
@@ -100,18 +110,18 @@ I don’t enjoy some of the icons shown to the user. The only option to be shown
 ![](vfe_images/image8.png)  
 This icon implies it downloads your project, it does not, it downloads the photosphere image instead.
 
-## 3.7. Too many elements.
+## 3.8. Too many elements.
 
 ![](vfe_images/image2.png)  
 The amount of elements presented here are not clear to the user, Having two different kinds of zoom is weird to me. Also the button on the bottom left is unclear on what it does (just rotates the photosphere automatically), it feels like a feature of the viewer which should have been removed for the final project.
 
-## 3.8. Editing NavMesh
+## 3.9. Editing NavMesh
 
 ![](vfe_images/image6.png)  
 This UI is not at all intuitive and a lot more clicking than should be required. My brain wants me to just be able to click and move around the dots, but instead moving a dot requires selecting which one you want to change from the dropdown and then clicking on the map. The current dot does NOT light up at all even to let you know which one you’ll be moving so you are forced to just memorize where you put each photosphere. There’s no way to view what each dot is inside of this UI; it just draws dots and gives the user no other information.
 
-## 3.9. Cannot move hotspots after placement
+## 3.10. Cannot move hotspots after placement
 There is no way to move hotspots after placing them, they have to be removed and re-added to move them.
 
-## 3.10. Bugs
+## 3.11. Bugs
 ![](vfe_images/image10.png)  
