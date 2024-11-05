@@ -1,0 +1,3 @@
+dependency-reduced-pom.xml
+backend/target/*
+.vscode/settings.json
