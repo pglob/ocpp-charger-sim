@@ -1,0 +1,78 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!-- Specify the POM model version -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Define the project's coordinates -->
+    <groupId>com.sim_backend</groupId>
+    <artifactId>ocpp-charger-sim-backend</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <!-- Specify the Java compiler source and target versions -->
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!-- Define project dependencies -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>6.3.0</version>
+        </dependency>
+        <!-- ADD NEW DEPENDENCIES HERE -->
+        <!-- <dependency>
+            <groupId>group.id.here</groupId>
+            <artifactId>artifact-id-here</artifactId>
+            <version>version-here</version>
+        </dependency> -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Configure the Maven Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <!-- Configure the Maven Shade Plugin for creating an uber JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Define the name of the final shaded JAR -->
+                            <finalName>ocpp-charger-sim-backend-1.0-SNAPSHOT</finalName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <!-- Specify the main class for the executable JAR -->
+                                    <mainClass>com.sim_backend.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- ADD NEW PLUGINS HERE -->
+            <!-- <plugin>
+                <groupId>plugin.group.id.here</groupId>
+                <artifactId>plugin-artifact-id-here</artifactId>
+                <version>plugin-version-here</version>
+            </plugin> -->
+        </plugins>
+    </build>
+
+</project>
