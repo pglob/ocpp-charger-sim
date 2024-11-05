@@ -22,6 +22,7 @@ public class Main {
         int frontendPort = Integer.parseInt(frontendPortString);
         int backendPort = Integer.parseInt(backendPortString);
 
+        // Setup the REST API for the frontend to use
         Javalin app = Javalin.create(config -> {
             config.bundledPlugins.enableCors(cors -> {
                 // Allow CORS from the frontend host and port
