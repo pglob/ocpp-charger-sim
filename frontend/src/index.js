@@ -6,7 +6,7 @@ import App from './App';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-  // Enable StrictMode to help identify potential problems in an application
+  // Enable StrictMode to help identify potential problems
   <React.StrictMode>
     <App />
   </React.StrictMode>
