@@ -10,8 +10,7 @@ COPY src /app/src
 # Set the working directory
 WORKDIR /app
 
-
-RUN mvn clean org.jacoco:jacoco-maven-plugin:0.8.12:prepare-agent  verify org.jacoco:jacoco-maven-plugin:0.8.12:report
+RUN mvn clean org.jacoco:jacoco-maven-plugin:0.8.12:prepare-agent  verify org.jacoco:jacoco-maven-plugin:0.8.12 :report
 
 # Package the application
 RUN mvn clean package -DskipTests
@@ -27,3 +26,12 @@ EXPOSE ${BACKEND_PORT}
 
 # Run the application
 CMD ["java", "-jar", "/app/app.jar"]
+
+# Tests Dockerfile
+FROM build as test
+
+# Set the working directory
+WORKDIR /app
+
+# Run Jacoco
+RUN mvn clean org.jacoco:jacoco-maven-plugin:0.8.12:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.12:report

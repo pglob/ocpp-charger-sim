@@ -2,12 +2,21 @@ services:
   backend:
     build:
       context: ./backend
+      target: build
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     environment:
       - BACKEND_HOST=${BACKEND_HOST}
       - BACKEND_PORT=${BACKEND_PORT}
       - FRONTEND_URL=http://${FRONTEND_HOST}:${FRONTEND_PORT}
+  backend-test:
+    depends_on:
+      - backend
+    build:
+      context: ./backend
+      target: test
+    profiles:
+     - test
   frontend:
     build:
       context: ./frontend
