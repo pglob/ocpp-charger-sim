@@ -10,6 +10,9 @@ COPY src /app/src
 # Set the working directory
 WORKDIR /app
 
+
+RUN mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent  verify org.jacoco:jacoco-maven-plugin:0.8.8:report
+
 # Package the application
 RUN mvn clean package -DskipTests
 
