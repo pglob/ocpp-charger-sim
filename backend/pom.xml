@@ -127,9 +127,11 @@
                         </reports>
                     </reportSet>
                 </reportSets>
-                <excludes>
-                    <exclude>com/sim_backend/**/package-info.java</exclude>
-                </excludes>
+                <configuration>
+                    <excludes>
+                        <exclude>com/sim_backend/**/package-info.java</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </reporting>
