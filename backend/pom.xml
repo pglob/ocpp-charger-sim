@@ -105,17 +105,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
-                <configuration>
-                    <excludes>
-                        <exclude>com/sim_backend/**/package-info.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
             <!-- ADD NEW PLUGINS HERE -->
             <!-- <plugin>
                 <groupId>plugin.group.id.here</groupId>
@@ -129,6 +118,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -137,6 +127,9 @@
                         </reports>
                     </reportSet>
                 </reportSets>
+                <excludes>
+                    <exclude>com/sim_backend/**/package-info.java</exclude>
+                </excludes>
             </plugin>
         </plugins>
     </reporting>
