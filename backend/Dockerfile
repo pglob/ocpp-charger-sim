@@ -14,7 +14,7 @@ WORKDIR /app
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application
-FROM eclipse-temurin:21-jdk-jammy
+FROM build as run
 
 # Copy the packaged jar file from the build stage
 COPY --from=build /app/target/ocpp-charger-sim-backend-1.0-SNAPSHOT.jar /app/app.jar
@@ -25,7 +25,7 @@ EXPOSE ${BACKEND_PORT}
 # Run the application
 CMD ["java", "-jar", "/app/app.jar"]
 
-# Tests Dockerfile
+# Run tests
 FROM build as test
 
 # Set the working directory
