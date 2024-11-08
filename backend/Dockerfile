@@ -31,5 +31,4 @@ FROM build as test
 # Set the working directory
 WORKDIR /app
 
-
 CMD ["mvn", "clean", "test"]
