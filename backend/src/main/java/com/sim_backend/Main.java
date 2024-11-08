@@ -33,6 +33,6 @@ public class Main {
         }).start(backendPort); // Start the server
 
         // Register a test route
-        TestMessageController.registerRoutes(app);
+        //TestMessageController.registerRoutes(app);
     }
 }
