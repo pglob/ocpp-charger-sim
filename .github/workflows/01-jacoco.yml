@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: maven:3.9.4-eclipse-temurin-21
     permissions:
       pull-requests: write
     steps:
@@ -18,7 +18,6 @@ jobs:
         run: |
           chmod +x mvn
           ./mvn clean test
-
       - name: Add coverage to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.7.1
