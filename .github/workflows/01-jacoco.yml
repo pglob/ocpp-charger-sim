@@ -18,7 +18,8 @@ jobs:
           architecture: x64
       - name: Run Coverage
         run: |
-          cd backend
+          rm -r frontend
+          cp -R backend/* ./ 
           mvn clean test
       - name: Add coverage to PR
         id: jacoco

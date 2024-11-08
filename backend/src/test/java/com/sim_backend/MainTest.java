@@ -1,10 +1,9 @@
-package com.sim_backend.rest;
+package com.sim_backend;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.*;
 
-import com.sim_backend.Main;
 import io.javalin.Javalin;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import org.junit.jupiter.api.BeforeEach;
