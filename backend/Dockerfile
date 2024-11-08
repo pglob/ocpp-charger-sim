@@ -31,7 +31,5 @@ FROM build as test
 # Set the working directory
 WORKDIR /app
 
-# Run Jacoco
-RUN mvn clean org.jacoco:jacoco-maven-plugin:0.8.12:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.12:report
 
-CMD []
+CMD ["mvn", "clean", "test"]
