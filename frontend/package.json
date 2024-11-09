@@ -8,6 +8,7 @@
     "react-scripts": "5.0.0"
   },
   "scripts": {
+    "lint": "eslint . --ext .js,.jsx",
     "start": "PORT=3030 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
