@@ -1,3 +1,5 @@
 dependency-reduced-pom.xml
 backend/target/*
 .vscode/settings.json
+backend/.idea
+node_modules/
