@@ -15,7 +15,7 @@ public class HeartBeatResponse extends OCCPMessage {
 
     public HeartBeatResponse() {
         super();
-        this.currentTime = ZonedDateTime.now(ZoneId.systemDefault());
+        this.currentTime = ZonedDateTime.now(ZoneId.of("UTC"));
     }
 
     public HeartBeatResponse(ZonedDateTime time) {

@@ -61,10 +61,21 @@ public class HeartBeatTest {
                 10,
                 2,
                 10,
-                10, ZoneId.systemDefault()));
+                10, ZoneId.of("UTC")));
         String json = GsonUtilities.toString(heartBeat.generateMessage());
-        assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001-07:00\"");
+        assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001Z\"");
 
+
+        heartBeat = new HeartBeatResponse(ZonedDateTime.of(
+                2004,
+                10,
+                10,
+                10,
+                2,
+                10,
+                10, ZoneId.of("UTC-7")));
+        json = GsonUtilities.toString(heartBeat.generateMessage());
+        assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001-07:00\"");
     }
 
     @Test
