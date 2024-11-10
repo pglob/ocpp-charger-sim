@@ -16,6 +16,25 @@ This project is for the RangerEV sponsor.
 ### Linting
 
 
+Use ESLint to check the code’s quality and style, and Prettier to adjust code formatting.
+
+Before running the linter, install the required dependencies by running the following command in the `frontend` directory:
+
+```bash
+npm install
+```
+View formatting and style issues in all .js and .jsx files:
+
+```bash
+npm run lint
+```
+to automatically fix code formatting issues:
+
+```bash
+npm run format
+```
+
+
 ## Backend
 ### Testing
 ### Linting
