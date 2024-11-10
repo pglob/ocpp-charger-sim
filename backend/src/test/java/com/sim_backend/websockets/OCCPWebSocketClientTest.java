@@ -1,6 +1,6 @@
-package com.sim_backend.networking.websockets;
+package com.sim_backend.websockets;
 
-import com.sim_backend.networking.websockets.messages.HeartBeat;
+import com.sim_backend.websockets.messages.HeartBeat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package com.sim_backend.networking.websockets;
+package com.sim_backend.websockets;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;

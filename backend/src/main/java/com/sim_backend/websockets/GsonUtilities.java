@@ -1,9 +1,9 @@
-package com.sim_backend.networking.websockets;
+package com.sim_backend.websockets;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.sim_backend.networking.websockets.gson.ZonedDateTimeSerializer;
+import com.sim_backend.websockets.gson.ZonedDateTimeSerializer;
 
 import java.time.ZonedDateTime;
 

@@ -1,4 +1,4 @@
-package com.sim_backend.networking.websockets.messages;
+package com.sim_backend.websockets.messages;
 
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;

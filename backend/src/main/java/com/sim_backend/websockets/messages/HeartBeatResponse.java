@@ -1,10 +1,10 @@
-package com.sim_backend.networking.websockets.messages;
+package com.sim_backend.websockets.messages;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.sim_backend.networking.websockets.GsonUtilities;
-import com.sim_backend.networking.websockets.OCCPMessage;
-import com.sim_backend.networking.websockets.OCCPMessageInfo;
+import com.sim_backend.websockets.GsonUtilities;
+import com.sim_backend.websockets.OCCPMessage;
+import com.sim_backend.websockets.OCCPMessageInfo;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

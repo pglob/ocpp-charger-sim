@@ -1,9 +1,9 @@
-package com.sim_backend.networking.websockets.messages;
+package com.sim_backend.websockets.messages;
 
 import com.networknt.schema.*;
-import com.sim_backend.networking.websockets.GsonUtilities;
-import com.sim_backend.networking.websockets.OCCPMessage;
-import com.sim_backend.networking.websockets.OCCPWebSocketClient;
+import com.sim_backend.websockets.GsonUtilities;
+import com.sim_backend.websockets.OCCPMessage;
+import com.sim_backend.websockets.OCCPWebSocketClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

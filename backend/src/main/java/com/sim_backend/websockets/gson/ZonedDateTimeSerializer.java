@@ -1,4 +1,4 @@
-package com.sim_backend.networking.websockets.gson;
+package com.sim_backend.websockets.gson;
 
 import com.ethlo.time.DateTime;
 import com.google.gson.JsonElement;

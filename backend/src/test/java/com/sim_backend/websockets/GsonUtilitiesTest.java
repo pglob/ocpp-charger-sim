@@ -1,4 +1,4 @@
-package com.sim_backend.networking.websockets;
+package com.sim_backend.websockets;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
