@@ -10,3 +10,12 @@ This project is for the RangerEV sponsor.
    * The frontend will default to http://localhost:3030
    * The backend will default to  http://localhost:8080
    * Port numbers and URLs are defined in `ocpp-charger-sim/.env`
+
+## Frontend
+### Testing
+### Linting
+
+
+## Backend
+### Testing
+### Linting
