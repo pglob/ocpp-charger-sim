@@ -1,5 +1,6 @@
 package com.sim_backend.websockets;
 
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -47,7 +48,12 @@ public class MessageQueue {
     public OCPPMessage popMessage(final OCPPWebSocketClient client) {
         OCPPMessage message = queue.poll();
         if (message != null) {
-            message.sendMessage(client);
+            try {
+                message.sendMessage(client);
+            } catch (WebsocketNotConnectedException ex) {
+                client.reconnect();
+                message.sendMessage(client);
+            }
         }
         return message;
     }
