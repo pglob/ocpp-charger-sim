@@ -4,7 +4,10 @@ import com.sim_backend.rest.TestMessageController;
 
 import io.javalin.Javalin;
 
-public class Main {
+public final class Main {
+    private Main() {
+
+    }
     /**
      * The main method that starts the Javalin web server.
      *

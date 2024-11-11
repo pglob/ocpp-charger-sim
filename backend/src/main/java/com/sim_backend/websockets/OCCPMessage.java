@@ -1,9 +1,6 @@
 package com.sim_backend.websockets;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-
-import org.java_websocket.client.WebSocketClient;
 
 public abstract class OCCPMessage {
     /**
@@ -15,10 +12,10 @@ public abstract class OCCPMessage {
     }
 
     /**
-     * Emit the message to the given client
-     * @param client The websocket client
+     * Emit the message to the given client.
+     * @param client The websocket client.
      */
-    public void sendMessage(OCCPWebSocketClient client) {
+    public void sendMessage(final OCCPWebSocketClient client) {
         client.send(GsonUtilities.toString(this.generateMessage()));
     }
 }

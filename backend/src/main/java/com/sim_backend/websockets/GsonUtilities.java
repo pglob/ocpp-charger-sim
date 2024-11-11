@@ -11,7 +11,9 @@ public abstract class GsonUtilities {
     /**
      * You cannot create this.
      */
-    private GsonUtilities() {}
+    private GsonUtilities() {
+
+    }
 
     /**
      * Get a Gson Object with our custom TypeAdapters installed.
@@ -19,7 +21,8 @@ public abstract class GsonUtilities {
      */
     public static Gson getGson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeSerializer());
+        gsonBuilder.registerTypeAdapter(ZonedDateTime.class,
+                new ZonedDateTimeSerializer());
 
         return gsonBuilder.create();
     }
@@ -29,7 +32,7 @@ public abstract class GsonUtilities {
      * @param json The JsonElement to convert.
      * @return The JsonElement converted to a String.
      */
-    public static String toString(JsonElement json) {
+    public static String toString(final JsonElement json) {
         Gson gson = getGson();
         return gson.toJson(json, JsonElement.class);
     }

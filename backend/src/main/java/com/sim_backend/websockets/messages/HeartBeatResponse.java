@@ -1,8 +1,5 @@
 package com.sim_backend.websockets.messages;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.OCCPMessage;
 import com.sim_backend.websockets.OCCPMessageInfo;
 
@@ -10,15 +7,25 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @OCCPMessageInfo(messageName = "HeartBeatResponse")
-public class HeartBeatResponse extends OCCPMessage {
+public final class HeartBeatResponse extends OCCPMessage {
+    /**
+     * The HeartBeat's time.
+     */
     public final ZonedDateTime currentTime;
 
+    /**
+     * The Response Message for a HeartBeat, currentTime will be set to now.
+     */
     public HeartBeatResponse() {
         super();
         this.currentTime = ZonedDateTime.now(ZoneId.of("UTC"));
     }
 
-    public HeartBeatResponse(ZonedDateTime time) {
+    /**
+     * The Response Message for a HeartBeat.
+     * @param time A Provided Time.
+     */
+    public HeartBeatResponse(final ZonedDateTime time) {
         super();
         this.currentTime = time;
     }

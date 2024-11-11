@@ -5,7 +5,10 @@ import com.sim_backend.websockets.OCCPMessageInfo;
 
 
 @OCCPMessageInfo(messageName = "HeartBeat")
-public class HeartBeat extends OCCPMessage {
+public final class HeartBeat extends OCCPMessage {
+    /***
+     * A HeartBeat Message.
+     */
     public HeartBeat() {
         super();
     }
