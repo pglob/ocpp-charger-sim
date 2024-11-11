@@ -3,3 +3,4 @@ backend/target/*
 .vscode/settings.json
 backend/.idea
 backend/ocpp-charger-sim-backend.iml
+node_modules/
