@@ -4,14 +4,14 @@ import com.networknt.schema.InputFormat;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 public class BootNotificationTest {
 
-    @Test
-    public void testBootNotification() {
+    private static @NotNull BootNotification getBootNotification() {
         BootNotification notification = new BootNotification(
                 "CP Vendor",
                 "CP Model",
@@ -22,6 +22,21 @@ public class BootNotificationTest {
                 "IMSI",
                 "Meter Type",
                 "Meter S/N");
+        assert notification.getChargePointVendor().equals("CP Vendor");
+        assert notification.getChargePointModel().equals("CP Model");
+        assert notification.getChargePointSerialNumber().equals("CP S/N");
+        assert notification.getChargeBoxSerialNumber().equals("Box S/N");
+        assert notification.getFirmwareVersion().equals("Firmware");
+        assert notification.getIccid().equals("ICCID");
+        assert notification.getImsi().equals("IMSI");
+        assert notification.getMeterType().equals("Meter Type");
+        assert notification.getMeterSerialNumber().equals("Meter S/N");
+        return notification;
+    }
+
+    @Test
+    public void testBootNotification() {
+        BootNotification notification = getBootNotification();
         String message = GsonUtilities.toString(notification.generateMessage());
 
 

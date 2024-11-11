@@ -26,6 +26,19 @@ public class HeartBeatTest {
         client = spy(new OCPPWebSocketClient(new URI("")));
     }
 
+    @Test
+    public void testHeartBeatConstructor() {
+        ZonedDateTime time = ZonedDateTime.of(
+                2004,
+                10,
+                10,
+                10,
+                2,
+                10,
+                10, ZoneId.of("UTC"));
+        HeartBeatResponse heartBeat = new HeartBeatResponse(time);
+        assert heartBeat.getCurrentTime() == time;
+    }
 
     @Test
     public void testSendMessage() {
