@@ -1,12 +1,9 @@
 package com.sim_backend.websockets;
 
-import org.eclipse.jetty.websocket.core.internal.MessageHandler;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class OCPPWebSocketClient extends WebSocketClient {
 

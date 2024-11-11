@@ -11,7 +11,7 @@ public class MessageQueue {
     private final Queue<OCPPMessage> queue = new LinkedList<>();
 
     /**
-     * Create an OCPPMessage Queue
+     * Create an OCPPMessage Queue.
      */
     public MessageQueue() {
     }
