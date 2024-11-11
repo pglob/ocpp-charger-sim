@@ -13,10 +13,11 @@ import static org.mockito.Mockito.*;
 public class OCPPWebSocketClientTest {
 
     OCPPWebSocketClient client;
-
+    MessageQueue queue;
     @BeforeEach
     void setUp() throws URISyntaxException {
         client = spy(new OCPPWebSocketClient(new URI("")));
+        queue = mock(MessageQueue.class);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.sim_backend.websockets;
 
+import org.eclipse.jetty.websocket.core.internal.MessageHandler;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -8,13 +9,14 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class OCPPWebSocketClient extends WebSocketClient {
-    /**
-     * THe OCCP Message Queue.
-     */
-    private final Queue<OCPPMessage> queue = new LinkedList<>();
 
     /**
-     * Create an OCCP WebSocket Client.
+     * The OCPP Message Queue.
+     */
+    private final MessageQueue queue = new MessageQueue();
+
+    /**
+     * Create an OCPP WebSocket Client.
      * @param serverUri The Websocket Address.
      */
     public OCPPWebSocketClient(final URI serverUri) {
@@ -45,13 +47,15 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
     }
 
+
     /**
-     * Add a OCCPMessage to our send queue.
+     * Add a OCPPMessage to our send queue.
      * @param message the message to be sent.
      */
     public void pushMessage(final OCPPMessage message) {
-        queue.add(message);
+        queue.pushMessage(message);
     }
+
 
     /**
      * Return the size of the send queue.
@@ -71,22 +75,16 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
     /**
      * Pop and send the message on top of the send queue.
-     * @return The Send OCCP Message.
+     * @return The Send OCPP Message.
      */
     public OCPPMessage popMessage() {
-        OCPPMessage message = queue.poll();
-        if (message != null) {
-            message.sendMessage(this);
-        }
-        return message;
+        return queue.popMessage(this);
     }
 
     /**
      * Pop the entire send queue.
      */
     public void popAllMessages() {
-        while (!queue.isEmpty()) {
-            popMessage();
-        }
+        queue.popAllMessages(this);
     }
 }

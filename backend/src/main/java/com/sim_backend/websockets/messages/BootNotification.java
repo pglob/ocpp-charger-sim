@@ -4,7 +4,7 @@ import com.sim_backend.websockets.OCPPMessage;
 import com.sim_backend.websockets.OCPPMessageInfo;
 
 /**
- * A OCCP Boot Notification Message.
+ * A OCPP Boot Notification Message.
  */
 
 @OCPPMessageInfo(messageName = "BootNotification")
