@@ -2,8 +2,8 @@ package com.sim_backend.websockets.messages;
 
 import com.networknt.schema.*;
 import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.OCCPMessage;
-import com.sim_backend.websockets.OCCPWebSocketClient;
+import com.sim_backend.websockets.OCPPMessage;
+import com.sim_backend.websockets.OCPPWebSocketClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,11 +19,11 @@ import static org.mockito.Mockito.*;
 
 public class HeartBeatTest {
 
-    OCCPWebSocketClient client;
+    OCPPWebSocketClient client;
 
     @BeforeEach
     void setUp() throws URISyntaxException {
-        client = spy(new OCCPWebSocketClient(new URI("")));
+        client = spy(new OCPPWebSocketClient(new URI("")));
     }
 
 
@@ -34,7 +34,7 @@ public class HeartBeatTest {
             return null;
         }).when(client).send(anyString());
 
-        OCCPMessage beatResponse = new HeartBeat();
+        OCPPMessage beatResponse = new HeartBeat();
         beatResponse.sendMessage(client);
 
         verify(client, times(1)).send(anyString());

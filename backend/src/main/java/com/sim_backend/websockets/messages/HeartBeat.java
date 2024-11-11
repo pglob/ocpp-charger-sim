@@ -1,11 +1,11 @@
 package com.sim_backend.websockets.messages;
 
-import com.sim_backend.websockets.OCCPMessage;
-import com.sim_backend.websockets.OCCPMessageInfo;
+import com.sim_backend.websockets.OCPPMessage;
+import com.sim_backend.websockets.OCPPMessageInfo;
 
 
-@OCCPMessageInfo(messageName = "HeartBeat")
-public final class HeartBeat extends OCCPMessage {
+@OCPPMessageInfo(messageName = "HeartBeat")
+public final class HeartBeat extends OCPPMessage {
     /***
      * A HeartBeat Message.
      */

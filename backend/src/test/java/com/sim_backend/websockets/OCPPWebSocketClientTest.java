@@ -10,13 +10,13 @@ import java.net.URISyntaxException;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-public class OCCPWebSocketClientTest {
+public class OCPPWebSocketClientTest {
 
-    OCCPWebSocketClient client;
+    OCPPWebSocketClient client;
 
     @BeforeEach
     void setUp() throws URISyntaxException {
-        client = spy(new OCCPWebSocketClient(new URI("")));
+        client = spy(new OCPPWebSocketClient(new URI("")));
     }
 
     @Test

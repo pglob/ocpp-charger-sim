@@ -17,7 +17,7 @@ public class ZonedDateTimeSerializer implements JsonSerializer<ZonedDateTime> {
             DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     /**
-     * Seriaize a ZonedDateTime.
+     * Serialize a ZonedDateTime.
      * @param zonedDateTime Given ZonedDateTime.
      * @param type The Type.
      * @param jsonSerializationContext The Serialization Context.

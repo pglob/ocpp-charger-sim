@@ -7,17 +7,17 @@ import java.net.URI;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class OCCPWebSocketClient extends WebSocketClient {
+public class OCPPWebSocketClient extends WebSocketClient {
     /**
      * THe OCCP Message Queue.
      */
-    private final Queue<OCCPMessage> queue = new LinkedList<>();
+    private final Queue<OCPPMessage> queue = new LinkedList<>();
 
     /**
      * Create an OCCP WebSocket Client.
      * @param serverUri The Websocket Address.
      */
-    public OCCPWebSocketClient(final URI serverUri) {
+    public OCPPWebSocketClient(final URI serverUri) {
         super(serverUri);
     }
 
@@ -49,7 +49,7 @@ public class OCCPWebSocketClient extends WebSocketClient {
      * Add a OCCPMessage to our send queue.
      * @param message the message to be sent.
      */
-    public void pushMessage(final OCCPMessage message) {
+    public void pushMessage(final OCPPMessage message) {
         queue.add(message);
     }
 
@@ -73,8 +73,8 @@ public class OCCPWebSocketClient extends WebSocketClient {
      * Pop and send the message on top of the send queue.
      * @return The Send OCCP Message.
      */
-    public OCCPMessage popMessage() {
-        OCCPMessage message = queue.poll();
+    public OCPPMessage popMessage() {
+        OCPPMessage message = queue.poll();
         if (message != null) {
             message.sendMessage(this);
         }

@@ -1,60 +1,60 @@
 package com.sim_backend.websockets.messages;
 
-import com.sim_backend.websockets.OCCPMessage;
-import com.sim_backend.websockets.OCCPMessageInfo;
+import com.sim_backend.websockets.OCPPMessage;
+import com.sim_backend.websockets.OCPPMessageInfo;
 
 /**
  * A OCCP Boot Notification Message.
  */
 
-@OCCPMessageInfo(messageName = "BootNotification")
-public final class BootNotification  extends OCCPMessage {
+@OCPPMessageInfo(messageName = "BootNotification")
+public final class BootNotification  extends OCPPMessage {
 
     /**
      * The Charge Point's Vendor.
      */
 
-    public String chargePointVendor;
+    public final String chargePointVendor;
 
     /**
      * The Charge Point's Model.
      */
-    public String chargePointModel;
+    public final String chargePointModel;
 
     /**
      * The Charge Point's Serial Number.
      */
-    public String chargePointSerialNumber;
+    public final String chargePointSerialNumber;
 
     /**
      * The Charge Box's Serial Number.
      */
-    public String chargeBoxSerialNumber;
+    public final String chargeBoxSerialNumber;
 
     /**
      * Firmware Version.
      */
-    public String firmwareVersion;
+    public final String firmwareVersion;
 
     /**
      * ICCID.
      */
-    public String iccid;
+    public final String iccid;
 
     /**
      * IMSI.
      */
-    public String imsi;
+    public final String imsi;
 
     /**
      * Meter Type.
      */
-    public String meterType;
+    public final String meterType;
 
     /**
      * Meter Serial Number.
       */
-    public String meterSerialNumber;
+    public final String meterSerialNumber;
 
     /**
      * Create a Boot Notification Message.
