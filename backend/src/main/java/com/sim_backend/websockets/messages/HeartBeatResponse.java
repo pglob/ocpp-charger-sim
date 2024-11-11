@@ -8,10 +8,11 @@ import java.time.ZonedDateTime;
 
 @OCPPMessageInfo(messageName = "HeartBeatResponse")
 public final class HeartBeatResponse extends OCPPMessage {
+
     /**
      * The HeartBeat's time.
      */
-    public final ZonedDateTime currentTime;
+    private final ZonedDateTime currentTime;
 
     /**
      * The Response Message for a HeartBeat, currentTime will be set to now.
@@ -28,5 +29,13 @@ public final class HeartBeatResponse extends OCPPMessage {
     public HeartBeatResponse(final ZonedDateTime time) {
         super();
         this.currentTime = time;
+    }
+
+    /**
+     * The HeartBeat's time.
+     * @return The current time in this object.
+     */
+    public ZonedDateTime getCurrentTime() {
+        return currentTime;
     }
 }

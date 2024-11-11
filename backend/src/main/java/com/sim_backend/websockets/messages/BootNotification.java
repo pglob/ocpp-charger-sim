@@ -9,52 +9,50 @@ import com.sim_backend.websockets.OCPPMessageInfo;
 
 @OCPPMessageInfo(messageName = "BootNotification")
 public final class BootNotification  extends OCPPMessage {
-
     /**
      * The Charge Point's Vendor.
      */
-
-    public final String chargePointVendor;
+    private final String chargePointVendor;
 
     /**
      * The Charge Point's Model.
      */
-    public final String chargePointModel;
+    private final String chargePointModel;
 
     /**
      * The Charge Point's Serial Number.
      */
-    public final String chargePointSerialNumber;
+    private final String chargePointSerialNumber;
 
     /**
      * The Charge Box's Serial Number.
      */
-    public final String chargeBoxSerialNumber;
+    private final String chargeBoxSerialNumber;
 
     /**
      * Firmware Version.
      */
-    public final String firmwareVersion;
+    private final String firmwareVersion;
 
     /**
      * ICCID.
      */
-    public final String iccid;
+    private final String iccid;
 
     /**
      * IMSI.
      */
-    public final String imsi;
+    private final String imsi;
 
     /**
      * Meter Type.
      */
-    public final String meterType;
+    private final String meterType;
 
     /**
      * Meter Serial Number.
       */
-    public final String meterSerialNumber;
+    private final String meterSerialNumber;
 
     /**
      * Create a Boot Notification Message.
@@ -86,6 +84,79 @@ public final class BootNotification  extends OCPPMessage {
         this.imsi = inIMSI;
         this.meterType = mType;
         this.meterSerialNumber = mSN;
+    }
+
+    /**
+     * Get the Charge Point's Vendor.
+     * @return The Charge Points Vendor.
+     */
+    public String getChargePointVendor() {
+        return chargePointVendor;
+    }
+
+    /**
+     * Get the Charge Point's Model.
+     * @return The Charge Point's Model.
+     */
+    public String getChargePointModel() {
+        return chargePointModel;
+    }
+
+    /**
+     * Get the Charge Point's Serial Number.
+     * @return The Charge Point Serial Number.
+     */
+    public String getChargePointSerialNumber() {
+        return chargePointSerialNumber;
+    }
+
+    /**
+     * Get the Charge Box's Serial Number.
+     * @return The Charge Box Serial Number.
+     */
+    public String getChargeBoxSerialNumber() {
+        return chargeBoxSerialNumber;
+    }
+
+    /**
+     * Get the Firmware Version.
+     * @return The Firmware Version.
+     */
+    public String getFirmwareVersion() {
+        return firmwareVersion;
+    }
+
+    /**
+     * Get the ICCID.
+     * @return THE ICCID.
+     */
+    public String getIccid() {
+        return iccid;
+    }
+
+    /**
+     * Get the IMSI.
+     * @return The IMSI.
+     */
+    public String getImsi() {
+        return imsi;
+    }
+
+    /**
+     * Get the Meter Type.
+     * @return The Meter Type
+     */
+    public String getMeterType() {
+        return meterType;
+    }
+
+    /**
+     * Get the Meter Serial Number.
+     * @return The Meter's Serial Number.
+     */
+
+    public String getMeterSerialNumber() {
+        return meterSerialNumber;
     }
 
 }
