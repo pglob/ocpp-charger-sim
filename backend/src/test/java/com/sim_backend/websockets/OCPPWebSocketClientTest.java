@@ -157,7 +157,8 @@ public class OCPPWebSocketClientTest {
         assert exception.getFailedMessage() == beat;
         assert exception.getFailedMessage().incrementTries() == MessageQueue.MAX_REATTEMPTS + 1;
         assert exception.getInnerException() != null;
-  }
+    }
+
     @Test
     public void testThrowsException() throws OCPPMessageFailure {
 
@@ -173,5 +174,31 @@ public class OCPPWebSocketClientTest {
         assert exception.getFailedMessage() == beat;
         assert exception.getFailedMessage().incrementTries() == MessageQueue.MAX_REATTEMPTS + 1;
         assert exception.getInnerException() != null;
+    }
+
+    @Test
+    public void testRetryAfterFirstAttempt() throws OCPPMessageFailure, InterruptedException {
+        HeartBeat beat = new HeartBeat();
+
+        client.pushMessage(beat);
+        assert client.size() == 1;
+
+        client.setOnRecieveMessage(message -> {
+            assert message.getMessage() instanceof HeartBeatResponse;
+        });
+
+        doAnswer(invocation -> {
+            doAnswer(invocation2 -> {
+                HeartBeatResponse response = new HeartBeatResponse();
+                client.onMessage(GsonUtilities.toString(response.generateMessage()));
+                return null;
+            }).when(client).send(anyString());
+            return true;
+        }).when(client).reconnectBlocking();
+
+        client.popMessage();
+
+        verify(client, times(2)).send(anyString());
+        verify(client, times(1)).onMessage(anyString());
     }
 }
