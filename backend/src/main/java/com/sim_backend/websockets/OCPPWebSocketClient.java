@@ -1,11 +1,22 @@
 package com.sim_backend.websockets;
 
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 
 public class OCPPWebSocketClient extends WebSocketClient {
+
+    /**
+     * The time to wait to try to reconnect.
+     */
+    public static final int CONNECTION_LOST_TIMER = 5;
+
+    /**
+     * The Connect Timeout.
+     */
+    private static final int CONNECT_TIMEOUT = 1;
 
     /**
      * The OCPP Message Queue.
@@ -17,7 +28,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
      * @param serverUri The Websocket Address.
      */
     public OCPPWebSocketClient(final URI serverUri) {
-        super(serverUri);
+        super(serverUri, new Draft_6455(), null, CONNECT_TIMEOUT);
+        this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
+        this.startConnectionLostTimer();
     }
 
     @SuppressWarnings("checkstyle:FinalParameters")
@@ -74,14 +87,27 @@ public class OCPPWebSocketClient extends WebSocketClient {
      * Pop and send the message on top of the send queue.
      * @return The Send OCPP Message.
      */
-    public OCPPMessage popMessage() {
-        return queue.popMessage(this);
+    public OCPPMessage popMessage()
+            throws OCPPMessageFailure, InterruptedException {
+        try {
+            return queue.popMessage(this);
+        } catch (OCPPMessageFailure failure) {
+            this.reconnectBlocking();
+            throw failure;
+        }
+
     }
 
     /**
      * Pop the entire send queue.
      */
-    public void popAllMessages() {
-        queue.popAllMessages(this);
+    public void popAllMessages()
+            throws OCPPMessageFailure, InterruptedException {
+        try {
+            queue.popAllMessages(this);
+        } catch (OCPPMessageFailure failure) {
+            this.reconnectBlocking();
+            throw failure;
+        }
     }
 }
