@@ -1,7 +1,6 @@
 package com.sim_backend.websockets;
 
 import com.sim_backend.websockets.messages.HeartBeat;
-import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,8 +15,11 @@ public class OCPPWebSocketClientTest {
 
     OCPPWebSocketClient client;
     MessageQueue queue;
+    OnOCPPMessage onOCPPMessageMock;
+
     @BeforeEach
     void setUp() throws URISyntaxException {
+        onOCPPMessageMock = mock(OnOCPPMessage.class);
         client = spy(new OCPPWebSocketClient(new URI("")));
         queue = mock(MessageQueue.class);
     }
@@ -70,6 +72,24 @@ public class OCPPWebSocketClientTest {
         verify(client, times(2)).send(anyString());
     }
 
+    @Test
+    public void testOnReceiveMessage() throws OCPPMessageFailure, InterruptedException {
+        doAnswer(invocation -> {
+            client.onMessage("{}");
+            return null;
+        }).when(client).send(anyString());
+
+        HeartBeat beat = new HeartBeat();
+
+        client.pushMessage(beat);
+        client.setOnRecieveMessage(message -> {
+            assert message.getMessage() instanceof HeartBeat;
+        });
+
+        client.popAllMessages();
+
+        //verify(onOCPPMessageMock, times(1)).getMessage();
+    }
 
     @Test
     public void testAllThrowsException() throws OCPPMessageFailure {

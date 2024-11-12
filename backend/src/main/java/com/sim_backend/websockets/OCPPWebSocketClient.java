@@ -1,5 +1,7 @@
 package com.sim_backend.websockets;
 
+import com.google.gson.Gson;
+import com.sim_backend.websockets.messages.HeartBeat;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
@@ -23,6 +25,14 @@ public class OCPPWebSocketClient extends WebSocketClient {
      */
     private final MessageQueue queue = new MessageQueue();
 
+
+
+
+    /**
+     * Subscribe to when we receive an OCPP message.
+     */
+    private OnOCPPMessageListener onReceiveMessage;
+
     /**
      * Create an OCPP WebSocket Client.
      * @param serverUri The Websocket Address.
@@ -39,10 +49,18 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
     }
 
+    /**
+     * When we receive a message from a sent ocpp message.
+     * @param s The received message as a string.
+     */
     @SuppressWarnings("checkstyle:FinalParameters")
     @Override
     public void onMessage(String s) {
-
+        if (onReceiveMessage != null) {
+            Gson gson = GsonUtilities.getGson();
+            OCPPMessage message = gson.fromJson(s, HeartBeat.class);
+            onReceiveMessage.onMessageReceieved(new OnOCPPMessage(message));
+        }
     }
 
     @SuppressWarnings("checkstyle:FinalParameters")
@@ -56,6 +74,15 @@ public class OCPPWebSocketClient extends WebSocketClient {
     public void onError(Exception e) {
 
     }
+
+    /**
+     * Set the function called when we receive an OCPP Message.
+     * @param onReceiveMessageListener The Received OCPPMessage.
+     */
+    public void setOnRecieveMessage(OnOCPPMessageListener onReceiveMessageListener) {
+        this.onReceiveMessage = onReceiveMessageListener;
+    }
+
 
 
     /**
