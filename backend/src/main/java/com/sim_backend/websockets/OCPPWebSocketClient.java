@@ -175,12 +175,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
      */
     public OCPPMessage popMessage()
             throws OCPPMessageFailure, InterruptedException {
-        try {
-            return queue.popMessage(this);
-        } catch (OCPPMessageFailure failure) {
-            this.reconnectBlocking();
-            throw failure;
-        }
+        return queue.popMessage(this);
 
     }
 
@@ -189,11 +184,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
      */
     public void popAllMessages()
             throws OCPPMessageFailure, InterruptedException {
-        try {
-            queue.popAllMessages(this);
-        } catch (OCPPMessageFailure failure) {
-            this.reconnectBlocking();
-            throw failure;
-        }
+        queue.popAllMessages(this);
     }
 }

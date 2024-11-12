@@ -8,6 +8,11 @@ import java.util.LinkedList;
 public class MessageQueue {
 
     /**
+     * The number of reattempts to resend a message.
+     */
+    public static final int MAX_REATTEMPTS = 5;
+
+    /**
      * The OCPP Message Queue.
      */
     private final Deque<OCPPMessage> queue = new LinkedList<>();
@@ -47,14 +52,19 @@ public class MessageQueue {
      * @return The Send OCPP Message.
      */
     public OCPPMessage popMessage(final OCPPWebSocketClient client)
-            throws OCPPMessageFailure {
+            throws OCPPMessageFailure, InterruptedException {
         OCPPMessage message = queue.poll();
         if (message != null) {
             try {
                 message.sendMessage(client);
             } catch (WebsocketNotConnectedException ex) {
-                queue.addFirst(message);
-                throw new OCPPMessageFailure(message, ex);
+                if (message.incrementTries() >= MAX_REATTEMPTS) {
+                    throw new OCPPMessageFailure(message, ex);
+                } else {
+                    client.reconnectBlocking();
+                    queue.addFirst(message);
+                    this.popMessage(client);
+                }
             }
         }
         return message;
@@ -65,7 +75,7 @@ public class MessageQueue {
      * @param client The WebsocketClient to send it through.
      */
     public void popAllMessages(final OCPPWebSocketClient client)
-            throws OCPPMessageFailure {
+            throws OCPPMessageFailure, InterruptedException {
         while (!queue.isEmpty()) {
             popMessage(client);
         }

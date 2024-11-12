@@ -149,9 +149,14 @@ public class OCPPWebSocketClientTest {
         client.pushMessage(beat);
         assert client.size() == 1;
 
-        assertThrows(OCPPMessageFailure.class, () -> {
+        OCPPMessageFailure exception = assertThrows(OCPPMessageFailure.class, () -> {
             client.popAllMessages();
         });
+
+        assert exception != null;
+        assert exception.getFailedMessage() == beat;
+        assert exception.getFailedMessage().incrementTries() == MessageQueue.MAX_REATTEMPTS + 1;
+        assert exception.getInnerException() != null;
   }
     @Test
     public void testThrowsException() throws OCPPMessageFailure {
@@ -166,6 +171,7 @@ public class OCPPWebSocketClientTest {
         });
         assert exception != null;
         assert exception.getFailedMessage() == beat;
+        assert exception.getFailedMessage().incrementTries() == MessageQueue.MAX_REATTEMPTS + 1;
         assert exception.getInnerException() != null;
     }
 }
