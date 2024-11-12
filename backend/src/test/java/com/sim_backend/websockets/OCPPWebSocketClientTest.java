@@ -79,8 +79,8 @@ public class OCPPWebSocketClientTest {
 
     @Test
     public void testOnReceiveMessage() throws OCPPMessageFailure, InterruptedException {
+        HeartBeatResponse response = new HeartBeatResponse();
         doAnswer(invocation -> {
-            HeartBeatResponse response = new HeartBeatResponse();
             client.onMessage(GsonUtilities.toString(response.generateMessage()));
             return null;
         }).when(client).send(anyString());
@@ -90,6 +90,8 @@ public class OCPPWebSocketClientTest {
         client.pushMessage(beat);
         client.setOnRecieveMessage(message -> {
             assert message.getMessage() instanceof HeartBeatResponse;
+            HeartBeatResponse receivedResponse = (HeartBeatResponse) message.getMessage();
+            assert receivedResponse.getCurrentTime().isEqual(response.getCurrentTime());
         });
 
         client.popAllMessages();
