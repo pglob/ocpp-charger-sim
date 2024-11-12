@@ -3,6 +3,7 @@ package com.sim_backend.websockets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.sim_backend.websockets.gson.ZonedDateTimeDeserializer;
 import com.sim_backend.websockets.gson.ZonedDateTimeSerializer;
 
 import java.time.ZonedDateTime;
@@ -23,6 +24,8 @@ public abstract class GsonUtilities {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(ZonedDateTime.class,
                 new ZonedDateTimeSerializer());
+        gsonBuilder.registerTypeAdapter(ZonedDateTime.class,
+                new ZonedDateTimeDeserializer());
 
         return gsonBuilder.create();
     }

@@ -6,7 +6,7 @@ import com.sim_backend.websockets.OCPPMessageInfo;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-@OCPPMessageInfo(messageName = "HeartBeatResponse")
+@OCPPMessageInfo(messageName = "HeartBeatResponse", messageCallID = OCPPMessage.CALL_ID_RESPONSE)
 public final class HeartBeatResponse extends OCPPMessage {
 
     /**
@@ -15,7 +15,7 @@ public final class HeartBeatResponse extends OCPPMessage {
     private final ZonedDateTime currentTime;
 
     /**
-     * The Response Message for a HeartBeat, currentTime will be set to now.
+     * The response message for a HeartBeat, currentTime will be set to now.
      */
     public HeartBeatResponse() {
         super();

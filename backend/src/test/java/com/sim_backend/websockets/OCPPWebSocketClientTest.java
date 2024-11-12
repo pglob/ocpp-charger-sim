@@ -1,11 +1,14 @@
 package com.sim_backend.websockets;
 
+import com.google.gson.Gson;
 import com.sim_backend.websockets.messages.HeartBeat;
+import com.sim_backend.websockets.messages.HeartBeatResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -40,8 +43,9 @@ public class OCPPWebSocketClientTest {
 
     @Test
     public void testPopMessage() throws OCPPMessageFailure, InterruptedException {
+        Pattern pattern = Pattern.compile("^\\[2,\\s*\".*?\",\\s*\"HeartBeat\",\\s*\\{}]$");
         doAnswer(invocation -> {
-            assert invocation.getArgument(0, String.class).equals("{}");
+            assert pattern.matcher(invocation.getArgument(0, String.class)).find();
             return null;
         }).when(client).send(anyString());
 
@@ -53,8 +57,9 @@ public class OCPPWebSocketClientTest {
     }
 
     @Test void testPopAllMessages() throws OCPPMessageFailure, InterruptedException {
+        Pattern pattern = Pattern.compile("^\\[2,\\s*\".*?\",\\s*\"HeartBeat\",\\s*\\{}]$");
         doAnswer(invocation -> {
-            assert invocation.getArgument(0, String.class).equals("{}");
+            assert pattern.matcher(invocation.getArgument(0, String.class)).find();
             return null;
         }).when(client).send(anyString());
 
@@ -75,7 +80,8 @@ public class OCPPWebSocketClientTest {
     @Test
     public void testOnReceiveMessage() throws OCPPMessageFailure, InterruptedException {
         doAnswer(invocation -> {
-            client.onMessage("{}");
+            HeartBeatResponse response = new HeartBeatResponse();
+            client.onMessage(GsonUtilities.toString(response.generateMessage()));
             return null;
         }).when(client).send(anyString());
 
@@ -83,12 +89,56 @@ public class OCPPWebSocketClientTest {
 
         client.pushMessage(beat);
         client.setOnRecieveMessage(message -> {
-            assert message.getMessage() instanceof HeartBeat;
+            assert message.getMessage() instanceof HeartBeatResponse;
         });
 
         client.popAllMessages();
 
         //verify(onOCPPMessageMock, times(1)).getMessage();
+    }
+
+    @Test
+    public void testReceiveBadMessageNoReceiver() throws OCPPMessageFailure, InterruptedException {
+        doAnswer(invocation -> {
+            client.onMessage("{}");
+            return null;
+        }).when(client).send(anyString());
+
+        HeartBeat beat = new HeartBeat();
+
+        client.pushMessage(beat);
+        client.popAllMessages();
+        verify(client, times(1)).onMessage(anyString());
+    }
+
+    @Test
+    public void testReceiveBadMessage() throws OCPPMessageFailure, InterruptedException {
+        doAnswer(invocation -> {
+            client.onMessage("{}");
+            return null;
+        }).when(client).send(anyString());
+
+        HeartBeat beat = new HeartBeat();
+
+        client.pushMessage(beat);
+        client.setOnRecieveMessage(message -> {});
+        AssertionError err = assertThrows(AssertionError.class, () -> client.popAllMessages());
+        assert err != null; // This should throw something more descriptive
+    }
+
+    @Test
+    public void testOnReceiveBadMessageType() throws OCPPMessageFailure, InterruptedException {
+        doAnswer(invocation -> {
+            client.onMessage("[2, \"Woah\", \"AbsoluteTrash\", {}]");
+            return null;
+        }).when(client).send(anyString());
+
+        HeartBeat beat = new HeartBeat();
+
+        client.pushMessage(beat);
+        client.setOnRecieveMessage(message -> {});
+        AssertionError err = assertThrows(AssertionError.class, () -> client.popAllMessages());
+        assert err != null; // This should throw something more descriptive
     }
 
     @Test

@@ -1,12 +1,17 @@
 package com.sim_backend.websockets;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.sim_backend.websockets.messages.HeartBeat;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
+import org.reflections.Reflections;
 
 import java.net.URI;
+import java.util.Set;
 
 public class OCPPWebSocketClient extends WebSocketClient {
 
@@ -21,12 +26,35 @@ public class OCPPWebSocketClient extends WebSocketClient {
     private static final int CONNECT_TIMEOUT = 1;
 
     /**
+     * The index in the JsonArray for the call ID.
+     */
+    private static final int CALL_ID_INDEX = 0;
+
+    /**
+     * The index in the JsonArray for the message ID.
+     */
+    private static final int MESSAGE_ID_INDEX = 1;
+
+    /**
+     * The index in the JsonArray for the message type.
+     */
+    private static final int TYPE_INDEX = 2;
+
+    /**
+     * The index in the JsonArray for the payload.
+     */
+    public static final int PAYLOAD_INDEX = 3;
+
+    /**
+     * The Package we will find our OCPPMessages in.
+     */
+    public static final String MESSAGE_PACKAGE =
+            "com.sim_backend.websockets.messages";
+
+    /**
      * The OCPP Message Queue.
      */
     private final MessageQueue queue = new MessageQueue();
-
-
-
 
     /**
      * Subscribe to when we receive an OCPP message.
@@ -58,8 +86,38 @@ public class OCPPWebSocketClient extends WebSocketClient {
     public void onMessage(String s) {
         if (onReceiveMessage != null) {
             Gson gson = GsonUtilities.getGson();
-            OCPPMessage message = gson.fromJson(s, HeartBeat.class);
-            onReceiveMessage.onMessageReceieved(new OnOCPPMessage(message));
+            JsonElement element = gson.fromJson(s, JsonElement.class);
+            assert element.isJsonArray();
+            JsonArray array = element.getAsJsonArray();
+
+            int callID = array.get(CALL_ID_INDEX).getAsInt();
+            String msgID = array.get(MESSAGE_ID_INDEX).getAsString();
+            String messageType = array.get(TYPE_INDEX).getAsString();
+            JsonObject data = array.get(PAYLOAD_INDEX).getAsJsonObject();
+
+            Reflections reflections = new Reflections(MESSAGE_PACKAGE);
+
+            // Get all classes in our messages package,
+            // that are annotated with OCPPMessageInfo.
+            Set<Class<?>> classes =
+                    reflections.getTypesAnnotatedWith(OCPPMessageInfo.class);
+
+            // Find the one that matches the received message Type.
+            for (Class<?> messageClass : classes) {
+                OCPPMessageInfo annotation =
+                        messageClass.getAnnotation(OCPPMessageInfo.class);
+                // Check if it's a has a parent class of OCPPMessage.
+                if (OCPPMessage.class.isAssignableFrom(messageClass)
+                        && annotation.messageName().equals(messageType)) {
+                    // Convert the payload String into the found class.
+                    OCPPMessage message =
+                            (OCPPMessage) gson.fromJson(data, messageClass);
+                    onReceiveMessage.onMessageReceieved(
+                            new OnOCPPMessage(message));
+                    return;
+                }
+            }
+            assert false;
         }
     }
 
@@ -79,7 +137,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
      * Set the function called when we receive an OCPP Message.
      * @param onReceiveMessageListener The Received OCPPMessage.
      */
-    public void setOnRecieveMessage(OnOCPPMessageListener onReceiveMessageListener) {
+    public void setOnRecieveMessage(
+            final OnOCPPMessageListener onReceiveMessageListener) {
         this.onReceiveMessage = onReceiveMessageListener;
     }
 

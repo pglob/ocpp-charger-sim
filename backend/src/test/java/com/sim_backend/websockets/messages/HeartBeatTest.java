@@ -1,5 +1,6 @@
 package com.sim_backend.websockets.messages;
 
+import com.google.gson.JsonElement;
 import com.networknt.schema.*;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.OCPPMessage;
@@ -13,6 +14,7 @@ import java.net.URISyntaxException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -42,8 +44,9 @@ public class HeartBeatTest {
 
     @Test
     public void testSendMessage() {
+        Pattern pattern = Pattern.compile("^\\[2,\\s*\".*?\",\\s*\"HeartBeat\",\\s*\\{}]$");
         doAnswer(invocation -> {
-            assert invocation.getArgument(0, String.class).equals("{}");
+            assert pattern.matcher(invocation.getArgument(0)).matches();
             return null;
         }).when(client).send(anyString());
 
@@ -58,7 +61,8 @@ public class HeartBeatTest {
     public void testResponseJSON() {
         HeartBeatResponse heartBeat = new HeartBeatResponse();
         JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/HeartbeatResponse.json");
-        Set<ValidationMessage> errors = jsonSchema.validate(GsonUtilities.toString(heartBeat.generateMessage()), InputFormat.JSON);
+        JsonElement jsonElement = heartBeat.generateMessage().get(3);
+        Set<ValidationMessage> errors = jsonSchema.validate(GsonUtilities.toString(jsonElement), InputFormat.JSON);
         if (!errors.isEmpty()) {
             for (ValidationMessage error : errors) {
                 System.out.println(error);
@@ -75,7 +79,7 @@ public class HeartBeatTest {
                 2,
                 10,
                 10, ZoneId.of("UTC")));
-        String json = GsonUtilities.toString(heartBeat.generateMessage());
+        String json = GsonUtilities.toString(heartBeat.generateMessage().get(3));
         assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001Z\"");
 
 
@@ -87,7 +91,7 @@ public class HeartBeatTest {
                 2,
                 10,
                 10, ZoneId.of("UTC-7")));
-        json = GsonUtilities.toString(heartBeat.generateMessage());
+        json = GsonUtilities.toString(heartBeat.generateMessage().get(3));
         assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001-07:00\"");
     }
 
@@ -98,7 +102,8 @@ public class HeartBeatTest {
         InputStream test = this.getClass().getResourceAsStream("schemas/Heartbeat.json");
         JsonSchema jsonSchema = factory.getSchema(test);
 
-        Set<ValidationMessage> errors = jsonSchema.validate(GsonUtilities.toString(heartBeat.generateMessage()), InputFormat.JSON);
+        JsonElement jsonElement = heartBeat.generateMessage().get(3);
+        Set<ValidationMessage> errors = jsonSchema.validate(GsonUtilities.toString(jsonElement), InputFormat.JSON);
         if (!errors.isEmpty()) {
             for (ValidationMessage error : errors) {
                 System.out.println(error);

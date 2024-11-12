@@ -1,19 +1,17 @@
 package com.sim_backend.websockets;
 
-import java.awt.event.ActionListener;
-
 public class OnOCPPMessage {
     /**
      * The received ocpp message.
      */
-    private OCPPMessage message;
+    private final OCPPMessage message;
 
     /**
      * Create an OCPPMessage event.
-     * @param message The received message.
+     * @param inMessage The received message.
      */
-    public OnOCPPMessage(OCPPMessage message) {
-        this.message = message;
+    public OnOCPPMessage(final OCPPMessage inMessage) {
+        this.message = inMessage;
     }
 
     /**

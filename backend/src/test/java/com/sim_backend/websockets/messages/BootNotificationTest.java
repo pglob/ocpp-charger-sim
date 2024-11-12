@@ -37,7 +37,8 @@ public class BootNotificationTest {
     @Test
     public void testBootNotification() {
         BootNotification notification = getBootNotification();
-        String message = GsonUtilities.toString(notification.generateMessage());
+        assert notification.generateMessage().size() == 4;
+        String message = GsonUtilities.toString(notification.generateMessage().get(3));
 
 
         JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/BootNotification.json");
