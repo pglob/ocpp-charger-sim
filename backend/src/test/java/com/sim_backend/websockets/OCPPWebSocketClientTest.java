@@ -131,8 +131,9 @@ public class OCPPWebSocketClientTest {
 
     @Test
     public void testOnReceiveBadMessageType() throws OCPPMessageFailure, InterruptedException {
+        String msgToSend = "[2, \"Woah\", \"AbsoluteTrash\", {}]";
         doAnswer(invocation -> {
-            client.onMessage("[2, \"Woah\", \"AbsoluteTrash\", {}]");
+            client.onMessage(msgToSend);
             return null;
         }).when(client).send(anyString());
 
@@ -143,6 +144,7 @@ public class OCPPWebSocketClientTest {
         OCPPUnsupportedMessage err = assertThrows(OCPPUnsupportedMessage.class, () -> client.popAllMessages());
         assert err != null;
         assert err.getMessageType().equals("AbsoluteTrash");
+        assert err.getMessage().equals(msgToSend);
     }
 
     @Test
