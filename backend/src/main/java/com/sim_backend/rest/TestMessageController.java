@@ -3,8 +3,11 @@ package com.sim_backend.rest;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
-public class TestMessageController {
+public final class TestMessageController {
 
+    private TestMessageController() {
+
+    }
     /**
      * Registers the routes for test-related endpoints.
      *

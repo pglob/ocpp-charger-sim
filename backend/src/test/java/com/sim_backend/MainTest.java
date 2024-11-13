@@ -28,12 +28,12 @@ public class MainTest {
     void testGetEnv() {
         doAnswer(invocation -> {
             assert invocation.getArgument(0, String.class).startsWith("http://localhost");
-            return null;
+            return invocation.callRealMethod();
         }).when(corsRulesMock).allowHost(anyString());
 
         doAnswer(invocation -> {
             assert invocation.getArgument(0, Integer.class).equals(8080);
-            return null;
+            return invocation.callRealMethod();
         }).when(javalinMock).start(anyInt());
 
         Main.main(new String[]{});
