@@ -1,10 +1,6 @@
 package com.sim_backend.websockets;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.sim_backend.websockets.messages.HeartBeat;
+import com.google.gson.*;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
@@ -87,7 +83,12 @@ public class OCPPWebSocketClient extends WebSocketClient {
         if (onReceiveMessage != null) {
             Gson gson = GsonUtilities.getGson();
             JsonElement element = gson.fromJson(s, JsonElement.class);
-            assert element.isJsonArray();
+
+            if (!element.isJsonArray()) {
+                throw new JsonParseException("Expected array got "
+                        + element.toString());
+            }
+
             JsonArray array = element.getAsJsonArray();
 
             int callID = array.get(CALL_ID_INDEX).getAsInt();
@@ -117,7 +118,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
                     return;
                 }
             }
-            assert false;
+            throw new OCPPUnsupportedMessage(s, messageType);
         }
     }
 
@@ -137,7 +138,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
      * Set the function called when we receive an OCPP Message.
      * @param onReceiveMessageListener The Received OCPPMessage.
      */
-    public void setOnRecieveMessage(
+    public void setOnReceiveMessage(
             final OnOCPPMessageListener onReceiveMessageListener) {
         this.onReceiveMessage = onReceiveMessageListener;
     }

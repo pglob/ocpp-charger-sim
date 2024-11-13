@@ -1,6 +1,6 @@
 package com.sim_backend.websockets;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.messages.HeartBeat;
 import com.sim_backend.websockets.messages.HeartBeatResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,7 +88,7 @@ public class OCPPWebSocketClientTest {
         HeartBeat beat = new HeartBeat();
 
         client.pushMessage(beat);
-        client.setOnRecieveMessage(message -> {
+        client.setOnReceiveMessage(message -> {
             assert message.getMessage() instanceof HeartBeatResponse;
             HeartBeatResponse receivedResponse = (HeartBeatResponse) message.getMessage();
             assert receivedResponse.getCurrentTime().isEqual(response.getCurrentTime());
@@ -123,9 +123,10 @@ public class OCPPWebSocketClientTest {
         HeartBeat beat = new HeartBeat();
 
         client.pushMessage(beat);
-        client.setOnRecieveMessage(message -> {});
-        AssertionError err = assertThrows(AssertionError.class, () -> client.popAllMessages());
-        assert err != null; // This should throw something more descriptive
+        client.setOnReceiveMessage(message -> {});
+        JsonParseException err = assertThrows(JsonParseException.class, () -> client.popAllMessages());
+        assert err != null;
+        assert err.getMessage().startsWith("Expected array");
     }
 
     @Test
@@ -138,9 +139,10 @@ public class OCPPWebSocketClientTest {
         HeartBeat beat = new HeartBeat();
 
         client.pushMessage(beat);
-        client.setOnRecieveMessage(message -> {});
-        AssertionError err = assertThrows(AssertionError.class, () -> client.popAllMessages());
-        assert err != null; // This should throw something more descriptive
+        client.setOnReceiveMessage(message -> {});
+        OCPPUnsupportedMessage err = assertThrows(OCPPUnsupportedMessage.class, () -> client.popAllMessages());
+        assert err != null;
+        assert err.getMessageType().equals("AbsoluteTrash");
     }
 
     @Test
@@ -185,7 +187,7 @@ public class OCPPWebSocketClientTest {
         client.pushMessage(beat);
         assert client.size() == 1;
 
-        client.setOnRecieveMessage(message -> {
+        client.setOnReceiveMessage(message -> {
             assert message.getMessage() instanceof HeartBeatResponse;
         });
 

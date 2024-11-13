@@ -2,7 +2,7 @@ package com.sim_backend.websockets;
 
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
-public class OCPPMessageFailure extends Exception {
+public class OCPPMessageFailure extends RuntimeException {
 
     /**
      * The Inner WebsocketException.
