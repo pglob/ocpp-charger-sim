@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 
 public class GsonUtilitiesTest {
 
-    @Test
-    public void testToString() {
-        assert GsonUtilities.toString(new JsonObject()).equals("{}");
-        assert GsonUtilities.toString(new JsonArray()).equals("[]");
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("foo", "bar");
-        assert GsonUtilities.toString(jsonObject).equals("{\"foo\":\"bar\"}");
-    }
+  @Test
+  public void testToString() {
+    assert GsonUtilities.toString(new JsonObject()).equals("{}");
+    assert GsonUtilities.toString(new JsonArray()).equals("[]");
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("foo", "bar");
+    assert GsonUtilities.toString(jsonObject).equals("{\"foo\":\"bar\"}");
+  }
 }
