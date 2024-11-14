@@ -38,3 +38,17 @@ npm run format
 ## Backend
 ### Testing
 ### Linting
+
+
+Use spotless for backend code formatting. Ensure current directory is at backend.
+
+View formatting and style issues in all .java files:
+
+```bash
+   mvn spotless:check
+```
+Automatically fix code formatting issues:
+
+```bash
+   mvn spotless:apply
+```
