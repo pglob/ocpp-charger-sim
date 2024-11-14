@@ -5,12 +5,12 @@ import org.junit.jupiter.api.Test;
 
 public class OCPPMessageTest {
 
-    @Test
-    public void testIncrementTries() {
-        OCPPMessage message = new HeartBeat();
-        int tries = message.incrementTries();
-        assert tries == 1;
-        tries = message.incrementTries();
-        assert tries == 2;
-    }
+  @Test
+  public void testIncrementTries() {
+    OCPPMessage message = new HeartBeat();
+    int tries = message.incrementTries();
+    assert tries == 1;
+    tries = message.incrementTries();
+    assert tries == 2;
+  }
 }
