@@ -39,6 +39,35 @@ npm run format
 ### Testing
 ### Linting
 
+Makefile can be used from the root directory for ease-of-use commands.
+
+Create the docker file
+```bash
+   make docker
+```
+
+Build backend
+```bash
+   make build_backend
+```
+
+Build backend and skip tests
+```bash
+   make build_backend_fast
+```
+
+Use the linter on the backend
+```bash
+   lint_backend
+```
+
+```bash
+   make docker
+```
+
+```bash
+   make docker
+```
 
 Use spotless for backend code formatting. Ensure current directory is at backend.
 
