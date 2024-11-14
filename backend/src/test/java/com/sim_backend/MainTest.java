@@ -1,7 +1,5 @@
 package com.sim_backend;
 
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.*;
 
 import io.javalin.Javalin;
@@ -11,34 +9,35 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 public class MainTest {
-    AutoCloseable openMocks;
+  AutoCloseable openMocks;
 
-    @BeforeEach
-    void setUp() {
-        openMocks = MockitoAnnotations.openMocks(this);
-    }
+  @BeforeEach
+  void setUp() {
+    openMocks = MockitoAnnotations.openMocks(this);
+  }
 
-    @Mock
-    Javalin javalinMock;
+  @Mock Javalin javalinMock;
 
-    @Mock
-    CorsPluginConfig.CorsRule corsRulesMock;
+  @Mock CorsPluginConfig.CorsRule corsRulesMock;
 
-    @Test
-    void testGetEnv() {
-        doAnswer(invocation -> {
-            assert invocation.getArgument(0, String.class).startsWith("http://localhost");
-            return invocation.callRealMethod();
-        }).when(corsRulesMock).allowHost(anyString());
+  @Test
+  void testGetEnv() {
+    doAnswer(
+            invocation -> {
+              assert invocation.getArgument(0, String.class).startsWith("http://localhost");
+              return invocation.callRealMethod();
+            })
+        .when(corsRulesMock)
+        .allowHost(anyString());
 
-        doAnswer(invocation -> {
-            assert invocation.getArgument(0, Integer.class).equals(8080);
-            return invocation.callRealMethod();
-        }).when(javalinMock).start(anyInt());
+    doAnswer(
+            invocation -> {
+              assert invocation.getArgument(0, Integer.class).equals(8080);
+              return invocation.callRealMethod();
+            })
+        .when(javalinMock)
+        .start(anyInt());
 
-        Main.main(new String[]{});
-
-    }
-
-
+    Main.main(new String[] {});
+  }
 }
