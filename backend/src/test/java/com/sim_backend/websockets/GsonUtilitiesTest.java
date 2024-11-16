@@ -2,6 +2,7 @@ package com.sim_backend.websockets;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.sim_backend.utils.GsonUtilities;
 import org.junit.jupiter.api.Test;
 
 public class GsonUtilitiesTest {

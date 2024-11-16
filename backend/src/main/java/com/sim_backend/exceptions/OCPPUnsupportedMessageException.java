@@ -1,6 +1,6 @@
-package com.sim_backend.websockets;
+package com.sim_backend.exceptions;
 
-public class OCPPUnsupportedMessage extends RuntimeException {
+public class OCPPUnsupportedMessageException extends RuntimeException {
 
   /** The OCPP message that failed to process. */
   private final String message;
@@ -13,7 +13,7 @@ public class OCPPUnsupportedMessage extends RuntimeException {
    *
    * @param msg The message that could not be processed.
    */
-  public OCPPUnsupportedMessage(final String msg, final String msgType) {
+  public OCPPUnsupportedMessageException(final String msg, final String msgType) {
     this.message = msg;
     this.messageType = msgType;
   }

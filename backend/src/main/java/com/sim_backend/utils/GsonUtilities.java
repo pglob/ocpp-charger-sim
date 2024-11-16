@@ -1,4 +1,4 @@
-package com.sim_backend.websockets;
+package com.sim_backend.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

@@ -1,8 +1,9 @@
-package com.sim_backend.websockets;
+package com.sim_backend.exceptions;
 
+import com.sim_backend.websockets.messages.OCPPMessage;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
-public class OCPPMessageFailure extends RuntimeException {
+public class OCPPMessageFailureException extends RuntimeException {
 
   /** The Inner WebsocketException. */
   private final WebsocketNotConnectedException innerException;
@@ -16,7 +17,7 @@ public class OCPPMessageFailure extends RuntimeException {
    * @param message The message.
    * @param innerExp The inner exception.
    */
-  public OCPPMessageFailure(
+  public OCPPMessageFailureException(
       final OCPPMessage message, final WebsocketNotConnectedException innerExp) {
     super(message.toString());
     this.failedMessage = message;
