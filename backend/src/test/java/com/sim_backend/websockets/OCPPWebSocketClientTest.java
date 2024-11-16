@@ -162,7 +162,7 @@ public class OCPPWebSocketClientTest {
     OCPPUnsupportedMessage err =
         assertThrows(OCPPUnsupportedMessage.class, () -> client.popAllMessages());
     assert err != null;
-    assert err.getMessageType().equals("AbsoluteTrash");
+    assert err.getMessageName().equals("AbsoluteTrash");
     assert err.getMessage().equals(msgToSend);
   }
 

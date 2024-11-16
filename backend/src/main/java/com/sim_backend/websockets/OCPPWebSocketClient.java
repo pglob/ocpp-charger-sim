@@ -23,7 +23,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   private static final int MESSAGE_ID_INDEX = 1;
 
   /** The index in the JsonArray for the message type. */
-  private static final int TYPE_INDEX = 2;
+  private static final int NAME_INDEX = 2;
 
   /** The index in the JsonArray for the payload. */
   public static final int PAYLOAD_INDEX = 3;
@@ -72,7 +72,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
       int callID = array.get(CALL_ID_INDEX).getAsInt();
       String msgID = array.get(MESSAGE_ID_INDEX).getAsString();
-      String messageType = array.get(TYPE_INDEX).getAsString();
+      String messageName = array.get(NAME_INDEX).getAsString();
       JsonObject data = array.get(PAYLOAD_INDEX).getAsJsonObject();
 
       Reflections reflections = new Reflections(MESSAGE_PACKAGE);
@@ -86,14 +86,14 @@ public class OCPPWebSocketClient extends WebSocketClient {
         OCPPMessageInfo annotation = messageClass.getAnnotation(OCPPMessageInfo.class);
         // Check if it's a has a parent class of OCPPMessage.
         if (OCPPMessage.class.isAssignableFrom(messageClass)
-            && annotation.messageName().equals(messageType)) {
+            && annotation.messageName().equals(messageName)) {
           // Convert the payload String into the found class.
           OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
           onReceiveMessage.onMessageReceieved(new OnOCPPMessage(message));
           return;
         }
       }
-      throw new OCPPUnsupportedMessage(s, messageType);
+      throw new OCPPUnsupportedMessage(s, messageName);
     }
   }
 

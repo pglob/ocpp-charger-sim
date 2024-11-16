@@ -5,17 +5,17 @@ public class OCPPUnsupportedMessage extends RuntimeException {
   /** The OCPP message that failed to process. */
   private final String message;
 
-  /** The failed Message Type. */
-  private final String messageType;
+  /** The failed Message Name. */
+  private final String messageName;
 
   /**
    * An Exception thrown when we fail to process an OCPPMessage.
    *
    * @param msg The message that could not be processed.
    */
-  public OCPPUnsupportedMessage(final String msg, final String msgType) {
+  public OCPPUnsupportedMessage(final String msg, final String msgName) {
     this.message = msg;
-    this.messageType = msgType;
+    this.messageName = msgName;
   }
 
   /**
@@ -28,11 +28,11 @@ public class OCPPUnsupportedMessage extends RuntimeException {
   }
 
   /**
-   * Get the message type of message we do not support.
+   * Get the message name of message we do not support.
    *
-   * @return The Failed message type.
+   * @return The Failed message name.
    */
-  public String getMessageType() {
-    return messageType;
+  public String getMessageName() {
+    return messageName;
   }
 }
