@@ -1,5 +1,8 @@
 package com.sim_backend.websockets;
 
+import com.sim_backend.exceptions.OCPPMessageFailureException;
+import com.sim_backend.websockets.client.OCPPWebSocketClient;
+import com.sim_backend.websockets.messages.OCPPMessage;
 import java.util.Deque;
 import java.util.LinkedList;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
@@ -49,14 +52,14 @@ public class MessageQueue {
    * @return The Send OCPP Message.
    */
   public OCPPMessage popMessage(final OCPPWebSocketClient client)
-      throws OCPPMessageFailure, InterruptedException {
+      throws OCPPMessageFailureException, InterruptedException {
     OCPPMessage message = queue.poll();
     if (message != null) {
       try {
         message.sendMessage(client);
       } catch (WebsocketNotConnectedException ex) {
         if (message.incrementTries() >= MAX_REATTEMPTS) {
-          throw new OCPPMessageFailure(message, ex);
+          throw new OCPPMessageFailureException(message, ex);
         } else {
           client.reconnectBlocking();
           queue.addFirst(message);
@@ -73,7 +76,7 @@ public class MessageQueue {
    * @param client The WebsocketClient to send it through.
    */
   public void popAllMessages(final OCPPWebSocketClient client)
-      throws OCPPMessageFailure, InterruptedException {
+      throws OCPPMessageFailureException, InterruptedException {
     while (!queue.isEmpty()) {
       popMessage(client);
     }
