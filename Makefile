@@ -6,6 +6,9 @@ docker:
 build_backend:
 	cd ./backend && mvn spotless:apply && mvn clean && mvn package
 
+test_backend:
+	cd ./backend && mvn test
+
 build_backend_fast:
 	cd ./backend && mvn spotless:apply && mvn clean && mvn -DskipTests=true package
 
