@@ -1,6 +1,11 @@
-package com.sim_backend.websockets;
+package com.sim_backend.websockets.client;
 
 import com.google.gson.*;
+import com.sim_backend.exceptions.OCPPMessageFailureException;
+import com.sim_backend.exceptions.OCPPUnsupportedMessageException;
+import com.sim_backend.utils.GsonUtilities;
+import com.sim_backend.websockets.*;
+import com.sim_backend.websockets.messages.OCPPMessage;
 import java.net.URI;
 import java.util.Set;
 import org.java_websocket.client.WebSocketClient;
@@ -15,18 +20,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
   /** The Connect Timeout. */
   private static final int CONNECT_TIMEOUT = 1;
-
-  /** The index in the JsonArray for the call ID. */
-  private static final int CALL_ID_INDEX = 0;
-
-  /** The index in the JsonArray for the message ID. */
-  private static final int MESSAGE_ID_INDEX = 1;
-
-  /** The index in the JsonArray for the message type. */
-  private static final int TYPE_INDEX = 2;
-
-  /** The index in the JsonArray for the payload. */
-  public static final int PAYLOAD_INDEX = 3;
 
   /** The Package we will find our OCPPMessages in. */
   public static final String MESSAGE_PACKAGE = "com.sim_backend.websockets.messages";
@@ -63,17 +56,22 @@ public class OCPPWebSocketClient extends WebSocketClient {
     if (onReceiveMessage != null) {
       Gson gson = GsonUtilities.getGson();
       JsonElement element = gson.fromJson(s, JsonElement.class);
+      System.out.println("Element: " + element);
 
-      if (!element.isJsonArray()) {
-        throw new JsonParseException("Expected array got " + element.toString());
+      if (!element.isJsonObject()) {
+        throw new JsonParseException("Expected object got " + element.toString());
       }
 
-      JsonArray array = element.getAsJsonArray();
+      JsonObject object = element.getAsJsonObject();
+      if (!object.has("body") || object.get("body") == null) {
+        throw new JsonParseException(s);
+      }
+      if (!object.has("messageType") || object.get("messageType") == null) {
+        throw new OCPPUnsupportedMessageException(s, null);
+      }
 
-      int callID = array.get(CALL_ID_INDEX).getAsInt();
-      String msgID = array.get(MESSAGE_ID_INDEX).getAsString();
-      String messageType = array.get(TYPE_INDEX).getAsString();
-      JsonObject data = array.get(PAYLOAD_INDEX).getAsJsonObject();
+      String messageType = object.get("messageType").getAsString();
+      JsonObject data = object.get("body").getAsJsonObject();
 
       Reflections reflections = new Reflections(MESSAGE_PACKAGE);
 
@@ -93,7 +91,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
           return;
         }
       }
-      throw new OCPPUnsupportedMessage(s, messageType);
+      throw new OCPPUnsupportedMessageException(s, messageType);
     }
   }
 
@@ -146,12 +144,12 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @return The Send OCPP Message.
    */
-  public OCPPMessage popMessage() throws OCPPMessageFailure, InterruptedException {
+  public OCPPMessage popMessage() throws OCPPMessageFailureException, InterruptedException {
     return queue.popMessage(this);
   }
 
   /** Pop the entire send queue. */
-  public void popAllMessages() throws OCPPMessageFailure, InterruptedException {
+  public void popAllMessages() throws OCPPMessageFailureException, InterruptedException {
     queue.popAllMessages(this);
   }
 }

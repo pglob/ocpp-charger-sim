@@ -1,5 +1,6 @@
 package com.sim_backend.websockets;
 
+import com.sim_backend.websockets.messages.OCPPMessage;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -11,6 +12,13 @@ public @interface OCPPMessageInfo {
    * @return The Current Message Name.
    */
   String messageName() default "";
+
+  /**
+   * The Message type.
+   *
+   * @return The Current Message Name.
+   */
+  String messageType() default "";
 
   /**
    * The Call ID to send this message with.

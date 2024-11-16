@@ -1,11 +1,13 @@
 package com.sim_backend.websockets.messages;
 
-import com.sim_backend.websockets.OCPPMessage;
 import com.sim_backend.websockets.OCPPMessageInfo;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-@OCPPMessageInfo(messageName = "HeartBeatResponse", messageCallID = OCPPMessage.CALL_ID_RESPONSE)
+@OCPPMessageInfo(
+    messageType = "HeartBeatResponse",
+    messageName = "HeartBeatResponse",
+    messageCallID = OCPPMessage.CALL_ID_RESPONSE)
 public final class HeartBeatResponse extends OCPPMessage {
 
   /** The HeartBeat's time. */

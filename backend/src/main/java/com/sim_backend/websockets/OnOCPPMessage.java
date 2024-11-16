@@ -1,5 +1,7 @@
 package com.sim_backend.websockets;
 
+import com.sim_backend.websockets.messages.OCPPMessage;
+
 public class OnOCPPMessage {
   /** The received ocpp message. */
   private final OCPPMessage message;

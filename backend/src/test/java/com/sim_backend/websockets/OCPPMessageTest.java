@@ -1,6 +1,7 @@
 package com.sim_backend.websockets;
 
 import com.sim_backend.websockets.messages.HeartBeat;
+import com.sim_backend.websockets.messages.OCPPMessage;
 import org.junit.jupiter.api.Test;
 
 public class OCPPMessageTest {

@@ -1,7 +1,10 @@
-package com.sim_backend.websockets;
+package com.sim_backend.websockets.messages;
 
-import com.google.gson.JsonArray;
-import java.security.SecureRandom;
+import com.google.gson.JsonObject;
+import com.sim_backend.utils.GsonUtilities;
+import com.sim_backend.websockets.OCPPMessageInfo;
+import com.sim_backend.websockets.client.OCPPWebSocketClient;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class OCPPMessage {
@@ -30,15 +33,16 @@ public abstract class OCPPMessage {
    *
    * @return The generated message JSON.
    */
-  public JsonArray generateMessage() {
+  public JsonObject generateMessage() {
     assert this.getClass().isAnnotationPresent(OCPPMessageInfo.class);
     OCPPMessageInfo messageInfo = this.getClass().getAnnotation(OCPPMessageInfo.class);
-    JsonArray array = new JsonArray();
-    array.add(messageInfo.messageCallID());
-    array.add(this.messageID);
-    array.add(messageInfo.messageName());
-    array.add(GsonUtilities.getGson().toJsonTree(this));
-    return array;
+    JsonObject response = new JsonObject();
+    response.addProperty("messageCallId", messageInfo.messageCallID());
+    response.addProperty("messageId", this.messageID);
+    response.addProperty("messageName", messageInfo.messageName());
+    response.addProperty("messageType", messageInfo.messageType());
+    response.add("body", GsonUtilities.getGson().toJsonTree(this));
+    return response;
   }
 
   /**
@@ -60,13 +64,6 @@ public abstract class OCPPMessage {
     return tries;
   }
 
-  /** The Characters we are allowed in a Message ID. */
-  private static final String CHARACTERS =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  /** Our random generator. */
-  private static final SecureRandom RANDOM = new SecureRandom();
-
   /**
    * Generates a message ID of a given length.
    *
@@ -74,11 +71,6 @@ public abstract class OCPPMessage {
    */
   @NotNull
   private static String generateMessageID() {
-    StringBuilder sb = new StringBuilder(OCPPMessage.MAX_MESSAGE_ID_LENGTH);
-    for (int i = 0; i < OCPPMessage.MAX_MESSAGE_ID_LENGTH; i++) {
-      int randomIndex = RANDOM.nextInt(CHARACTERS.length());
-      sb.append(CHARACTERS.charAt(randomIndex));
-    }
-    return sb.toString();
+    return UUID.randomUUID().toString();
   }
 }

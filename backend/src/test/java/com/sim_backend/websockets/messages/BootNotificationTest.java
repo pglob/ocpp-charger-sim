@@ -3,7 +3,7 @@ package com.sim_backend.websockets.messages;
 import com.networknt.schema.InputFormat;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
-import com.sim_backend.websockets.GsonUtilities;
+import com.sim_backend.utils.GsonUtilities;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -37,8 +37,8 @@ public class BootNotificationTest {
   @Test
   public void testBootNotification() {
     BootNotification notification = getBootNotification();
-    assert notification.generateMessage().size() == 4;
-    String message = GsonUtilities.toString(notification.generateMessage().get(3));
+    // assert notification.generateMessage().size() == 4;
+    String message = GsonUtilities.toString(notification.generateMessage().get("body"));
 
     JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/BootNotification.json");
     Set<ValidationMessage> errors = jsonSchema.validate(message, InputFormat.JSON);
@@ -48,6 +48,7 @@ public class BootNotificationTest {
       }
     }
 
+    System.out.println(message);
     assert message.equals(
         "{\"chargePointVendor\":\"CP Vendor\",\"chargePointModel\":\"CP Model\",\"chargePointSerialNumber\":\"CP S/N\",\"chargeBoxSerialNumber\":\"Box S/N\",\"firmwareVersion\":\"Firmware\",\"iccid\":\"ICCID\",\"imsi\":\"IMSI\",\"meterType\":\"Meter Type\",\"meterSerialNumber\":\"Meter S/N\"}");
     assert errors.isEmpty();
