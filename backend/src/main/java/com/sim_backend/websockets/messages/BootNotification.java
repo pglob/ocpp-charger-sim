@@ -1,6 +1,5 @@
 package com.sim_backend.websockets.messages;
 
-import com.google.gson.JsonArray;
 import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.OCPPMessage;
 import com.sim_backend.websockets.OCPPMessageInfo;
@@ -68,6 +67,7 @@ public final class BootNotification extends OCPPMessage {
       final String inIMSI,
       final String mType,
       final String mSN) {
+    super();
     this.chargePointVendor = chargePVendor;
     this.chargePointModel = chargePModel;
     this.chargePointSerialNumber = chargePSN;
@@ -159,5 +159,4 @@ public final class BootNotification extends OCPPMessage {
   public String getMeterSerialNumber() {
     return meterSerialNumber;
   }
-
 }
