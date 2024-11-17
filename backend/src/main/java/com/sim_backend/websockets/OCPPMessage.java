@@ -35,13 +35,7 @@ public abstract class OCPPMessage {
     array.add(messageInfo.messageCallID());
     array.add(this.messageID);
     array.add(messageInfo.messageName());
-    // HeartBeat request requires an empty JSON array, has no JSON fields itself
-    if (messageInfo.messageName().equals("HeartBeat")){
-      array.add(new JsonArray());
-    }
-    else {
-      array.add(GsonUtilities.getGson().toJsonTree(this));
-    }
+    array.add(GsonUtilities.getGson().toJsonTree(this));
     return array;
   }
 
