@@ -11,5 +11,4 @@ public final class HeartBeat extends OCPPMessage {
   public HeartBeat() {
     super();
   }
-
 }
