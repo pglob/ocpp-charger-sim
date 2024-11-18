@@ -16,8 +16,7 @@ function App() {
   return (
     <div>
       <h1>Frontend</h1>
-      <p>Message from backend: {message}</p>
-      <Button />
+      <p data-testid="message">Message from backend: {message}</p>
     </div>
   );
 }
