@@ -4,14 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.events.OnOCPPMessage;
+import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPBadCallID;
 import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.messages.HeartBeat;
 import com.sim_backend.websockets.messages.HeartBeatResponse;
+import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
@@ -116,7 +119,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testBadCallID2() throws InterruptedException {
-    String badResponseMsg = "[4, \"Cool\", \"HeartBeat\", {}]";
+    String badResponseMsg = "[5, \"Cool\", \"HeartBeat\", {}]";
     HeartBeat beat = new HeartBeat();
     doAnswer(
             invocation -> {
@@ -127,7 +130,7 @@ public class OCPPWebSocketClientTest {
                         client.onMessage(badResponseMsg);
                       });
               assert badResponse.getFullMessage().equals(badResponseMsg);
-              assert badResponse.getBadCallID() == 4;
+              assert badResponse.getBadCallID() == 5;
               return null;
             })
         .when(client)
@@ -139,6 +142,26 @@ public class OCPPWebSocketClientTest {
     client.popAllMessages();
 
     // verify(onOCPPMessageMock, times(1)).getMessage();
+  }
+
+  @Test
+  public void testOnReceiveError() {
+    OnOCPPMessageListener listener = mock(OnOCPPMessageListener.class);
+    OCPPMessageError messageError = new OCPPMessageError("404", "Not Found", new JsonObject());
+
+    String fullMessage = GsonUtilities.toString(messageError.generateMessage());
+
+    client.setOnReceiveMessage(
+        message -> {
+          assert message.getMessage() instanceof OCPPMessageError;
+          OCPPMessageError receivedError = (OCPPMessageError) message.getMessage();
+          assert receivedError.getErrorCode().equals("404");
+          assert receivedError.getErrorDescription().equals("Not Found");
+          assert receivedError.getErrorDetails() != null;
+        });
+    client.onMessage(fullMessage);
+
+    // verify(listener, times(1)).onMessageReceieved(any(OnOCPPMessage.class));
   }
 
   @Test

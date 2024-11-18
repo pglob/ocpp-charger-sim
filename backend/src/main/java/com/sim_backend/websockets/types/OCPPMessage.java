@@ -21,6 +21,9 @@ public abstract class OCPPMessage {
   /** The call ID for a response. */
   public static final int CALL_ID_RESPONSE = 3;
 
+  /** The call ID for an error. */
+  public static final int CALL_ID_ERROR = 4;
+
   /** Number of attempts to send this message. */
   private transient int tries = 0;
 

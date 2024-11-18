@@ -9,6 +9,7 @@ import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.types.OCPPMessage;
+import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -86,9 +87,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
       JsonObject data = null;
 
       int callID = array.get(CALL_ID_INDEX).getAsInt();
-      if (callID == 1) {
-        throw new OCPPBadCallID(callID, s);
-      } else if (callID == OCPPMessage.CALL_ID_REQUEST) {
+      if (callID == OCPPMessage.CALL_ID_REQUEST) {
         messageName = array.get(NAME_INDEX).getAsString();
         data = array.get(PAYLOAD_INDEX).getAsJsonObject();
       } else if (callID == OCPPMessage.CALL_ID_RESPONSE) {
@@ -100,7 +99,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
             this.previousMessages.remove(msgID).getClass().getAnnotation(OCPPMessageInfo.class);
         messageName = info.messageName() + "Response";
         data = array.get(PAYLOAD_INDEX - 1).getAsJsonObject();
-      } else if (callID > OCPPMessage.CALL_ID_RESPONSE) {
+      } else if (callID == OCPPMessage.CALL_ID_ERROR) {
+        OCPPMessageError error = new OCPPMessageError(array);
+        onReceiveMessage.onMessageReceieved(new OnOCPPMessage(error));
+        return;
+      } else {
         throw new OCPPBadCallID(callID, s);
       }
 
