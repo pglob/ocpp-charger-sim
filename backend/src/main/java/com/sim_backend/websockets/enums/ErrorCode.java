@@ -1,5 +1,6 @@
 package com.sim_backend.websockets.enums;
 
+/** The ErrorCode for an OCPPMessageError. */
 public enum ErrorCode {
   /** Requested Action is not known by receiver. */
   NotImplemented,
@@ -31,6 +32,6 @@ public enum ErrorCode {
    * constraints (e.g. “somestring”: 12)
    */
   TypeConstraintViolation,
-  /** Any other error not covered by the previous ones */
+  /** Any other error not covered by the previous ones. */
   GenericError
 }

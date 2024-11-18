@@ -1,6 +1,10 @@
 package com.sim_backend.websockets;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
@@ -11,12 +15,15 @@ import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
 
+/** A WebSocket client for handling OCPP Messages. */
 public class OCPPWebSocketClient extends WebSocketClient {
 
   /** The time to wait to try to reconnect. */
@@ -44,7 +51,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   private final MessageQueue queue = new MessageQueue();
 
   /** Subscribe to when we receive an OCPP message. */
-  private Map<Class<?>, ArrayList<OnOCPPMessageListener>> onReceiveMessage =
+  private final Map<Class<?>, ArrayList<OnOCPPMessageListener>> onReceiveMessage =
       new ConcurrentHashMap<>();
 
   /** The previous messages we have sent. * */
@@ -66,7 +73,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void onOpen(ServerHandshake serverHandshake) {}
 
   /**
-   * When we receive a message from a sent ocpp message.
+   * When we receive an OCPP message.
    *
    * @param s The received message as a string.
    */
@@ -77,13 +84,13 @@ public class OCPPWebSocketClient extends WebSocketClient {
     JsonElement element = gson.fromJson(s, JsonElement.class);
 
     if (!element.isJsonArray()) {
-      throw new JsonParseException("Expected array got " + element.toString());
+      throw new JsonParseException("Expected array got " + element);
     }
 
     JsonArray array = element.getAsJsonArray();
     String msgID = array.get(MESSAGE_ID_INDEX).getAsString();
-    String messageName = null;
-    JsonObject data = null;
+    String messageName;
+    JsonObject data;
 
     int callID = array.get(CALL_ID_INDEX).getAsInt();
     switch (callID) {

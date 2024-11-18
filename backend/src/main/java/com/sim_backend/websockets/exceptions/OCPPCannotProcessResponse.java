@@ -1,5 +1,6 @@
 package com.sim_backend.websockets.exceptions;
 
+/** Thrown when we receive a message ID we did not send. */
 public class OCPPCannotProcessResponse extends RuntimeException {
 
   /** The Received message we could not process due to us not having a matching message ID. */
@@ -19,7 +20,7 @@ public class OCPPCannotProcessResponse extends RuntimeException {
     this.badMessageId = badMsgId;
   }
 
-  /** Get The unable to be matched messageID; */
+  /** Get The unable to be matched messageID. */
   public String getBadMessageId() {
     return badMessageId;
   }

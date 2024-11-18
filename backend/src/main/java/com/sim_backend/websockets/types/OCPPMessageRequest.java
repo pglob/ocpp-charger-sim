@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 
+/** An OCPP Call message. */
 public class OCPPMessageRequest extends OCPPMessage {
 
   /**

@@ -3,6 +3,7 @@ package com.sim_backend.websockets.exceptions;
 import com.sim_backend.websockets.types.OCPPMessage;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
+/** Thrown when we could not send a message after a certain number of reattempts. */
 public class OCPPMessageFailure extends RuntimeException {
 
   /** The Inner WebsocketException. */

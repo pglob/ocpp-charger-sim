@@ -3,6 +3,7 @@ package com.sim_backend;
 import com.sim_backend.rest.TestMessageController;
 import io.javalin.Javalin;
 
+/** The entry into our program. */
 public final class Main {
   private Main() {}
 

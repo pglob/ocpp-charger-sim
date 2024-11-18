@@ -6,6 +6,7 @@ import com.sim_backend.websockets.types.OCPPMessageResponse;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+/** An OCPP HeartBeatResponse message. */
 @OCPPMessageInfo(messageName = "HeartBeatResponse", messageCallID = OCPPMessage.CALL_ID_RESPONSE)
 public final class HeartBeatResponse extends OCPPMessageResponse {
 

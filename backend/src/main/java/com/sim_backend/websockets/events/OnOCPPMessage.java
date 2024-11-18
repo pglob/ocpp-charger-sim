@@ -2,6 +2,7 @@ package com.sim_backend.websockets.events;
 
 import com.sim_backend.websockets.types.OCPPMessage;
 
+/** An event for when we receive an OCPP message. */
 public class OnOCPPMessage {
   /** The received ocpp message. */
   private final OCPPMessage message;

@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
+/** A class for handling an OCPP Message Queue. */
 public class MessageQueue {
 
   /** The number of reattempts to resend a message. */

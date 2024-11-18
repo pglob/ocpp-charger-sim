@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ErrorCode;
 
+/** A CallError message for OCPP. */
 public class OCPPMessageError extends OCPPMessage {
 
   /** The message id index in a received JsonArray. */

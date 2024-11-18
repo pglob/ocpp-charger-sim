@@ -11,6 +11,7 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
+/** An OCPP message. */
 public abstract class OCPPMessage {
   /** The maximum allowed message ID length. */
   public static final int MAX_MESSAGE_ID_LENGTH = 20;

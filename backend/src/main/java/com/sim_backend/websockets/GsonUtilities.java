@@ -7,6 +7,7 @@ import com.sim_backend.websockets.gson.ZonedDateTimeDeserializer;
 import com.sim_backend.websockets.gson.ZonedDateTimeSerializer;
 import java.time.ZonedDateTime;
 
+/** Gson Utilities to make working with Gson easier. */
 public abstract class GsonUtilities {
   /** You cannot create this. */
   private GsonUtilities() {}
