@@ -14,3 +14,6 @@ lint_backend:
 
 build_frontend:
 	cd ./frontend && npm run format && npm run local
+
+lint_frontend:
+	cd ./frontend && npm run lint
