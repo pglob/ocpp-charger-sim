@@ -1,11 +1,11 @@
 package com.sim_backend.websockets.messages;
 
-import com.sim_backend.websockets.OCPPMessage;
-import com.sim_backend.websockets.OCPPMessageInfo;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.types.OCPPMessageRequest;
 
 /** A OCPP Boot Notification Message. */
 @OCPPMessageInfo(messageName = "BootNotification")
-public final class BootNotification extends OCPPMessage {
+public final class BootNotification extends OCPPMessageRequest {
   /** The Charge Point's Vendor. */
   private final String chargePointVendor;
 

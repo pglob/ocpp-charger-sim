@@ -1,8 +1,16 @@
-package com.sim_backend.websockets;
+package com.sim_backend.websockets.types;
 
 import com.google.gson.JsonArray;
 import java.security.SecureRandom;
+import java.util.Set;
+
+import com.sim_backend.websockets.GsonUtilities;
+import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import org.jetbrains.annotations.NotNull;
+import org.reflections.Reflections;
+
+import static com.sim_backend.websockets.OCPPWebSocketClient.MESSAGE_PACKAGE;
 
 public abstract class OCPPMessage {
   /** The maximum allowed message ID length. */
@@ -18,7 +26,7 @@ public abstract class OCPPMessage {
   private transient int tries = 0;
 
   /** The Message ID we send this message with. */
-  private final transient String messageID;
+  protected transient String messageID;
 
   /** The constructor for an OCPP message. */
   protected OCPPMessage() {
@@ -30,16 +38,7 @@ public abstract class OCPPMessage {
    *
    * @return The generated message JSON.
    */
-  public JsonArray generateMessage() {
-    assert this.getClass().isAnnotationPresent(OCPPMessageInfo.class);
-    OCPPMessageInfo messageInfo = this.getClass().getAnnotation(OCPPMessageInfo.class);
-    JsonArray array = new JsonArray();
-    array.add(messageInfo.messageCallID());
-    array.add(this.messageID);
-    array.add(messageInfo.messageName());
-    array.add(GsonUtilities.getGson().toJsonTree(this));
-    return array;
-  }
+  public abstract JsonArray generateMessage();
 
   /**
    * Emit the message to the given client.
@@ -58,6 +57,22 @@ public abstract class OCPPMessage {
   public int incrementTries() {
     tries += 1;
     return tries;
+  }
+
+  /**
+   * Get the message ID.
+   * @return the current message ID.
+   */
+  public String getMessageID() {
+    return messageID;
+  }
+
+  /**
+   * Set the current message ID.
+   * @param msgID Set the message ID.
+   */
+  public void setMessageID(final String msgID) {
+    this.messageID = msgID;
   }
 
   /** The Characters we are allowed in a Message ID. */
@@ -80,5 +95,30 @@ public abstract class OCPPMessage {
       sb.append(CHARACTERS.charAt(randomIndex));
     }
     return sb.toString();
+  }
+
+  /**
+   * Get a message Class by the message Name.
+   * @param messageName The message class name we are looking for.
+   * @return The Found OCPPMessage Class or throws an exception if not found.
+   */
+  public static Class<?> getMessageByName(final String messageName) {
+    Reflections reflections = new Reflections(MESSAGE_PACKAGE);
+
+    // Get all classes in our messages package,
+    // that are annotated with OCPPMessageInfo.
+    Set<Class<?>> classes = reflections.getTypesAnnotatedWith(OCPPMessageInfo.class);
+
+    // Find the one that matches the received message Type.
+    for (Class<?> messageClass : classes) {
+      OCPPMessageInfo annotation = messageClass.getAnnotation(OCPPMessageInfo.class);
+      // Check if it's a has a parent class of OCPPMessage.
+      if (OCPPMessage.class.isAssignableFrom(messageClass)
+              && annotation.messageName().equals(messageName)) {
+        // Convert the payload String into the found class.
+        return messageClass;
+      }
+    }
+    return null;
   }
 }

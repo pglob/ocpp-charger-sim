@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import com.google.gson.JsonElement;
 import com.networknt.schema.*;
 import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.OCPPMessage;
+import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import java.io.InputStream;
 import java.net.URI;
@@ -55,7 +55,7 @@ public class HeartBeatTest {
   public void testResponseJSON() {
     HeartBeatResponse heartBeat = new HeartBeatResponse();
     JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/HeartbeatResponse.json");
-    JsonElement jsonElement = heartBeat.generateMessage().get(3);
+    JsonElement jsonElement = heartBeat.generateMessage().get(2);
     Set<ValidationMessage> errors =
         jsonSchema.validate(GsonUtilities.toString(jsonElement), InputFormat.JSON);
     if (!errors.isEmpty()) {
@@ -67,12 +67,12 @@ public class HeartBeatTest {
 
     heartBeat =
         new HeartBeatResponse(ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC")));
-    String json = GsonUtilities.toString(heartBeat.generateMessage().get(3));
+    String json = GsonUtilities.toString(heartBeat.generateMessage().get(2));
     assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001Z\"");
 
     heartBeat =
         new HeartBeatResponse(ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC-7")));
-    json = GsonUtilities.toString(heartBeat.generateMessage().get(3));
+    json = GsonUtilities.toString(heartBeat.generateMessage().get(2));
     assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001-07:00\"");
   }
 

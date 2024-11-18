@@ -1,4 +1,6 @@
-package com.sim_backend.websockets;
+package com.sim_backend.websockets.events;
+
+import com.sim_backend.websockets.types.OCPPMessage;
 
 public class OnOCPPMessage {
   /** The received ocpp message. */
@@ -18,7 +20,7 @@ public class OnOCPPMessage {
    *
    * @return The received message.
    */
-  OCPPMessage getMessage() {
+  public OCPPMessage getMessage() {
     return message;
   }
 }

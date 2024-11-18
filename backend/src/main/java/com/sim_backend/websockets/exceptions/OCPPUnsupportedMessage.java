@@ -1,4 +1,4 @@
-package com.sim_backend.websockets;
+package com.sim_backend.websockets.exceptions;
 
 public class OCPPUnsupportedMessage extends RuntimeException {
 
