@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 
+const messages = [
+  { name: 'Authorize', endpoint: '/api/message/authorize' },
+  { name: 'Boot', endpoint: '/api/message/boot' },
+  { name: 'Heartbeat', endpoint: '/api/message/heartbeat' },
+];
+
 //Generic method where each button POST request to the specified endpoint
-function sendRequest(endpoint, button) {
+function postRequest(endpoint, button) {
   return fetch(endpoint, {
     method: 'POST', //Add header and body after clarifying the request content
   })
@@ -31,7 +37,7 @@ function Button() {
   const handleOnlineOffline = () => {
     const endpoint = isOnline ? '/api/state/offline' : '/api/state/online';
     const buttonName = isOnline ? 'Take Offline' : 'Bring Online';
-    sendRequest(endpoint, buttonName).finally(() => {
+    postRequest(endpoint, buttonName).finally(() => {
       setIsOnline(!isOnline);
     });
   }; //Handle Bring online/Take Offline button click behavior, In offline state, the drop-down menu will not be displayed, which is in line with the example in the requirements document.
@@ -45,7 +51,7 @@ function Button() {
       {isOnline && (
         <>
           <button onClick={handleDropdown} style={{ marginRight: '10px' }}>
-            {openDropdown ? 'Close Menu' : 'Open Menu'}
+            {openDropdown ? 'Close Menu' : 'Send Messages'}
           </button>
           {openDropdown && (
             <div
@@ -60,30 +66,15 @@ function Button() {
                 flexDirection: 'column',
               }}
             >
-              <button
-                onClick={() =>
-                  sendRequest('/api/message/authorize', 'Authorize')
-                }
-                style={{ marginBottom: '8px' }}
-              >
-                Authorize
-              </button>
-              <button
-                onClick={() =>
-                  sendRequest('/api/message/boot', 'Boot Notification')
-                }
-                style={{ marginBottom: '8px' }}
-              >
-                Boot Notification
-              </button>
-              <button
-                onClick={() =>
-                  sendRequest('/api/message/heartbeat', 'Heartbeat')
-                }
-                style={{ marginBottom: '8px' }}
-              >
-                Heartbeat
-              </button>
+              {messages.map((message) => (
+                <button
+                  key={message.name}
+                  onClick={() => postRequest(message.endpoint, message.name)}
+                  style={{ marginBottom: '8px' }}
+                >
+                  {message.name}
+                </button>
+              ))}
             </div>
           )}
         </>
