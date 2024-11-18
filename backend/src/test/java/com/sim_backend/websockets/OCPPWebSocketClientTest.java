@@ -233,7 +233,7 @@ public class OCPPWebSocketClientTest {
     HeartBeat beat = new HeartBeat();
     doAnswer(
             invocation -> {
-              client.addMessageToPreviousMessage(beat);
+              client.addPreviousMessage(beat);
               response.setMessageID(beat.getMessageID());
               client.onMessage(GsonUtilities.toString(response.generateMessage()));
               return null;
@@ -354,7 +354,7 @@ public class OCPPWebSocketClientTest {
             invocation -> {
               doAnswer(
                       invocation2 -> {
-                        this.client.addMessageToPreviousMessage(beat);
+                        this.client.addPreviousMessage(beat);
                         HeartBeatResponse response = new HeartBeatResponse();
                         response.setMessageID(beat.getMessageID());
                         client.onMessage(GsonUtilities.toString(response.generateMessage()));

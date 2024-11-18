@@ -50,7 +50,7 @@ public abstract class OCPPMessage {
   public void sendMessage(final OCPPWebSocketClient client) {
     client.send(GsonUtilities.toString(this.generateMessage()));
     if (this instanceof OCPPMessageRequest) {
-      client.addMessageToPreviousMessage(this);
+      client.addPreviousMessage(this);
     }
   }
 

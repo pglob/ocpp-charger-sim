@@ -216,7 +216,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @param msg The message we wish to add.
    */
-  public void addMessageToPreviousMessage(final OCPPMessage msg) {
+  public void addPreviousMessage(final OCPPMessage msg) {
     this.previousMessages.put(msg.getMessageID(), msg);
   }
 }
