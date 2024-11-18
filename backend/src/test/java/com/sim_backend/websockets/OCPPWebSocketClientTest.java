@@ -111,7 +111,7 @@ public class OCPPWebSocketClientTest {
         .send(anyString());
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(message -> {});
+    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
 
     client.popAllMessages();
 
@@ -138,7 +138,7 @@ public class OCPPWebSocketClientTest {
         .send(anyString());
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(message -> {});
+    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
 
     client.popAllMessages();
 
@@ -154,6 +154,7 @@ public class OCPPWebSocketClientTest {
     String fullMessage = GsonUtilities.toString(messageError.generateMessage());
 
     client.setOnReceiveMessage(
+        OCPPMessageError.class,
         message -> {
           assert message.getMessage() instanceof OCPPMessageError;
           OCPPMessageError receivedError = (OCPPMessageError) message.getMessage();
@@ -190,12 +191,7 @@ public class OCPPWebSocketClientTest {
         .send(anyString());
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(
-        message -> {
-          assert message.getMessage() instanceof HeartBeatResponse;
-          HeartBeatResponse receivedResponse = (HeartBeatResponse) message.getMessage();
-          assert receivedResponse.getCurrentTime().isEqual(response.getCurrentTime());
-        });
+    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
 
     client.popAllMessages();
 
@@ -219,6 +215,7 @@ public class OCPPWebSocketClientTest {
 
     client.pushMessage(beat);
     client.setOnReceiveMessage(
+        HeartBeatResponse.class,
         message -> {
           assert message.getMessage() instanceof HeartBeatResponse;
           HeartBeatResponse receivedResponse = (HeartBeatResponse) message.getMessage();
@@ -228,23 +225,6 @@ public class OCPPWebSocketClientTest {
     client.popAllMessages();
 
     // verify(onOCPPMessageMock, times(1)).getMessage();
-  }
-
-  @Test
-  public void testReceiveBadMessageNoReceiver() throws OCPPMessageFailure, InterruptedException {
-    doAnswer(
-            invocation -> {
-              client.onMessage("{}");
-              return null;
-            })
-        .when(client)
-        .send(anyString());
-
-    HeartBeat beat = new HeartBeat();
-
-    client.pushMessage(beat);
-    client.popAllMessages();
-    verify(client, times(1)).onMessage(anyString());
   }
 
   @Test
@@ -260,7 +240,7 @@ public class OCPPWebSocketClientTest {
     HeartBeat beat = new HeartBeat();
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(message -> {});
+    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
     JsonParseException err = assertThrows(JsonParseException.class, () -> client.popAllMessages());
     assert err != null;
     assert err.getMessage().startsWith("Expected array");
@@ -280,7 +260,7 @@ public class OCPPWebSocketClientTest {
     HeartBeat beat = new HeartBeat();
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(message -> {});
+    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
     OCPPUnsupportedMessage err =
         assertThrows(OCPPUnsupportedMessage.class, () -> client.popAllMessages());
     assert err != null;
@@ -337,6 +317,7 @@ public class OCPPWebSocketClientTest {
     assert client.size() == 1;
 
     client.setOnReceiveMessage(
+        HeartBeatResponse.class,
         message -> {
           assert message.getMessage() instanceof HeartBeatResponse;
         });

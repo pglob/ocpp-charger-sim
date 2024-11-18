@@ -11,8 +11,8 @@ import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
@@ -44,10 +44,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
   private final MessageQueue queue = new MessageQueue();
 
   /** Subscribe to when we receive an OCPP message. */
-  private OnOCPPMessageListener onReceiveMessage;
+  private Map<Class<?>, ArrayList<OnOCPPMessageListener>> onReceiveMessage =
+      new ConcurrentHashMap<>();
 
   /** The previous messages we have sent. * */
-  private final Dictionary<String, OCPPMessage> previousMessages = new Hashtable<>();
+  private final Map<String, OCPPMessage> previousMessages = new ConcurrentHashMap<>();
 
   /**
    * Create an OCPP WebSocket Client.
@@ -72,25 +73,28 @@ public class OCPPWebSocketClient extends WebSocketClient {
   @SuppressWarnings("checkstyle:FinalParameters")
   @Override
   public void onMessage(String s) {
+    Gson gson = GsonUtilities.getGson();
+    JsonElement element = gson.fromJson(s, JsonElement.class);
 
-    if (onReceiveMessage != null) {
-      Gson gson = GsonUtilities.getGson();
-      JsonElement element = gson.fromJson(s, JsonElement.class);
+    if (!element.isJsonArray()) {
+      throw new JsonParseException("Expected array got " + element.toString());
+    }
 
-      if (!element.isJsonArray()) {
-        throw new JsonParseException("Expected array got " + element.toString());
-      }
+    JsonArray array = element.getAsJsonArray();
+    String msgID = array.get(MESSAGE_ID_INDEX).getAsString();
+    String messageName = null;
+    JsonObject data = null;
 
-      JsonArray array = element.getAsJsonArray();
-      String msgID = array.get(MESSAGE_ID_INDEX).getAsString();
-      String messageName = null;
-      JsonObject data = null;
-
-      int callID = array.get(CALL_ID_INDEX).getAsInt();
-      if (callID == OCPPMessage.CALL_ID_REQUEST) {
+    int callID = array.get(CALL_ID_INDEX).getAsInt();
+    switch (callID) {
+      case OCPPMessage.CALL_ID_REQUEST -> {
+        // handling a simple Call
         messageName = array.get(NAME_INDEX).getAsString();
         data = array.get(PAYLOAD_INDEX).getAsJsonObject();
-      } else if (callID == OCPPMessage.CALL_ID_RESPONSE) {
+        break;
+      }
+      case OCPPMessage.CALL_ID_RESPONSE -> {
+        // handling a CallResult
         if (this.previousMessages.get(msgID) == null) {
           throw new OCPPCannotProcessResponse(s, msgID);
         }
@@ -99,26 +103,29 @@ public class OCPPWebSocketClient extends WebSocketClient {
             this.previousMessages.remove(msgID).getClass().getAnnotation(OCPPMessageInfo.class);
         messageName = info.messageName() + "Response";
         data = array.get(PAYLOAD_INDEX - 1).getAsJsonObject();
-      } else if (callID == OCPPMessage.CALL_ID_ERROR) {
+      }
+      case OCPPMessage.CALL_ID_ERROR -> {
+        // handling a CallError.
         OCPPMessageError error = new OCPPMessageError(array);
-        onReceiveMessage.onMessageReceieved(new OnOCPPMessage(error));
+        this.onReceiveMessage(OCPPMessageError.class, error);
         return;
-      } else {
-        throw new OCPPBadCallID(callID, s);
       }
-
-      if (messageName == null) {
-        throw new OCPPUnsupportedMessage(s, "null");
-      }
-      Class<?> messageClass = OCPPMessage.getMessageByName(messageName);
-      if (messageClass == null) {
-        throw new OCPPUnsupportedMessage(s, messageName);
-      }
-
-      OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
-      message.setMessageID(msgID);
-      onReceiveMessage.onMessageReceieved(new OnOCPPMessage(message));
+      default -> throw new OCPPBadCallID(callID, s);
     }
+
+    if (messageName == null) {
+      throw new OCPPUnsupportedMessage(s, "null");
+    }
+
+    // We found our class
+    Class<?> messageClass = OCPPMessage.getMessageByName(messageName);
+    if (messageClass == null) {
+      throw new OCPPUnsupportedMessage(s, messageName);
+    }
+
+    OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
+    message.setMessageID(msgID);
+    this.onReceiveMessage(messageClass, message);
   }
 
   @SuppressWarnings("checkstyle:FinalParameters")
@@ -130,12 +137,38 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void onError(Exception e) {}
 
   /**
+   * Helper function for when we receive an OCPP message.
+   *
+   * @param currClass The class of the message we received.
+   * @param message The Message we received
+   */
+  private void onReceiveMessage(final Class<?> currClass, final OCPPMessage message) {
+    if (!OCPPMessage.class.isAssignableFrom(currClass)) {
+      return;
+    }
+    Optional.ofNullable(this.onReceiveMessage.get(currClass))
+        .ifPresent(
+            listeners -> {
+              for (OnOCPPMessageListener listener : listeners) {
+                listener.onMessageReceieved(new OnOCPPMessage(message));
+              }
+            });
+  }
+
+  /**
    * Set the function called when we receive an OCPP Message.
    *
    * @param onReceiveMessageListener The Received OCPPMessage.
+   * @param currClass The class we want to set a listener for.
    */
-  public void setOnReceiveMessage(final OnOCPPMessageListener onReceiveMessageListener) {
-    this.onReceiveMessage = onReceiveMessageListener;
+  public void setOnReceiveMessage(
+      final Class<?> currClass, final OnOCPPMessageListener onReceiveMessageListener) {
+    if (!OCPPMessage.class.isAssignableFrom(currClass)) {
+      return;
+    }
+    this.onReceiveMessage
+        .computeIfAbsent(currClass, k -> new ArrayList<>())
+        .add(onReceiveMessageListener);
   }
 
   /**
