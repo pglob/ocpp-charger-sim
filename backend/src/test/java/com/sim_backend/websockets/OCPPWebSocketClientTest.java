@@ -148,7 +148,8 @@ public class OCPPWebSocketClientTest {
   @Test
   public void testOnReceiveError() {
     OnOCPPMessageListener listener = mock(OnOCPPMessageListener.class);
-    OCPPMessageError messageError = new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
+    OCPPMessageError messageError =
+        new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
     String fullMessage = GsonUtilities.toString(messageError.generateMessage());
 

@@ -10,7 +10,8 @@ public class OCPPMessageErrorTest {
 
   @Test
   public void testMessageError() {
-    OCPPMessageError error = new OCPPMessageError(ErrorCode.InternalError, "Not Found", new JsonObject());
+    OCPPMessageError error =
+        new OCPPMessageError(ErrorCode.InternalError, "Not Found", new JsonObject());
     JsonArray array = error.generateMessage();
     assert array.get(2).getAsString().equals(error.getErrorCode().toString());
     assert array.get(3).getAsString().equals("Not Found");
