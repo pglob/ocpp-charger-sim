@@ -1,10 +1,9 @@
 package com.sim_backend.websockets;
 
-import java.util.Deque;
-import java.util.LinkedList;
-
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.types.OCPPMessage;
+import java.util.Deque;
+import java.util.LinkedList;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 public class MessageQueue {

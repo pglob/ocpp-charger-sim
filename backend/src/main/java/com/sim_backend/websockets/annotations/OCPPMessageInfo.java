@@ -1,7 +1,6 @@
 package com.sim_backend.websockets.annotations;
 
 import com.sim_backend.websockets.types.OCPPMessage;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 

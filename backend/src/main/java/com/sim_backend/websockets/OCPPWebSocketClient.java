@@ -1,10 +1,6 @@
 package com.sim_backend.websockets;
 
 import com.google.gson.*;
-import java.net.URI;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
@@ -13,6 +9,9 @@ import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.types.OCPPMessage;
+import java.net.URI;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
@@ -46,7 +45,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** Subscribe to when we receive an OCPP message. */
   private OnOCPPMessageListener onReceiveMessage;
 
-  /** The previous messages we have sent. **/
+  /** The previous messages we have sent. * */
   private final Dictionary<String, OCPPMessage> previousMessages = new Hashtable<>();
 
   /**
@@ -97,7 +96,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
           throw new OCPPCannotProcessResponse(s, msgID);
         }
 
-        OCPPMessageInfo info = this.previousMessages.remove(msgID).getClass().getAnnotation(OCPPMessageInfo.class);
+        OCPPMessageInfo info =
+            this.previousMessages.remove(msgID).getClass().getAnnotation(OCPPMessageInfo.class);
         messageName = info.messageName() + "Response";
         data = array.get(PAYLOAD_INDEX - 1).getAsJsonObject();
       } else if (callID > OCPPMessage.CALL_ID_RESPONSE) {
@@ -182,6 +182,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
   /**
    * Add an OCPPMessage to the previous messages.
+   *
    * @param msg The message we wish to add.
    */
   public void addMessageToPreviousMessage(final OCPPMessage msg) {

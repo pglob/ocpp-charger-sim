@@ -14,7 +14,6 @@ import com.sim_backend.websockets.messages.HeartBeat;
 import com.sim_backend.websockets.messages.HeartBeatResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,110 +87,116 @@ public class OCPPWebSocketClientTest {
     verify(client, times(2)).send(anyString());
   }
 
-    @Test
-    public void testBadCallID() throws InterruptedException {
-        String badResponseMsg = "[1, \"Cool\", \"HeartBeat\", {}]";
-        HeartBeat beat = new HeartBeat();
-        doAnswer(
-                invocation -> {
-                    OCPPBadCallID badResponse = assertThrows(OCPPBadCallID.class, () -> {
-                        client.onMessage(badResponseMsg);
-                    });
-                    assert badResponse.getFullMessage().equals(badResponseMsg);
-                    assert badResponse.getBadCallID() == 1;
-                    return null;
-                })
-                .when(client)
-                .send(anyString());
-
-        client.pushMessage(beat);
-        client.setOnReceiveMessage(message -> {});
-
-        client.popAllMessages();
-
-        // verify(onOCPPMessageMock, times(1)).getMessage();
-    }
-    @Test
-    public void testBadCallID2() throws InterruptedException {
-        String badResponseMsg = "[4, \"Cool\", \"HeartBeat\", {}]";
-        HeartBeat beat = new HeartBeat();
-        doAnswer(
-                invocation -> {
-                    OCPPBadCallID badResponse = assertThrows(OCPPBadCallID.class, () -> {
-                        client.onMessage(badResponseMsg);
-                    });
-                    assert badResponse.getFullMessage().equals(badResponseMsg);
-                    assert badResponse.getBadCallID() == 4;
-                    return null;
-                })
-                .when(client)
-                .send(anyString());
-
-        client.pushMessage(beat);
-        client.setOnReceiveMessage(message -> {});
-
-        client.popAllMessages();
-
-        // verify(onOCPPMessageMock, times(1)).getMessage();
-    }
   @Test
-  public void testOnReceiveMessageNoMatchingMsg()  throws OCPPMessageFailure, InterruptedException {
-      HeartBeatResponse response = new HeartBeatResponse();
+  public void testBadCallID() throws InterruptedException {
+    String badResponseMsg = "[1, \"Cool\", \"HeartBeat\", {}]";
+    HeartBeat beat = new HeartBeat();
+    doAnswer(
+            invocation -> {
+              OCPPBadCallID badResponse =
+                  assertThrows(
+                      OCPPBadCallID.class,
+                      () -> {
+                        client.onMessage(badResponseMsg);
+                      });
+              assert badResponse.getFullMessage().equals(badResponseMsg);
+              assert badResponse.getBadCallID() == 1;
+              return null;
+            })
+        .when(client)
+        .send(anyString());
 
-      HeartBeat beat = new HeartBeat();
-      doAnswer(
-              invocation -> {
-                  response.setMessageID(beat.getMessageID());
-                  String fullMessage = GsonUtilities.toString(response.generateMessage());
-                  OCPPCannotProcessResponse badResponse = assertThrows(OCPPCannotProcessResponse.class, () -> {
-                      client.onMessage(fullMessage);
-                  });
-                  assert badResponse.getReceivedMessage().equals(fullMessage);
-                  assert badResponse.getBadMessageId().equals(beat.getMessageID());
+    client.pushMessage(beat);
+    client.setOnReceiveMessage(message -> {});
 
-                  return null;
-              })
-              .when(client)
-              .send(anyString());
+    client.popAllMessages();
 
-
-
-      client.pushMessage(beat);
-      client.setOnReceiveMessage(
-              message -> {
-
-                  assert message.getMessage() instanceof HeartBeatResponse;
-                  HeartBeatResponse receivedResponse = (HeartBeatResponse) message.getMessage();
-                  assert receivedResponse.getCurrentTime().isEqual(response.getCurrentTime());
-              });
-
-      client.popAllMessages();
-
-      // verify(onOCPPMessageMock, times(1)).getMessage();
+    // verify(onOCPPMessageMock, times(1)).getMessage();
   }
+
+  @Test
+  public void testBadCallID2() throws InterruptedException {
+    String badResponseMsg = "[4, \"Cool\", \"HeartBeat\", {}]";
+    HeartBeat beat = new HeartBeat();
+    doAnswer(
+            invocation -> {
+              OCPPBadCallID badResponse =
+                  assertThrows(
+                      OCPPBadCallID.class,
+                      () -> {
+                        client.onMessage(badResponseMsg);
+                      });
+              assert badResponse.getFullMessage().equals(badResponseMsg);
+              assert badResponse.getBadCallID() == 4;
+              return null;
+            })
+        .when(client)
+        .send(anyString());
+
+    client.pushMessage(beat);
+    client.setOnReceiveMessage(message -> {});
+
+    client.popAllMessages();
+
+    // verify(onOCPPMessageMock, times(1)).getMessage();
+  }
+
+  @Test
+  public void testOnReceiveMessageNoMatchingMsg() throws OCPPMessageFailure, InterruptedException {
+    HeartBeatResponse response = new HeartBeatResponse();
+
+    HeartBeat beat = new HeartBeat();
+    doAnswer(
+            invocation -> {
+              response.setMessageID(beat.getMessageID());
+              String fullMessage = GsonUtilities.toString(response.generateMessage());
+              OCPPCannotProcessResponse badResponse =
+                  assertThrows(
+                      OCPPCannotProcessResponse.class,
+                      () -> {
+                        client.onMessage(fullMessage);
+                      });
+              assert badResponse.getReceivedMessage().equals(fullMessage);
+              assert badResponse.getBadMessageId().equals(beat.getMessageID());
+
+              return null;
+            })
+        .when(client)
+        .send(anyString());
+
+    client.pushMessage(beat);
+    client.setOnReceiveMessage(
+        message -> {
+          assert message.getMessage() instanceof HeartBeatResponse;
+          HeartBeatResponse receivedResponse = (HeartBeatResponse) message.getMessage();
+          assert receivedResponse.getCurrentTime().isEqual(response.getCurrentTime());
+        });
+
+    client.popAllMessages();
+
+    // verify(onOCPPMessageMock, times(1)).getMessage();
+  }
+
   @Test
   public void testOnReceiveMessage() throws OCPPMessageFailure, InterruptedException {
     HeartBeatResponse response = new HeartBeatResponse();
 
-      HeartBeat beat = new HeartBeat();
+    HeartBeat beat = new HeartBeat();
     doAnswer(
             invocation -> {
-                client.addMessageToPreviousMessage(beat);
-                response.setMessageID(beat.getMessageID());
+              client.addMessageToPreviousMessage(beat);
+              response.setMessageID(beat.getMessageID());
               client.onMessage(GsonUtilities.toString(response.generateMessage()));
               return null;
             })
         .when(client)
         .send(anyString());
 
-
-
     client.pushMessage(beat);
     client.setOnReceiveMessage(
         message -> {
-
           assert message.getMessage() instanceof HeartBeatResponse;
-            HeartBeatResponse receivedResponse = (HeartBeatResponse) message.getMessage();
+          HeartBeatResponse receivedResponse = (HeartBeatResponse) message.getMessage();
           assert receivedResponse.getCurrentTime().isEqual(response.getCurrentTime());
         });
 
@@ -315,7 +320,7 @@ public class OCPPWebSocketClientTest {
             invocation -> {
               doAnswer(
                       invocation2 -> {
-                          this.client.addMessageToPreviousMessage(beat);
+                        this.client.addMessageToPreviousMessage(beat);
                         HeartBeatResponse response = new HeartBeatResponse();
                         response.setMessageID(beat.getMessageID());
                         client.onMessage(GsonUtilities.toString(response.generateMessage()));

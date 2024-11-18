@@ -1,9 +1,8 @@
 package com.sim_backend.websockets.messages;
 
-import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 

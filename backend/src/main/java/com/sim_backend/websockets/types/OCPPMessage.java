@@ -1,16 +1,15 @@
 package com.sim_backend.websockets.types;
 
-import com.google.gson.JsonArray;
-import java.security.SecureRandom;
-import java.util.Set;
+import static com.sim_backend.websockets.OCPPWebSocketClient.MESSAGE_PACKAGE;
 
+import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import java.security.SecureRandom;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
-
-import static com.sim_backend.websockets.OCPPWebSocketClient.MESSAGE_PACKAGE;
 
 public abstract class OCPPMessage {
   /** The maximum allowed message ID length. */
@@ -61,6 +60,7 @@ public abstract class OCPPMessage {
 
   /**
    * Get the message ID.
+   *
    * @return the current message ID.
    */
   public String getMessageID() {
@@ -69,6 +69,7 @@ public abstract class OCPPMessage {
 
   /**
    * Set the current message ID.
+   *
    * @param msgID Set the message ID.
    */
   public void setMessageID(final String msgID) {
@@ -99,6 +100,7 @@ public abstract class OCPPMessage {
 
   /**
    * Get a message Class by the message Name.
+   *
    * @param messageName The message class name we are looking for.
    * @return The Found OCPPMessage Class or throws an exception if not found.
    */
@@ -114,7 +116,7 @@ public abstract class OCPPMessage {
       OCPPMessageInfo annotation = messageClass.getAnnotation(OCPPMessageInfo.class);
       // Check if it's a has a parent class of OCPPMessage.
       if (OCPPMessage.class.isAssignableFrom(messageClass)
-              && annotation.messageName().equals(messageName)) {
+          && annotation.messageName().equals(messageName)) {
         // Convert the payload String into the found class.
         return messageClass;
       }
