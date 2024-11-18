@@ -6,7 +6,7 @@ import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ErrorCode;
 
 /** A CallError message for OCPP. */
-public class OCPPMessageError extends OCPPMessage {
+public class OcppMessageError extends OcppMessage {
 
   /** The message id index in a received JsonArray. */
   private static final int MESSAGE_ID_INDEX = 1;
@@ -36,7 +36,7 @@ public class OCPPMessageError extends OCPPMessage {
    * @param errDescription The given description.
    * @param details given json object (specification says it's undefined how it's laid out).
    */
-  public OCPPMessageError(
+  public OcppMessageError(
       final ErrorCode errCode, final String errDescription, final JsonObject details) {
     super();
     this.errorCode = errCode;
@@ -49,9 +49,9 @@ public class OCPPMessageError extends OCPPMessage {
    *
    * @param array The given json array.
    */
-  public OCPPMessageError(final JsonArray array) {
+  public OcppMessageError(final JsonArray array) {
     super();
-    this.messageID = array.get(MESSAGE_ID_INDEX).getAsString();
+    this.messageId = array.get(MESSAGE_ID_INDEX).getAsString();
     this.errorCode = ErrorCode.valueOf(array.get(CODE_INDEX).getAsString());
     this.errorDescription = array.get(DESCRIPTION_INDEX).getAsString();
     this.errorDetails = array.get(DETAIL_INDEX).getAsJsonObject();
@@ -65,8 +65,8 @@ public class OCPPMessageError extends OCPPMessage {
   @Override
   public JsonArray generateMessage() {
     JsonArray array = new JsonArray();
-    array.add(OCPPMessage.CALL_ID_ERROR);
-    array.add(this.getMessageID());
+    array.add(OcppMessage.CALL_ID_ERROR);
+    array.add(this.getMessageId());
     array.add(this.errorCode.toString());
     array.add(this.errorDescription);
     array.add(GsonUtilities.getGson().toJsonTree(this.errorDetails));

@@ -1,7 +1,7 @@
 package com.sim_backend.websockets.exceptions;
 
 /** Thrown when we receive an OCPP message name we cannot serialize. */
-public class OCPPUnsupportedMessage extends RuntimeException {
+public class OcppUnsupportedMessage extends RuntimeException {
 
   /** The OCPP message that failed to process. */
   private final String message;
@@ -14,7 +14,7 @@ public class OCPPUnsupportedMessage extends RuntimeException {
    *
    * @param msg The message that could not be processed.
    */
-  public OCPPUnsupportedMessage(final String msg, final String msgName) {
+  public OcppUnsupportedMessage(final String msg, final String msgName) {
     this.message = msg;
     this.messageName = msgName;
   }

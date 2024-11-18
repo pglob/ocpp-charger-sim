@@ -1,18 +1,18 @@
 package com.sim_backend.websockets.events;
 
-import com.sim_backend.websockets.types.OCPPMessage;
+import com.sim_backend.websockets.types.OcppMessage;
 
 /** An event for when we receive an OCPP message. */
-public class OnOCPPMessage {
+public class OnOcppMessage {
   /** The received ocpp message. */
-  private final OCPPMessage message;
+  private final OcppMessage message;
 
   /**
    * Create an OCPPMessage event.
    *
    * @param inMessage The received message.
    */
-  public OnOCPPMessage(final OCPPMessage inMessage) {
+  public OnOcppMessage(final OcppMessage inMessage) {
     this.message = inMessage;
   }
 
@@ -21,7 +21,7 @@ public class OnOCPPMessage {
    *
    * @return The received message.
    */
-  public OCPPMessage getMessage() {
+  public OcppMessage getMessage() {
     return message;
   }
 }

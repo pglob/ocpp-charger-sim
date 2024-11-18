@@ -1,12 +1,12 @@
 package com.sim_backend.websockets.annotations;
 
-import com.sim_backend.websockets.types.OCPPMessage;
+import com.sim_backend.websockets.types.OcppMessage;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /** Holds the message name and call ID for an OCPP Message for reflection purposes. */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OCPPMessageInfo {
+public @interface OcppMessageInfo {
   /**
    * The Message name.
    *
@@ -19,5 +19,5 @@ public @interface OCPPMessageInfo {
    *
    * @return The call ID either 2, 3, or 4.
    */
-  int messageCallID() default OCPPMessage.CALL_ID_REQUEST;
+  int messageCallId() default OcppMessage.CALL_ID_REQUEST;
 }
