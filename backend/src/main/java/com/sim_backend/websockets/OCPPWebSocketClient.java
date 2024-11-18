@@ -116,6 +116,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
       }
 
       OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
+      message.setMessageID(msgID);
       onReceiveMessage.onMessageReceieved(new OnOCPPMessage(message));
     }
   }

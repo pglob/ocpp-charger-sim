@@ -6,14 +6,18 @@ import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ErrorCode;
 
 public class OCPPMessageError extends OCPPMessage {
+
+  /** The message id index in a received JsonArray. */
+  private static final int MESSAGE_ID_INDEX = 1;
+
   /** The error code index in a received JsonArray. */
-  public static final int CODE_INDEX = 2;
+  private static final int CODE_INDEX = 2;
 
   /** The description index in a received JsonArray. */
-  public static final int DESCRIPTION_INDEX = 3;
+  private static final int DESCRIPTION_INDEX = 3;
 
   /** The error details index in a received JsonArray. */
-  public static final int DETAIL_INDEX = 4;
+  private static final int DETAIL_INDEX = 4;
 
   /** The given error code. */
   private final transient ErrorCode errorCode;
@@ -46,6 +50,7 @@ public class OCPPMessageError extends OCPPMessage {
    */
   public OCPPMessageError(final JsonArray array) {
     super();
+    this.messageID = array.get(MESSAGE_ID_INDEX).getAsString();
     this.errorCode = ErrorCode.valueOf(array.get(CODE_INDEX).getAsString());
     this.errorDescription = array.get(DESCRIPTION_INDEX).getAsString();
     this.errorDetails = array.get(DETAIL_INDEX).getAsJsonObject();
