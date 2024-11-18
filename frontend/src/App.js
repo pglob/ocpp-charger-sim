@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Button } from './Button';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -6,9 +7,9 @@ function App() {
   // Hook to fetch data from backend when the component mounts
   useEffect(() => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/test`)
-      .then(response => response.text())
-      .then(data => setMessage(data))
-      .catch(error => console.error('Error fetching test message:', error));
+      .then((response) => response.text())
+      .then((data) => setMessage(data))
+      .catch((error) => console.error('Error fetching test message:', error));
   }, []);
 
   // Render the component
@@ -16,6 +17,7 @@ function App() {
     <div>
       <h1>Frontend</h1>
       <p>Message from backend: {message}</p>
+      <Button />
     </div>
   );
 }
