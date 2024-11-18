@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPBadCallID;
@@ -147,7 +148,7 @@ public class OCPPWebSocketClientTest {
   @Test
   public void testOnReceiveError() {
     OnOCPPMessageListener listener = mock(OnOCPPMessageListener.class);
-    OCPPMessageError messageError = new OCPPMessageError("404", "Not Found", new JsonObject());
+    OCPPMessageError messageError = new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
     String fullMessage = GsonUtilities.toString(messageError.generateMessage());
 
@@ -155,7 +156,7 @@ public class OCPPWebSocketClientTest {
         message -> {
           assert message.getMessage() instanceof OCPPMessageError;
           OCPPMessageError receivedError = (OCPPMessageError) message.getMessage();
-          assert receivedError.getErrorCode().equals("404");
+          assert receivedError.getErrorCode() == ErrorCode.FormatViolation;
           assert receivedError.getErrorDescription().equals("Not Found");
           assert receivedError.getErrorDetails() != null;
         });

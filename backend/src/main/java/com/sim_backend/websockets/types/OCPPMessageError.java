@@ -3,6 +3,7 @@ package com.sim_backend.websockets.types;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sim_backend.websockets.GsonUtilities;
+import com.sim_backend.websockets.enums.ErrorCode;
 
 public class OCPPMessageError extends OCPPMessage {
   /** The error code index in a received JsonArray. */
@@ -15,7 +16,7 @@ public class OCPPMessageError extends OCPPMessage {
   public static final int DETAIL_INDEX = 4;
 
   /** The given error code. */
-  private final transient String errorCode;
+  private final transient ErrorCode errorCode;
 
   /** The given error description. */
   private final transient String errorDescription;
@@ -31,7 +32,7 @@ public class OCPPMessageError extends OCPPMessage {
    * @param details given json object (specification says it's undefined how it's laid out).
    */
   public OCPPMessageError(
-      final String errCode, final String errDescription, final JsonObject details) {
+      final ErrorCode errCode, final String errDescription, final JsonObject details) {
     super();
     this.errorCode = errCode;
     this.errorDescription = errDescription;
@@ -45,7 +46,7 @@ public class OCPPMessageError extends OCPPMessage {
    */
   public OCPPMessageError(final JsonArray array) {
     super();
-    this.errorCode = array.get(CODE_INDEX).getAsString();
+    this.errorCode = ErrorCode.valueOf(array.get(CODE_INDEX).getAsString());
     this.errorDescription = array.get(DESCRIPTION_INDEX).getAsString();
     this.errorDetails = array.get(DETAIL_INDEX).getAsJsonObject();
   }
@@ -60,7 +61,7 @@ public class OCPPMessageError extends OCPPMessage {
     JsonArray array = new JsonArray();
     array.add(OCPPMessage.CALL_ID_ERROR);
     array.add(this.getMessageID());
-    array.add(this.errorCode);
+    array.add(this.errorCode.toString());
     array.add(this.errorDescription);
     array.add(GsonUtilities.getGson().toJsonTree(this.errorDetails));
 
@@ -90,7 +91,7 @@ public class OCPPMessageError extends OCPPMessage {
    *
    * @return The given error code.
    */
-  public String getErrorCode() {
+  public ErrorCode getErrorCode() {
     return errorCode;
   }
 }
