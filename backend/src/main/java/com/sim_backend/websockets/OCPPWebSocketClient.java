@@ -91,7 +91,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
         // handling a simple Call
         messageName = array.get(NAME_INDEX).getAsString();
         data = array.get(PAYLOAD_INDEX).getAsJsonObject();
-        break;
       }
       case OCPPMessage.CALL_ID_RESPONSE -> {
         // handling a CallResult
