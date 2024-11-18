@@ -136,7 +136,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void onError(Exception e) {}
 
   /**
-   * Helper function for when we receive an OCPP message.
+   * Helper function for when we receive an OCPP message. This is not for registering a listener.
    *
    * @param currClass The class of the message we received.
    * @param message The Message we received
@@ -155,12 +155,12 @@ public class OCPPWebSocketClient extends WebSocketClient {
   }
 
   /**
-   * Set the function called when we receive an OCPP Message.
+   * Register a listener for when we receive an OCPP Message.
    *
    * @param onReceiveMessageListener The Received OCPPMessage.
    * @param currClass The class we want to set a listener for.
    */
-  public void setOnReceiveMessage(
+  public void onReceiveMessage(
       final Class<?> currClass, final OnOCPPMessageListener onReceiveMessageListener) {
     if (!OCPPMessage.class.isAssignableFrom(currClass)) {
       return;

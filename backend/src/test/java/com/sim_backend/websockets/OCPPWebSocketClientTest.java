@@ -111,7 +111,7 @@ public class OCPPWebSocketClientTest {
         .send(anyString());
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
+    client.onReceiveMessage(HeartBeatResponse.class, message -> {});
 
     client.popAllMessages();
 
@@ -138,7 +138,7 @@ public class OCPPWebSocketClientTest {
         .send(anyString());
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
+    client.onReceiveMessage(HeartBeatResponse.class, message -> {});
 
     client.popAllMessages();
 
@@ -153,7 +153,7 @@ public class OCPPWebSocketClientTest {
 
     String fullMessage = GsonUtilities.toString(messageError.generateMessage());
 
-    client.setOnReceiveMessage(
+    client.onReceiveMessage(
         OCPPMessageError.class,
         message -> {
           assert message.getMessage() instanceof OCPPMessageError;
@@ -163,6 +163,34 @@ public class OCPPWebSocketClientTest {
           assert receivedError.getErrorDetails() != null;
         });
     client.onMessage(fullMessage);
+
+    // verify(listener, times(1)).onMessageReceieved(any(OnOCPPMessage.class));
+  }
+
+  @Test
+  public void testOnReceiveMulti() {
+    OnOCPPMessageListener listener = mock(OnOCPPMessageListener.class);
+    OCPPMessageError messageError =
+        new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
+
+    String fullMessage = GsonUtilities.toString(messageError.generateMessage());
+
+    client.onReceiveMessage(
+        OCPPMessageError.class,
+        message -> {
+          assert message.getMessage() instanceof OCPPMessageError;
+          OCPPMessageError receivedError = (OCPPMessageError) message.getMessage();
+          assert receivedError.getErrorCode() == ErrorCode.FormatViolation;
+          assert receivedError.getErrorDescription().equals("Not Found");
+          assert receivedError.getErrorDetails() != null;
+        });
+    client.onReceiveMessage(
+        HeartBeat.class,
+        message -> {
+          assert message.getMessage() instanceof HeartBeat;
+        });
+    client.onMessage(fullMessage);
+    client.onMessage(GsonUtilities.toString(new HeartBeat().generateMessage()));
 
     // verify(listener, times(1)).onMessageReceieved(any(OnOCPPMessage.class));
   }
@@ -191,7 +219,7 @@ public class OCPPWebSocketClientTest {
         .send(anyString());
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
+    client.onReceiveMessage(HeartBeatResponse.class, message -> {});
 
     client.popAllMessages();
 
@@ -214,7 +242,7 @@ public class OCPPWebSocketClientTest {
         .send(anyString());
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(
+    client.onReceiveMessage(
         HeartBeatResponse.class,
         message -> {
           assert message.getMessage() instanceof HeartBeatResponse;
@@ -240,7 +268,7 @@ public class OCPPWebSocketClientTest {
     HeartBeat beat = new HeartBeat();
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
+    client.onReceiveMessage(HeartBeatResponse.class, message -> {});
     JsonParseException err = assertThrows(JsonParseException.class, () -> client.popAllMessages());
     assert err != null;
     assert err.getMessage().startsWith("Expected array");
@@ -260,7 +288,7 @@ public class OCPPWebSocketClientTest {
     HeartBeat beat = new HeartBeat();
 
     client.pushMessage(beat);
-    client.setOnReceiveMessage(HeartBeatResponse.class, message -> {});
+    client.onReceiveMessage(HeartBeatResponse.class, message -> {});
     OCPPUnsupportedMessage err =
         assertThrows(OCPPUnsupportedMessage.class, () -> client.popAllMessages());
     assert err != null;
@@ -316,7 +344,7 @@ public class OCPPWebSocketClientTest {
     client.pushMessage(beat);
     assert client.size() == 1;
 
-    client.setOnReceiveMessage(
+    client.onReceiveMessage(
         HeartBeatResponse.class,
         message -> {
           assert message.getMessage() instanceof HeartBeatResponse;
