@@ -203,12 +203,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @return The Send OCPP Message.
    */
   public OCPPMessage popMessage() throws OCPPMessageFailure, InterruptedException {
-    OCPPMessage message = queue.popMessage(this);
-
-    if (message != null) {
-      this.addMessageToPreviousMessage(message);
-    }
-    return message;
+    return queue.popMessage(this);
   }
 
   /** Pop the entire send queue. */
