@@ -1,7 +1,7 @@
 package com.sim_backend.websockets.exceptions;
 
 /** Thrown when we receive a CallID we cannot process or is invalid. */
-public class OcppBadCallId extends RuntimeException {
+public class OcppBadCall extends RuntimeException {
   /** The calL ID we could not process. */
   private final int badCallId;
 
@@ -14,7 +14,7 @@ public class OcppBadCallId extends RuntimeException {
    * @param badCall The bad call ID.
    * @param msg The full message.
    */
-  public OcppBadCallId(final int badCall, final String msg) {
+  public OcppBadCall(final int badCall, final String msg) {
     this.badCallId = badCall;
     this.message = msg;
   }

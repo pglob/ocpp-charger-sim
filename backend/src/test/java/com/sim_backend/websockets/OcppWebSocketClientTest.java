@@ -9,6 +9,7 @@ import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOcppMessage;
 import com.sim_backend.websockets.events.OnOcppMessageListener;
+import com.sim_backend.websockets.exceptions.OcppBadCall;
 import com.sim_backend.websockets.exceptions.OcppCannotProcessResponse;
 import com.sim_backend.websockets.exceptions.OcppMessageFailure;
 import com.sim_backend.websockets.exceptions.OcppUnsupportedMessage;
@@ -21,16 +22,16 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class OcppBadCallIdTest {
+public class OcppWebSocketClientTest {
 
-  OcppBadCallId client;
+  OcppWebSocketClient client;
   MessageQueue queue;
   OnOcppMessage onOcppMessageMock;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
     onOcppMessageMock = mock(OnOcppMessage.class);
-    client = spy(new OcppBadCallId(new URI("")));
+    client = spy(new OcppWebSocketClient(new URI("")));
     queue = mock(MessageQueue.class);
   }
 
@@ -96,9 +97,9 @@ public class OcppBadCallIdTest {
     HeartBeat beat = new HeartBeat();
     doAnswer(
             invocation -> {
-              com.sim_backend.websockets.exceptions.OcppBadCallId badResponse =
+              OcppBadCall badResponse =
                   assertThrows(
-                      com.sim_backend.websockets.exceptions.OcppBadCallId.class,
+                      OcppBadCall.class,
                       () -> {
                         client.onMessage(badResponseMsg);
                       });
@@ -123,9 +124,9 @@ public class OcppBadCallIdTest {
     HeartBeat beat = new HeartBeat();
     doAnswer(
             invocation -> {
-              com.sim_backend.websockets.exceptions.OcppBadCallId badResponse =
+              OcppBadCall badResponse =
                   assertThrows(
-                      com.sim_backend.websockets.exceptions.OcppBadCallId.class,
+                      OcppBadCall.class,
                       () -> {
                         client.onMessage(badResponseMsg);
                       });
