@@ -67,7 +67,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   public OCPPWebSocketClient(final URI serverUri) {
     super(serverUri, new Draft_6455(), null, CONNECT_TIMEOUT);
-    this.setConnect0ionLostTimeout(CONNECTION_LOST_TIMER);
+    this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
   }
 
