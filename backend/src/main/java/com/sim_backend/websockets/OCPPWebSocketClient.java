@@ -1,5 +1,6 @@
 package com.sim_backend.websockets;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -73,6 +74,20 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   @Override
   public void onMessage(String s) {
+    try {
+      this.handleMessage(s);
+    } catch (Exception exception) {
+      System.out.println(exception.getMessage());
+    }
+  }
+
+  /**
+   * Handle an OCPP Message.
+   *
+   * @param s The received message as a string.
+   */
+  @VisibleForTesting
+  void handleMessage(final String s) throws Exception {
     Gson gson = GsonUtilities.getGson();
     JsonElement element = gson.fromJson(s, JsonElement.class);
 
@@ -81,12 +96,12 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
 
     JsonArray array = element.getAsJsonArray();
-    String msgID = array.get(MESSAGE_ID_INDEX).getAsString();
+    String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
     String messageName;
     JsonObject data;
 
-    int callID = array.get(CALL_ID_INDEX).getAsInt();
-    switch (callID) {
+    int callId = array.get(CALL_ID_INDEX).getAsInt();
+    switch (callId) {
       case OCPPMessage.CALL_ID_REQUEST -> {
         // handling a simple Call
         messageName = array.get(NAME_INDEX).getAsString();
@@ -94,12 +109,12 @@ public class OCPPWebSocketClient extends WebSocketClient {
       }
       case OCPPMessage.CALL_ID_RESPONSE -> {
         // handling a CallResult
-        if (this.previousMessages.get(msgID) == null) {
-          throw new OCPPCannotProcessResponse(s, msgID);
+        if (this.previousMessages.get(msgId) == null) {
+          throw new OCPPCannotProcessResponse(s, msgId);
         }
 
         OCPPMessageInfo info =
-            this.previousMessages.remove(msgID).getClass().getAnnotation(OCPPMessageInfo.class);
+            this.previousMessages.remove(msgId).getClass().getAnnotation(OCPPMessageInfo.class);
         messageName = info.messageName() + "Response";
         data = array.get(PAYLOAD_INDEX - 1).getAsJsonObject();
       }
@@ -109,7 +124,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
         this.onReceiveMessage(OCPPMessageError.class, error);
         return;
       }
-      default -> throw new OCPPBadCallID(callID, s);
+      default -> throw new OCPPBadCallID(callId, s);
     }
 
     if (messageName == null) {
@@ -123,7 +138,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
 
     OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
-    message.setMessageID(msgID);
+    message.setMessageID(msgId);
     this.onReceiveMessage(messageClass, message);
   }
 
@@ -139,7 +154,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param currClass The class of the message we received.
    * @param message The Message we received
    */
-  private void onReceiveMessage(final Class<?> currClass, final OCPPMessage message) {
+  private void onReceiveMessage(final Class<?> currClass, final OCPPMessage message)
+      throws OCPPBadClass {
     if (!OCPPMessage.class.isAssignableFrom(currClass)) {
       throw new OCPPBadClass();
     }
@@ -159,7 +175,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param currClass The class we want to set a listener for.
    */
   public void onReceiveMessage(
-      final Class<?> currClass, final OnOCPPMessageListener onReceiveMessageListener) {
+      final Class<?> currClass, final OnOCPPMessageListener onReceiveMessageListener)
+      throws OCPPBadClass {
     if (!OCPPMessage.class.isAssignableFrom(currClass)) {
       throw new OCPPBadClass();
     }

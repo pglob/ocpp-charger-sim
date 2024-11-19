@@ -89,7 +89,7 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testBadCallID() throws InterruptedException {
+  public void testBadCallID() throws InterruptedException, OCPPMessageFailure {
     String badResponseMsg = "[1, \"Cool\", \"HeartBeat\", {}]";
     HeartBeat beat = new HeartBeat();
     doAnswer(
@@ -98,10 +98,10 @@ public class OCPPWebSocketClientTest {
                   assertThrows(
                       OCPPBadCallID.class,
                       () -> {
-                        client.onMessage(badResponseMsg);
+                        client.handleMessage(badResponseMsg);
                       });
               assert badResponse.getFullMessage().equals(badResponseMsg);
-              assert badResponse.getBadCallID() == 1;
+              assert badResponse.getBadCallId() == 1;
               return null;
             })
         .when(client)
@@ -116,7 +116,7 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testBadCallID2() throws InterruptedException {
+  public void testBadCallID2() throws InterruptedException, OCPPMessageFailure {
     String badResponseMsg = "[5, \"Cool\", \"HeartBeat\", {}]";
     HeartBeat beat = new HeartBeat();
     doAnswer(
@@ -125,10 +125,10 @@ public class OCPPWebSocketClientTest {
                   assertThrows(
                       OCPPBadCallID.class,
                       () -> {
-                        client.onMessage(badResponseMsg);
+                        client.handleMessage(badResponseMsg);
                       });
               assert badResponse.getFullMessage().equals(badResponseMsg);
-              assert badResponse.getBadCallID() == 5;
+              assert badResponse.getBadCallId() == 5;
               return null;
             })
         .when(client)
@@ -205,7 +205,7 @@ public class OCPPWebSocketClientTest {
                   assertThrows(
                       OCPPCannotProcessResponse.class,
                       () -> {
-                        client.onMessage(fullMessage);
+                        client.handleMessage(fullMessage);
                       });
               assert badResponse.getReceivedMessage().equals(fullMessage);
               assert badResponse.getBadMessageId().equals(beat.getMessageID());
@@ -256,7 +256,7 @@ public class OCPPWebSocketClientTest {
   public void testReceiveBadMessage() throws OCPPMessageFailure, InterruptedException {
     doAnswer(
             invocation -> {
-              client.onMessage("{}");
+              client.handleMessage("{}");
               return null;
             })
         .when(client)
@@ -276,7 +276,7 @@ public class OCPPWebSocketClientTest {
     String msgToSend = "[2, \"Woah\", \"AbsoluteTrash\", {}]";
     doAnswer(
             invocation -> {
-              client.onMessage(msgToSend);
+              client.handleMessage(msgToSend);
               return null;
             })
         .when(client)
@@ -290,7 +290,7 @@ public class OCPPWebSocketClientTest {
         assertThrows(OCPPUnsupportedMessage.class, () -> client.popAllMessages());
     assert err != null;
     assert err.getMessageName().equals("AbsoluteTrash");
-    assert err.getMessage().equals(msgToSend);
+    assert err.getFullMessage().equals(msgToSend);
   }
 
   @Test
@@ -335,7 +335,7 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testRetryAfterFirstAttempt() throws OCPPMessageFailure, InterruptedException {
+  public void testRetryAfterFirstAttempt() throws Exception {
     HeartBeat beat = new HeartBeat();
 
     client.pushMessage(beat);
@@ -354,7 +354,7 @@ public class OCPPWebSocketClientTest {
                         this.client.addPreviousMessage(beat);
                         HeartBeatResponse response = new HeartBeatResponse();
                         response.setMessageID(beat.getMessageID());
-                        client.onMessage(GsonUtilities.toString(response.generateMessage()));
+                        client.handleMessage(GsonUtilities.toString(response.generateMessage()));
                         return null;
                       })
                   .when(client)
@@ -366,13 +366,15 @@ public class OCPPWebSocketClientTest {
 
     client.popMessage();
     verify(client, times(2)).send(anyString());
-    verify(client, times(1)).onMessage(anyString());
+    verify(client, times(1)).handleMessage(anyString());
   }
 
   @Test
-    public void testBadClass() {
-      assertThrows(OCPPBadClass.class, () -> {
+  public void testBadClass() {
+    assertThrows(
+        OCPPBadClass.class,
+        () -> {
           client.onReceiveMessage(MessageQueue.class, message -> {});
-      });
+        });
   }
 }
