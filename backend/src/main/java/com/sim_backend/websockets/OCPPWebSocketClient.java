@@ -1,6 +1,8 @@
 package com.sim_backend.websockets;
 
 import com.google.gson.*;
+import com.sim_backend.rest.model.OCPPMessage;
+import com.sim_backend.rest.model.OCPPMessageInfo;
 import java.net.URI;
 import java.util.Set;
 import org.java_websocket.client.WebSocketClient;
@@ -29,7 +31,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public static final int PAYLOAD_INDEX = 3;
 
   /** The Package we will find our OCPPMessages in. */
-  public static final String MESSAGE_PACKAGE = "com.sim_backend.websockets.messages";
+  public static final String MESSAGE_PACKAGE = "com.sim_backend.rest.model";
 
   /** The OCPP Message Queue. */
   private final MessageQueue queue = new MessageQueue();
