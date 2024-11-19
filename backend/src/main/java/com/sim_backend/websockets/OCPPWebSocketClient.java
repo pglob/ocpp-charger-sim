@@ -77,7 +77,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     try {
       this.handleMessage(s);
     } catch (Exception exception) {
-      System.out.println(exception.getMessage());
+      System.err.println(exception.getMessage());
     }
   }
 
