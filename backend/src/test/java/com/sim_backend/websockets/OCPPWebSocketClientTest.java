@@ -9,10 +9,7 @@ import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
-import com.sim_backend.websockets.exceptions.OCPPBadCallID;
-import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
-import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
-import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
+import com.sim_backend.websockets.exceptions.*;
 import com.sim_backend.websockets.messages.HeartBeat;
 import com.sim_backend.websockets.messages.HeartBeatResponse;
 import com.sim_backend.websockets.types.OCPPMessageError;
@@ -370,5 +367,12 @@ public class OCPPWebSocketClientTest {
     client.popMessage();
     verify(client, times(2)).send(anyString());
     verify(client, times(1)).onMessage(anyString());
+  }
+
+  @Test
+    public void testBadClass() {
+      assertThrows(OCPPBadClass.class, () -> {
+          client.onReceiveMessage(MessageQueue.class, message -> {});
+      });
   }
 }

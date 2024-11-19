@@ -22,7 +22,6 @@ public class ZonedDateTimeSerializer implements JsonSerializer<ZonedDateTime> {
    * @param jsonSerializationContext The Serialization Context.
    * @return A Serialized ZonedDateTime.
    */
-  @SuppressWarnings("checkstyle:FinalParameters")
   @Override
   public JsonElement serialize(
       ZonedDateTime zonedDateTime, Type type, JsonSerializationContext jsonSerializationContext) {

@@ -22,7 +22,6 @@ public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime
    * @param jsonDeserializationContext The Deserialization Context.
    * @return A Serialized ZonedDateTime.
    */
-  @SuppressWarnings("checkstyle:FinalParameters")
   @Override
   public ZonedDateTime deserialize(
       JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext)

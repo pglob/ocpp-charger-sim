@@ -8,16 +8,11 @@ import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
-import com.sim_backend.websockets.exceptions.OCPPBadCallID;
-import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
-import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
-import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
+import com.sim_backend.websockets.exceptions.*;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
@@ -51,7 +46,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   private final MessageQueue queue = new MessageQueue();
 
   /** Subscribe to when we receive an OCPP message. */
-  private final Map<Class<?>, ArrayList<OnOCPPMessageListener>> onReceiveMessage =
+  private final Map<Class<?>, List<OnOCPPMessageListener>> onReceiveMessage =
       new ConcurrentHashMap<>();
 
   /** The previous messages we have sent. * */
@@ -68,7 +63,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
     this.startConnectionLostTimer();
   }
 
-  @SuppressWarnings("checkstyle:FinalParameters")
   @Override
   public void onOpen(ServerHandshake serverHandshake) {}
 
@@ -77,7 +71,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @param s The received message as a string.
    */
-  @SuppressWarnings("checkstyle:FinalParameters")
   @Override
   public void onMessage(String s) {
     Gson gson = GsonUtilities.getGson();
@@ -134,11 +127,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
     this.onReceiveMessage(messageClass, message);
   }
 
-  @SuppressWarnings("checkstyle:FinalParameters")
   @Override
   public void onClose(int i, String s, boolean b) {}
 
-  @SuppressWarnings("checkstyle:FinalParameters")
   @Override
   public void onError(Exception e) {}
 
@@ -150,7 +141,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   private void onReceiveMessage(final Class<?> currClass, final OCPPMessage message) {
     if (!OCPPMessage.class.isAssignableFrom(currClass)) {
-      return;
+      throw new OCPPBadClass();
     }
     Optional.ofNullable(this.onReceiveMessage.get(currClass))
         .ifPresent(
@@ -170,10 +161,10 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void onReceiveMessage(
       final Class<?> currClass, final OnOCPPMessageListener onReceiveMessageListener) {
     if (!OCPPMessage.class.isAssignableFrom(currClass)) {
-      return;
+      throw new OCPPBadClass();
     }
     this.onReceiveMessage
-        .computeIfAbsent(currClass, k -> new ArrayList<>())
+        .computeIfAbsent(currClass, k -> new Vector<>())
         .add(onReceiveMessageListener);
   }
 
