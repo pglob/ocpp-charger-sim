@@ -1,6 +1,9 @@
 package com.sim_backend;
 
 import com.sim_backend.rest.TestMessageController;
+import com.sim_backend.rest.controllers.ControllerBase;
+import com.sim_backend.rest.controllers.MessageController;
+import com.sim_backend.rest.service.MessageService;
 import io.javalin.Javalin;
 
 public final class Main {
@@ -37,6 +40,9 @@ public final class Main {
                       });
                 })
             .start(backendPort); // Start the server
+
+    ControllerBase messageController = new MessageController(app, new MessageService());
+    messageController.registerRoutes(app);
 
     // Register a test route
     TestMessageController.registerRoutes(app);
