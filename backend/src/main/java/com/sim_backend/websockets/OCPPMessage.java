@@ -21,7 +21,7 @@ public abstract class OCPPMessage {
   private final transient String messageID;
 
   /** The constructor for an OCPP message. */
-  public OCPPMessage() {
+  protected OCPPMessage() {
     this.messageID = generateMessageID();
   }
 
