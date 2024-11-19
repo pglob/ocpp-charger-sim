@@ -1,5 +1,7 @@
 package com.sim_backend.websockets.exceptions;
 
+import com.google.gson.Gson;
+import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.types.OCPPMessage;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
@@ -51,6 +53,6 @@ public class OCPPMessageFailure extends Exception {
    */
   @Override
   public String getMessage() {
-    return String.format("%s: %s", failedMessage.toString(), innerException.getMessage());
+    return String.format("Could not Send Message %s: %s", GsonUtilities.toString(failedMessage.generateMessage()), innerException.getMessage());
   }
 }
