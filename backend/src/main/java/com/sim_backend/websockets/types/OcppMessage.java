@@ -1,10 +1,10 @@
 package com.sim_backend.websockets.types;
 
-import static com.sim_backend.websockets.OcppWebSocketClient.MESSAGE_PACKAGE;
+import static com.sim_backend.websockets.OcppBadCallId.MESSAGE_PACKAGE;
 
 import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.OcppWebSocketClient;
+import com.sim_backend.websockets.OcppBadCallId;
 import com.sim_backend.websockets.annotations.OcppMessageInfo;
 import java.security.SecureRandom;
 import java.util.Set;
@@ -48,7 +48,7 @@ public abstract class OcppMessage {
    *
    * @param client The websocket client.
    */
-  public void sendMessage(final OcppWebSocketClient client) {
+  public void sendMessage(final OcppBadCallId client) {
     client.send(GsonUtilities.toString(this.generateMessage()));
     if (this instanceof OcppMessageRequest) {
       client.addPreviousMessage(this);

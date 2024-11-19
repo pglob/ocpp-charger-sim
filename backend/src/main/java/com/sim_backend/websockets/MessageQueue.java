@@ -51,7 +51,7 @@ public class MessageQueue {
    * @param client The WebsocketClient to send it through.
    * @return The Send OCPP Message.
    */
-  public OcppMessage popMessage(final OcppWebSocketClient client)
+  public OcppMessage popMessage(final OcppBadCallId client)
       throws OcppMessageFailure, InterruptedException {
     OcppMessage message = queue.poll();
     if (message != null) {
@@ -75,7 +75,7 @@ public class MessageQueue {
    *
    * @param client The WebsocketClient to send it through.
    */
-  public void popAllMessages(final OcppWebSocketClient client)
+  public void popAllMessages(final OcppBadCallId client)
       throws OcppMessageFailure, InterruptedException {
     while (!queue.isEmpty()) {
       popMessage(client);

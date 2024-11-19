@@ -8,7 +8,6 @@ import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.annotations.OcppMessageInfo;
 import com.sim_backend.websockets.events.OnOcppMessage;
 import com.sim_backend.websockets.events.OnOcppMessageListener;
-import com.sim_backend.websockets.exceptions.OcppBadCall;
 import com.sim_backend.websockets.exceptions.OcppCannotProcessResponse;
 import com.sim_backend.websockets.exceptions.OcppMessageFailure;
 import com.sim_backend.websockets.exceptions.OcppUnsupportedMessage;
@@ -24,7 +23,7 @@ import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
 
 /** A WebSocket client for handling OCPP Messages. */
-public class OcppWebSocketClient extends WebSocketClient {
+public class OcppBadCallId extends WebSocketClient {
 
   /** The time to wait to try to reconnect. */
   public static final int CONNECTION_LOST_TIMER = 5;
@@ -62,7 +61,7 @@ public class OcppWebSocketClient extends WebSocketClient {
    *
    * @param serverUri The Websocket Address.
    */
-  public OcppWebSocketClient(final URI serverUri) {
+  public OcppBadCallId(final URI serverUri) {
     super(serverUri, new Draft_6455(), null, CONNECT_TIMEOUT);
     this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
@@ -116,7 +115,7 @@ public class OcppWebSocketClient extends WebSocketClient {
         this.onReceiveMessage(OcppMessageError.class, error);
         return;
       }
-      default -> throw new OcppBadCall(callId, s);
+      default -> throw new com.sim_backend.websockets.exceptions.OcppBadCallId(callId, s);
     }
 
     if (messageName == null) {
