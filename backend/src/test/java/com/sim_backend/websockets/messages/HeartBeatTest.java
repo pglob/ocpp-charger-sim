@@ -5,8 +5,10 @@ import static org.mockito.Mockito.*;
 
 import com.google.gson.JsonElement;
 import com.networknt.schema.*;
+import com.sim_backend.rest.model.HeartBeat;
+import com.sim_backend.rest.model.HeartBeatResponse;
+import com.sim_backend.rest.model.OCPPMessage;
 import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.OCPPMessage;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import java.io.InputStream;
 import java.net.URI;

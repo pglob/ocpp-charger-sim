@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.google.gson.JsonParseException;
-import com.sim_backend.websockets.messages.HeartBeat;
-import com.sim_backend.websockets.messages.HeartBeatResponse;
+import com.sim_backend.rest.model.HeartBeat;
+import com.sim_backend.rest.model.HeartBeatResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
