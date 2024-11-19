@@ -6,15 +6,17 @@ public class MessageService {
 
   public MessageService() {}
 
-  public AuthorizeResponse authorizeUser(Authorize request) {
-    return new AuthorizeResponse("Authorized");
+  public AuthorizeResponse authorizeUser(AuthorizeRequest request) {
+    // return new AuthorizeResponse("Authorized");
+    return new AuthorizeResponse("test");
   }
 
-  public HeartBeatResponse getHeartbeat(HeartBeat request) {
-    return new HeartBeatResponse();
+  public HeartbeatResponse getHeartbeat(HeartbeatRequest request) {
+    return new HeartbeatResponse("test");
   }
 
-  public BootNotificationResponse getBootNotification(BootNotification request) {
-    return new BootNotificationResponse("Accepted", 30);
+  public BootNotificationResponse getBootNotification(BootNotificationRequest request) {
+    // return new BootNotificationResponse("Accepted", 30);
+    return new BootNotificationResponse("test");
   }
 }

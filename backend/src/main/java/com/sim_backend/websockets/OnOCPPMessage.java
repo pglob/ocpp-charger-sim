@@ -1,7 +1,5 @@
 package com.sim_backend.websockets;
 
-import com.sim_backend.rest.model.OCPPMessage;
-
 public class OnOCPPMessage {
   /** The received ocpp message. */
   private final OCPPMessage message;
@@ -11,7 +9,7 @@ public class OnOCPPMessage {
    *
    * @param inMessage The received message.
    */
-  public OnOCPPMessage(final OCPPMessage inMessage) {
+  protected OnOCPPMessage(final OCPPMessage inMessage) {
     this.message = inMessage;
   }
 

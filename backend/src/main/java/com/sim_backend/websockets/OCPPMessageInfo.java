@@ -1,4 +1,4 @@
-package com.sim_backend.rest.model;
+package com.sim_backend.websockets;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -1,8 +1,6 @@
-package com.sim_backend.rest.model;
+package com.sim_backend.websockets;
 
 import com.google.gson.JsonArray;
-import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.OCPPWebSocketClient;
 import java.util.UUID;
 import lombok.experimental.SuperBuilder;
 import org.jetbrains.annotations.NotNull;

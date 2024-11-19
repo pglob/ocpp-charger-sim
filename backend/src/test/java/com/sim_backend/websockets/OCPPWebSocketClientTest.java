@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.google.gson.JsonParseException;
-import com.sim_backend.rest.model.HeartBeat;
-import com.sim_backend.rest.model.HeartBeatResponse;
+import com.sim_backend.websockets.messages.HeartBeatMessage;
+import com.sim_backend.websockets.messages.HeartBeatResponseMessage;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
@@ -33,7 +33,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testPushThenPop() throws OCPPMessageFailure, InterruptedException {
-    HeartBeat heartbeat = new HeartBeat();
+    HeartBeatMessage heartbeat = new HeartBeatMessage();
     doReturn(heartbeat).when(client).popMessage();
     client.pushMessage(heartbeat);
 
@@ -51,7 +51,7 @@ public class OCPPWebSocketClientTest {
         .when(client)
         .send(anyString());
 
-    HeartBeat beat = new HeartBeat();
+    HeartBeatMessage beat = new HeartBeatMessage();
     client.pushMessage(beat);
     client.popMessage();
     verify(client, times(1)).send(anyString());
@@ -68,8 +68,8 @@ public class OCPPWebSocketClientTest {
         .when(client)
         .send(anyString());
 
-    HeartBeat beat = new HeartBeat();
-    HeartBeat beat2 = new HeartBeat();
+    HeartBeatMessage beat = new HeartBeatMessage();
+    HeartBeatMessage beat2 = new HeartBeatMessage();
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -84,7 +84,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testOnReceiveMessage() throws OCPPMessageFailure, InterruptedException {
-    HeartBeatResponse response = new HeartBeatResponse();
+    HeartBeatResponseMessage response = new HeartBeatResponseMessage();
     doAnswer(
             invocation -> {
               client.onMessage(GsonUtilities.toString(response.generateMessage()));
@@ -93,13 +93,14 @@ public class OCPPWebSocketClientTest {
         .when(client)
         .send(anyString());
 
-    HeartBeat beat = new HeartBeat();
+    HeartBeatMessage beat = new HeartBeatMessage();
 
     client.pushMessage(beat);
     client.setOnReceiveMessage(
         message -> {
-          assert message.getMessage() instanceof HeartBeatResponse;
-          HeartBeatResponse receivedResponse = (HeartBeatResponse) message.getMessage();
+          assert message.getMessage() instanceof HeartBeatResponseMessage;
+          HeartBeatResponseMessage receivedResponse =
+              (HeartBeatResponseMessage) message.getMessage();
           assert receivedResponse.getCurrentTime().isEqual(response.getCurrentTime());
         });
 
@@ -118,7 +119,7 @@ public class OCPPWebSocketClientTest {
         .when(client)
         .send(anyString());
 
-    HeartBeat beat = new HeartBeat();
+    HeartBeatMessage beat = new HeartBeatMessage();
 
     client.pushMessage(beat);
     client.popAllMessages();
@@ -135,7 +136,7 @@ public class OCPPWebSocketClientTest {
         .when(client)
         .send(anyString());
 
-    HeartBeat beat = new HeartBeat();
+    HeartBeatMessage beat = new HeartBeatMessage();
 
     client.pushMessage(beat);
     client.setOnReceiveMessage(message -> {});
@@ -155,7 +156,7 @@ public class OCPPWebSocketClientTest {
         .when(client)
         .send(anyString());
 
-    HeartBeat beat = new HeartBeat();
+    HeartBeatMessage beat = new HeartBeatMessage();
 
     client.pushMessage(beat);
     client.setOnReceiveMessage(message -> {});
@@ -169,7 +170,7 @@ public class OCPPWebSocketClientTest {
   @Test
   public void testAllThrowsException() throws OCPPMessageFailure {
 
-    HeartBeat beat = new HeartBeat();
+    HeartBeatMessage beat = new HeartBeatMessage();
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -190,7 +191,7 @@ public class OCPPWebSocketClientTest {
   @Test
   public void testThrowsException() throws OCPPMessageFailure {
 
-    HeartBeat beat = new HeartBeat();
+    HeartBeatMessage beat = new HeartBeatMessage();
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -209,21 +210,21 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testRetryAfterFirstAttempt() throws OCPPMessageFailure, InterruptedException {
-    HeartBeat beat = new HeartBeat();
+    HeartBeatMessage beat = new HeartBeatMessage();
 
     client.pushMessage(beat);
     assert client.size() == 1;
 
     client.setOnReceiveMessage(
         message -> {
-          assert message.getMessage() instanceof HeartBeatResponse;
+          assert message.getMessage() instanceof HeartBeatResponseMessage;
         });
 
     doAnswer(
             invocation -> {
               doAnswer(
                       invocation2 -> {
-                        HeartBeatResponse response = new HeartBeatResponse();
+                        HeartBeatResponseMessage response = new HeartBeatResponseMessage();
                         client.onMessage(GsonUtilities.toString(response.generateMessage()));
                         return null;
                       })
