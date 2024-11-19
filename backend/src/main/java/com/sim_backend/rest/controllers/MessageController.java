@@ -1,9 +1,9 @@
 package com.sim_backend.rest.controllers;
 
-import com.sim_backend.rest.model.Authorize;
+import com.sim_backend.rest.model.AuthorizeRequest;
 import com.sim_backend.rest.model.AuthorizeResponse;
-import com.sim_backend.rest.model.BootNotification;
-import com.sim_backend.rest.model.HeartBeat;
+import com.sim_backend.rest.model.BootNotificationRequest;
+import com.sim_backend.rest.model.HeartbeatRequest;
 import com.sim_backend.rest.service.MessageService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
@@ -18,19 +18,19 @@ public class MessageController extends ControllerBase {
   }
 
   private void authorize(Context ctx) {
-    Authorize request = ctx.bodyAsClass(Authorize.class);
+    AuthorizeRequest request = ctx.bodyAsClass(AuthorizeRequest.class);
     AuthorizeResponse response = messageService.authorizeUser(request);
-    ctx.json(response);
+    ctx.result("OK");
   }
 
   private void boot(Context ctx) {
-    BootNotification request = ctx.bodyAsClass(BootNotification.class);
-    ctx.json(messageService.getBootNotification(request));
+    BootNotificationRequest request = ctx.bodyAsClass(BootNotificationRequest.class);
+    ctx.result("OK");
   }
 
   private void heartbeat(Context ctx) {
-    HeartBeat request = ctx.bodyAsClass(HeartBeat.class);
-    ctx.json(messageService.getHeartbeat(request));
+    HeartbeatRequest request = ctx.bodyAsClass(HeartbeatRequest.class);
+    ctx.result("OK");
   }
 
   @Override
