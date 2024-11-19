@@ -1,22 +1,24 @@
-package com.sim_backend.rest.model;
+package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
+import com.sim_backend.websockets.OCPPMessage;
+import com.sim_backend.websockets.OCPPMessageInfo;
 import java.util.UUID;
 
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "Authorize")
-public class Authorize extends OCPPMessage {
+public class AuthorizeMessage extends OCPPMessage {
 
   @SerializedName("idTag")
   private String idTag;
 
   // Constructor
-  public Authorize(String idTag) {
+  public AuthorizeMessage(String idTag) {
     super();
     this.idTag = idTag;
   }
 
   // Constructor
-  public Authorize() {
+  public AuthorizeMessage() {
     super();
     this.idTag = generateIdTag();
   }

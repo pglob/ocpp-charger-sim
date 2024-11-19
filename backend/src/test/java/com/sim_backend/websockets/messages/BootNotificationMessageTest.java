@@ -3,17 +3,16 @@ package com.sim_backend.websockets.messages;
 import com.networknt.schema.InputFormat;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
-import com.sim_backend.rest.model.BootNotification;
 import com.sim_backend.websockets.GsonUtilities;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-public class BootNotificationTest {
+public class BootNotificationMessageTest {
 
-  private static @NotNull BootNotification getBootNotification() {
-    BootNotification notification =
-        new BootNotification(
+  private static @NotNull BootNotificationMessage getBootNotification() {
+    BootNotificationMessage notification =
+        new BootNotificationMessage(
             "CP Vendor",
             "CP Model",
             "CP S/N",
@@ -37,7 +36,7 @@ public class BootNotificationTest {
 
   @Test
   public void testBootNotification() {
-    BootNotification notification = getBootNotification();
+    BootNotificationMessage notification = getBootNotification();
     assert notification.generateMessage().size() == 4;
     String message = GsonUtilities.toString(notification.generateMessage().get(3));
 

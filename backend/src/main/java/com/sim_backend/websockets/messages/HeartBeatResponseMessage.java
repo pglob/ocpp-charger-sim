@@ -1,17 +1,19 @@
-package com.sim_backend.rest.model;
+package com.sim_backend.websockets.messages;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sim_backend.websockets.OCPPMessage;
+import com.sim_backend.websockets.OCPPMessageInfo;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "HeartBeatResponse")
-public final class HeartBeatResponse extends OCPPMessage {
+public final class HeartBeatResponseMessage extends OCPPMessage {
 
   @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSX", timezone = "UTC")
   private final ZonedDateTime currentTime;
 
   /** The response message for a HeartBeat, currentTime will be set to now. */
-  public HeartBeatResponse() {
+  public HeartBeatResponseMessage() {
     super();
     this.currentTime = ZonedDateTime.now(ZoneId.of("UTC"));
   }
@@ -21,7 +23,7 @@ public final class HeartBeatResponse extends OCPPMessage {
    *
    * @param time A Provided Time.
    */
-  public HeartBeatResponse(final ZonedDateTime time) {
+  public HeartBeatResponseMessage(final ZonedDateTime time) {
     super();
     this.currentTime = time;
   }

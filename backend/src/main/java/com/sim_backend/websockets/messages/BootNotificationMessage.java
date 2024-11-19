@@ -1,8 +1,8 @@
-package com.sim_backend.rest.model;
+package com.sim_backend.websockets.messages;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
+import com.sim_backend.websockets.OCPPMessage;
+import com.sim_backend.websockets.OCPPMessageInfo;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "BootNotification")
-public final class BootNotification extends OCPPMessage {
+public final class BootNotificationMessage extends OCPPMessage {
 
   /** The Charge Point's Vendor. */
   @SerializedName("chargePointVendor")
@@ -48,18 +48,16 @@ public final class BootNotification extends OCPPMessage {
   @SerializedName("meterSerialNumber")
   private final String meterSerialNumber;
 
-  // Jackson annotations for deserialization
-  @JsonCreator
-  public BootNotification(
-      @JsonProperty("chargePointVendor") String chargePointVendor,
-      @JsonProperty("chargePointModel") String chargePointModel,
-      @JsonProperty("chargePointSerialNumber") String chargePointSerialNumber,
-      @JsonProperty("chargeBoxSerialNumber") String chargeBoxSerialNumber,
-      @JsonProperty("firmwareVersion") String firmwareVersion,
-      @JsonProperty("iccid") String iccid,
-      @JsonProperty("imsi") String imsi,
-      @JsonProperty("meterType") String meterType,
-      @JsonProperty("meterSerialNumber") String meterSerialNumber) {
+  public BootNotificationMessage(
+      String chargePointVendor,
+      String chargePointModel,
+      String chargePointSerialNumber,
+      String chargeBoxSerialNumber,
+      String firmwareVersion,
+      String iccid,
+      String imsi,
+      String meterType,
+      String meterSerialNumber) {
     this.chargePointVendor = chargePointVendor;
     this.chargePointModel = chargePointModel;
     this.chargePointSerialNumber = chargePointSerialNumber;
