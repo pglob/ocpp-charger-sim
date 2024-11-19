@@ -1,35 +1,48 @@
 package com.sim_backend.rest.controllers;
 
-import com.sim_backend.rest.model.AuthorizeRequest;
-import com.sim_backend.rest.model.AuthorizeResponse;
-import com.sim_backend.rest.model.BootNotificationRequest;
-import com.sim_backend.rest.model.HeartbeatRequest;
-import com.sim_backend.rest.service.MessageService;
+import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.messages.AuthorizeMessage;
+import com.sim_backend.websockets.messages.BootNotificationMessage;
+import com.sim_backend.websockets.messages.HeartBeatMessage;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class MessageController extends ControllerBase {
 
-  private final MessageService messageService;
+  private OCPPWebSocketClient webSocketClient;
 
-  public MessageController(Javalin app, MessageService service) {
+  public MessageController(Javalin app) throws URISyntaxException {
     super(app);
-    this.messageService = service;
+    this.webSocketClient = new OCPPWebSocketClient(new URI(""));
   }
 
   private void authorize(Context ctx) {
-    AuthorizeRequest request = ctx.bodyAsClass(AuthorizeRequest.class);
-    AuthorizeResponse response = messageService.authorizeUser(request);
+    AuthorizeMessage msg = new AuthorizeMessage();
+    webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
 
   private void boot(Context ctx) {
-    BootNotificationRequest request = ctx.bodyAsClass(BootNotificationRequest.class);
+    BootNotificationMessage msg =
+        new BootNotificationMessage(
+            "CP Vendor",
+            "CP Model",
+            "CP S/N",
+            "Box S/N",
+            "Firmware",
+            "ICCID",
+            "IMSI",
+            "Meter Type",
+            "Meter S/N");
+    webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
 
   private void heartbeat(Context ctx) {
-    HeartbeatRequest request = ctx.bodyAsClass(HeartbeatRequest.class);
+    HeartBeatMessage msg = new HeartBeatMessage();
+    webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
 
@@ -37,6 +50,6 @@ public class MessageController extends ControllerBase {
   public void registerRoutes(Javalin app) {
     app.post("/api/message/authorize", this::authorize);
     app.post("/api/message/boot", this::boot);
-    app.get("/api/message/heartbeat", this::heartbeat);
+    app.post("/api/message/heartbeat", this::heartbeat);
   }
 }
