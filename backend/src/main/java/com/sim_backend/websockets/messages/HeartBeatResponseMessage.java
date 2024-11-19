@@ -1,6 +1,5 @@
 package com.sim_backend.websockets.messages;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sim_backend.websockets.OCPPMessage;
 import com.sim_backend.websockets.OCPPMessageInfo;
 import java.time.ZoneId;
