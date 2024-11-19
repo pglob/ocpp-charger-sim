@@ -1,9 +1,13 @@
-package com.sim_backend.websockets;
+package com.sim_backend.rest.model;
 
 import com.google.gson.JsonArray;
+import com.sim_backend.websockets.GsonUtilities;
+import com.sim_backend.websockets.OCPPWebSocketClient;
 import java.util.UUID;
+import lombok.experimental.SuperBuilder;
 import org.jetbrains.annotations.NotNull;
 
+@SuperBuilder
 public abstract class OCPPMessage {
 
   /** The call ID for a request. */
@@ -19,7 +23,7 @@ public abstract class OCPPMessage {
   private final transient String messageID;
 
   /** The constructor for an OCPP message. */
-  protected OCPPMessage() {
+  public OCPPMessage() {
     this.messageID = generateMessageID();
   }
 
