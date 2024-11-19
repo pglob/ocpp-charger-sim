@@ -147,6 +147,6 @@ public abstract class OCPPMessage {
    */
   @Override
   public String toString() {
-    return String.format("%s: %s", this.getClass().toGenericString(), this.toJsonString());
+    return String.format("%s = %s", this.getClass(), this.toJsonString());
   }
 }
