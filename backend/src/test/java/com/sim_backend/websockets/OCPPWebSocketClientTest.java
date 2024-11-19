@@ -148,7 +148,7 @@ public class OCPPWebSocketClientTest {
     OCPPMessageError messageError =
         new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
-    String fullMessage = GsonUtilities.toString(messageError.generateMessage());
+    String fullMessage = messageError.toJsonString();
 
     client.onReceiveMessage(
         OCPPMessageError.class,
@@ -170,7 +170,7 @@ public class OCPPWebSocketClientTest {
     OCPPMessageError messageError =
         new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
-    String fullMessage = GsonUtilities.toString(messageError.generateMessage());
+    String fullMessage = messageError.toJsonString();
 
     client.onReceiveMessage(
         OCPPMessageError.class,
@@ -187,7 +187,7 @@ public class OCPPWebSocketClientTest {
           assert message.getMessage() instanceof HeartBeat;
         });
     client.onMessage(fullMessage);
-    client.onMessage(GsonUtilities.toString(new HeartBeat().generateMessage()));
+    client.onMessage(new HeartBeat().toJsonString());
 
     // verify(listener, times(1)).onMessageReceieved(any(OnOCPPMessage.class));
   }
@@ -200,7 +200,7 @@ public class OCPPWebSocketClientTest {
     doAnswer(
             invocation -> {
               response.setMessageID(beat.getMessageID());
-              String fullMessage = GsonUtilities.toString(response.generateMessage());
+              String fullMessage = response.toJsonString();
               OCPPCannotProcessResponse badResponse =
                   assertThrows(
                       OCPPCannotProcessResponse.class,
@@ -232,7 +232,7 @@ public class OCPPWebSocketClientTest {
             invocation -> {
               client.addPreviousMessage(beat);
               response.setMessageID(beat.getMessageID());
-              client.onMessage(GsonUtilities.toString(response.generateMessage()));
+              client.onMessage(response.toJsonString());
               return null;
             })
         .when(client)
@@ -354,7 +354,7 @@ public class OCPPWebSocketClientTest {
                         this.client.addPreviousMessage(beat);
                         HeartBeatResponse response = new HeartBeatResponse();
                         response.setMessageID(beat.getMessageID());
-                        client.handleMessage(GsonUtilities.toString(response.generateMessage()));
+                        client.handleMessage(response.toJsonString());
                         return null;
                       })
                   .when(client)

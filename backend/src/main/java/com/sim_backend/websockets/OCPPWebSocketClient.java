@@ -9,11 +9,18 @@ import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
-import com.sim_backend.websockets.exceptions.*;
+import com.sim_backend.websockets.exceptions.OCPPBadCallID;
+import com.sim_backend.websockets.exceptions.OCPPBadClass;
+import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
+import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
+import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
@@ -60,7 +67,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   public OCPPWebSocketClient(final URI serverUri) {
     super(serverUri, new Draft_6455(), null, CONNECT_TIMEOUT);
-    this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
+    this.setConnect0ionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
   }
 

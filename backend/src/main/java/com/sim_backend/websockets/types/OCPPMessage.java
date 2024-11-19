@@ -49,7 +49,7 @@ public abstract class OCPPMessage {
    * @param client The websocket client.
    */
   public void sendMessage(final OCPPWebSocketClient client) {
-    client.send(GsonUtilities.toString(this.generateMessage()));
+    client.send(this.toJsonString());
     if (this instanceof OCPPMessageRequest) {
       client.addPreviousMessage(this);
     }
@@ -129,5 +129,24 @@ public abstract class OCPPMessage {
       }
     }
     return null;
+  }
+
+  /**
+   * Get a JSON representation of a OCPP Message.
+   *
+   * @return The message in a json string.
+   */
+  public String toJsonString() {
+    return GsonUtilities.toString(this.generateMessage());
+  }
+
+  /**
+   * Get a String representation of a OCPP message.
+   *
+   * @return The string representation.
+   */
+  @Override
+  public String toString() {
+    return String.format("%s: %s", this.getClass().toGenericString(), this.toJsonString());
   }
 }
