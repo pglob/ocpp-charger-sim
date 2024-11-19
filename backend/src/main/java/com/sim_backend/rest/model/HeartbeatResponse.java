@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class BootNotificationResponse {
+public class HeartbeatResponse {
   @SerializedName("message")
   private String message;
 }
