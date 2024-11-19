@@ -17,11 +17,10 @@ import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
@@ -54,7 +53,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   private final MessageQueue queue = new MessageQueue();
 
   /** Subscribe to when we receive an OCPP message. */
-  private final Map<Class<?>, List<OnOCPPMessageListener>> onReceiveMessage =
+  private final Map<Class<?>, CopyOnWriteArrayList<OnOCPPMessageListener>> onReceiveMessage =
       new ConcurrentHashMap<>();
 
   /** The previous messages we have sent. * */
@@ -188,7 +187,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
       throw new OCPPBadClass();
     }
     this.onReceiveMessage
-        .computeIfAbsent(currClass, k -> new Vector<>())
+        .computeIfAbsent(currClass, k -> new CopyOnWriteArrayList<>())
         .add(onReceiveMessageListener);
   }
 
