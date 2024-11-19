@@ -36,7 +36,8 @@ public class ExceptionTests {
     OCPPMessageFailure exception =
         new OCPPMessageFailure(beat, new WebsocketNotConnectedException());
     String message = exception.getMessage();
-    assert message.contains("Could not Send Message class com.sim_backend.websockets.messages.HeartBeat = [2,\"Why\",\"HeartBeat\",{}]: null");
+    assert message.contains(
+        "Could not Send Message class com.sim_backend.websockets.messages.HeartBeat = [2,\"Why\",\"HeartBeat\",{}]: null");
   }
 
   @Test
