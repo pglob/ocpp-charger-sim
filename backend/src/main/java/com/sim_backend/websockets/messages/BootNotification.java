@@ -1,11 +1,11 @@
 package com.sim_backend.websockets.messages;
 
-import com.sim_backend.websockets.annotations.OcppMessageInfo;
-import com.sim_backend.websockets.types.OcppMessageRequest;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.types.OCPPMessageRequest;
 
 /** A OCPP Boot Notification Message. */
-@OcppMessageInfo(messageName = "BootNotification")
-public final class BootNotification extends OcppMessageRequest {
+@OCPPMessageInfo(messageName = "BootNotification")
+public final class BootNotification extends OCPPMessageRequest {
   /** The Charge Point's Vendor. */
   private final String chargePointVendor;
 
@@ -36,35 +36,35 @@ public final class BootNotification extends OcppMessageRequest {
   /**
    * Create a Boot Notification Message.
    *
-   * @param chargePointVdr The Charge Point Vendor.
-   * @param chargePointMdl The Charge Point Model.
-   * @param chargePointSn THe Charge Point Serial Number.
-   * @param chargeBoxSn The Charge Box Serial Number.
-   * @param fwVersion The Firmware Version.
-   * @param inIccid The ICCID.
-   * @param inImsi The IMSI.
-   * @param mtrType The Meter Type.
-   * @param mtrSn The Meter Serial Number.
+   * @param chargePVendor The Charge Point Vendor.
+   * @param chargePModel The Charge Point Model.
+   * @param chargePSN THe Charge Point Serial Number.
+   * @param chargeboxSN The Charge Box Serial Number.
+   * @param fwversion The Firmware Version.
+   * @param inICCID The ICCID.
+   * @param inIMSI The IMSI.
+   * @param mType The Meter Type.
+   * @param mSN The Meter Serial Number.
    */
   public BootNotification(
-      final String chargePointVdr,
-      final String chargePointMdl,
-      final String chargePointSn,
-      final String chargeBoxSn,
-      final String fwVersion,
-      final String inIccid,
-      final String inImsi,
-      final String mtrType,
-      final String mtrSn) {
-    this.chargePointVendor = chargePointVdr;
-    this.chargePointModel = chargePointMdl;
-    this.chargePointSerialNumber = chargePointSn;
-    this.chargeBoxSerialNumber = chargeBoxSn;
-    this.firmwareVersion = fwVersion;
-    this.iccid = inIccid;
-    this.imsi = inImsi;
-    this.meterType = mtrType;
-    this.meterSerialNumber = mtrSn;
+      final String chargePVendor,
+      final String chargePModel,
+      final String chargePSN,
+      final String chargeboxSN,
+      final String fwversion,
+      final String inICCID,
+      final String inIMSI,
+      final String mType,
+      final String mSN) {
+    this.chargePointVendor = chargePVendor;
+    this.chargePointModel = chargePModel;
+    this.chargePointSerialNumber = chargePSN;
+    this.chargeBoxSerialNumber = chargeboxSN;
+    this.firmwareVersion = fwversion;
+    this.iccid = inICCID;
+    this.imsi = inIMSI;
+    this.meterType = mType;
+    this.meterSerialNumber = mSN;
   }
 
   /**

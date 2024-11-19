@@ -1,7 +1,7 @@
 package com.sim_backend.websockets;
 
-import com.sim_backend.websockets.exceptions.OcppMessageFailure;
-import com.sim_backend.websockets.types.OcppMessage;
+import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
+import com.sim_backend.websockets.types.OCPPMessage;
 import java.util.Deque;
 import java.util.LinkedList;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
@@ -13,7 +13,7 @@ public class MessageQueue {
   public static final int MAX_REATTEMPTS = 5;
 
   /** The OCPP Message Queue. */
-  private final Deque<OcppMessage> queue = new LinkedList<>();
+  private final Deque<OCPPMessage> queue = new LinkedList<>();
 
   /** Create an OCPPMessage Queue. */
   public MessageQueue() {}
@@ -23,7 +23,7 @@ public class MessageQueue {
    *
    * @param message the message to be sent.
    */
-  public void pushMessage(final OcppMessage message) {
+  public void pushMessage(final OCPPMessage message) {
     queue.add(message);
   }
 
@@ -51,15 +51,15 @@ public class MessageQueue {
    * @param client The WebsocketClient to send it through.
    * @return The Send OCPP Message.
    */
-  public OcppMessage popMessage(final OcppBadCallId client)
-      throws OcppMessageFailure, InterruptedException {
-    OcppMessage message = queue.poll();
+  public OCPPMessage popMessage(final OCPPWebSocketClient client)
+      throws OCPPMessageFailure, InterruptedException {
+    OCPPMessage message = queue.poll();
     if (message != null) {
       try {
         message.sendMessage(client);
       } catch (WebsocketNotConnectedException ex) {
         if (message.incrementTries() >= MAX_REATTEMPTS) {
-          throw new OcppMessageFailure(message, ex);
+          throw new OCPPMessageFailure(message, ex);
         } else {
           client.reconnectBlocking();
           queue.addFirst(message);
@@ -75,8 +75,8 @@ public class MessageQueue {
    *
    * @param client The WebsocketClient to send it through.
    */
-  public void popAllMessages(final OcppBadCallId client)
-      throws OcppMessageFailure, InterruptedException {
+  public void popAllMessages(final OCPPWebSocketClient client)
+      throws OCPPMessageFailure, InterruptedException {
     while (!queue.isEmpty()) {
       popMessage(client);
     }

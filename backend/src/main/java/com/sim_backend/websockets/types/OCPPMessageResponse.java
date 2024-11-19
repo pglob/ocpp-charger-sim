@@ -2,10 +2,10 @@ package com.sim_backend.websockets.types;
 
 import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.annotations.OcppMessageInfo;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 
 /** An OCPP CallResult message. */
-public class OcppMessageResponse extends OcppMessage {
+public class OCPPMessageResponse extends OCPPMessage {
   /**
    * Define the structure for a request message.
    *
@@ -13,11 +13,11 @@ public class OcppMessageResponse extends OcppMessage {
    */
   @Override
   public JsonArray generateMessage() {
-    assert this.getClass().isAnnotationPresent(OcppMessageInfo.class);
-    OcppMessageInfo messageInfo = this.getClass().getAnnotation(OcppMessageInfo.class);
+    assert this.getClass().isAnnotationPresent(OCPPMessageInfo.class);
+    OCPPMessageInfo messageInfo = this.getClass().getAnnotation(OCPPMessageInfo.class);
     JsonArray array = new JsonArray();
-    array.add(messageInfo.messageCallId());
-    array.add(this.getMessageId());
+    array.add(messageInfo.messageCallID());
+    array.add(this.getMessageID());
     array.add(GsonUtilities.getGson().toJsonTree(this));
 
     return array;

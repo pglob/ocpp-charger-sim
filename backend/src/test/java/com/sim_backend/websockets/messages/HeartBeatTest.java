@@ -6,8 +6,8 @@ import static org.mockito.Mockito.*;
 import com.google.gson.JsonElement;
 import com.networknt.schema.*;
 import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.OcppBadCallId;
-import com.sim_backend.websockets.types.OcppMessage;
+import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.types.OCPPMessage;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,11 +20,11 @@ import org.junit.jupiter.api.Test;
 
 public class HeartBeatTest {
 
-  OcppBadCallId client;
+  OCPPWebSocketClient client;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
-    client = spy(new OcppBadCallId(new URI("")));
+    client = spy(new OCPPWebSocketClient(new URI("")));
   }
 
   @Test
@@ -45,7 +45,7 @@ public class HeartBeatTest {
         .when(client)
         .send(anyString());
 
-    OcppMessage beatResponse = new HeartBeat();
+    OCPPMessage beatResponse = new HeartBeat();
     beatResponse.sendMessage(client);
 
     verify(client, times(1)).send(anyString());

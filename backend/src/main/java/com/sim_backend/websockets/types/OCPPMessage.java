@@ -1,18 +1,18 @@
 package com.sim_backend.websockets.types;
 
-import static com.sim_backend.websockets.OcppBadCallId.MESSAGE_PACKAGE;
+import static com.sim_backend.websockets.OCPPWebSocketClient.MESSAGE_PACKAGE;
 
 import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.OcppBadCallId;
-import com.sim_backend.websockets.annotations.OcppMessageInfo;
+import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import java.security.SecureRandom;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 /** An OCPP message. */
-public abstract class OcppMessage {
+public abstract class OCPPMessage {
   /** The maximum allowed message ID length. */
   public static final int MAX_MESSAGE_ID_LENGTH = 20;
 
@@ -29,11 +29,11 @@ public abstract class OcppMessage {
   private transient int tries = 0;
 
   /** The Message ID we send this message with. */
-  protected transient String messageId;
+  protected transient String messageID;
 
   /** The constructor for an OCPP message. */
-  protected OcppMessage() {
-    this.messageId = generateMessageId();
+  protected OCPPMessage() {
+    this.messageID = generateMessageID();
   }
 
   /**
@@ -48,9 +48,9 @@ public abstract class OcppMessage {
    *
    * @param client The websocket client.
    */
-  public void sendMessage(final OcppBadCallId client) {
+  public void sendMessage(final OCPPWebSocketClient client) {
     client.send(GsonUtilities.toString(this.generateMessage()));
-    if (this instanceof OcppMessageRequest) {
+    if (this instanceof OCPPMessageRequest) {
       client.addPreviousMessage(this);
     }
   }
@@ -70,17 +70,17 @@ public abstract class OcppMessage {
    *
    * @return the current message ID.
    */
-  public String getMessageId() {
-    return messageId;
+  public String getMessageID() {
+    return messageID;
   }
 
   /**
    * Set the current message ID.
    *
-   * @param msgId Set the message ID.
+   * @param msgID Set the message ID.
    */
-  public void setMessageId(final String msgId) {
-    this.messageId = msgId;
+  public void setMessageID(final String msgID) {
+    this.messageID = msgID;
   }
 
   /** The Characters we are allowed in a Message ID. */
@@ -96,9 +96,9 @@ public abstract class OcppMessage {
    * @return A randomly generated message ID.
    */
   @NotNull
-  private static String generateMessageId() {
-    StringBuilder sb = new StringBuilder(OcppMessage.MAX_MESSAGE_ID_LENGTH);
-    for (int i = 0; i < OcppMessage.MAX_MESSAGE_ID_LENGTH; i++) {
+  private static String generateMessageID() {
+    StringBuilder sb = new StringBuilder(OCPPMessage.MAX_MESSAGE_ID_LENGTH);
+    for (int i = 0; i < OCPPMessage.MAX_MESSAGE_ID_LENGTH; i++) {
       int randomIndex = RANDOM.nextInt(CHARACTERS.length());
       sb.append(CHARACTERS.charAt(randomIndex));
     }
@@ -116,13 +116,13 @@ public abstract class OcppMessage {
 
     // Get all classes in our messages package,
     // that are annotated with OCPPMessageInfo.
-    Set<Class<?>> classes = reflections.getTypesAnnotatedWith(OcppMessageInfo.class);
+    Set<Class<?>> classes = reflections.getTypesAnnotatedWith(OCPPMessageInfo.class);
 
     // Find the one that matches the received message Type.
     for (Class<?> messageClass : classes) {
-      OcppMessageInfo annotation = messageClass.getAnnotation(OcppMessageInfo.class);
+      OCPPMessageInfo annotation = messageClass.getAnnotation(OCPPMessageInfo.class);
       // Check if it's a has a parent class of OCPPMessage.
-      if (OcppMessage.class.isAssignableFrom(messageClass)
+      if (OCPPMessage.class.isAssignableFrom(messageClass)
           && annotation.messageName().equals(messageName)) {
         // Convert the payload String into the found class.
         return messageClass;

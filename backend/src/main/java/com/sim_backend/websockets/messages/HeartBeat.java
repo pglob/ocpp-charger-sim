@@ -1,11 +1,11 @@
 package com.sim_backend.websockets.messages;
 
-import com.sim_backend.websockets.annotations.OcppMessageInfo;
-import com.sim_backend.websockets.types.OcppMessageRequest;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.types.OCPPMessageRequest;
 
 /** An OCPP HeartBeat Message. */
-@OcppMessageInfo(messageName = "HeartBeat")
-public final class HeartBeat extends OcppMessageRequest {
+@OCPPMessageInfo(messageName = "HeartBeat")
+public final class HeartBeat extends OCPPMessageRequest {
   /** A HeartBeat Message. */
   public HeartBeat() {
     super();

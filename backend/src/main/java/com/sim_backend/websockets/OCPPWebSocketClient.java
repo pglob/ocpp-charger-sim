@@ -5,14 +5,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.sim_backend.websockets.annotations.OcppMessageInfo;
-import com.sim_backend.websockets.events.OnOcppMessage;
-import com.sim_backend.websockets.events.OnOcppMessageListener;
-import com.sim_backend.websockets.exceptions.OcppCannotProcessResponse;
-import com.sim_backend.websockets.exceptions.OcppMessageFailure;
-import com.sim_backend.websockets.exceptions.OcppUnsupportedMessage;
-import com.sim_backend.websockets.types.OcppMessage;
-import com.sim_backend.websockets.types.OcppMessageError;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.events.OnOCPPMessage;
+import com.sim_backend.websockets.events.OnOCPPMessageListener;
+import com.sim_backend.websockets.exceptions.OCPPBadCallID;
+import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
+import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
+import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
+import com.sim_backend.websockets.types.OCPPMessage;
+import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
@@ -23,7 +24,7 @@ import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
 
 /** A WebSocket client for handling OCPP Messages. */
-public class OcppBadCallId extends WebSocketClient {
+public class OCPPWebSocketClient extends WebSocketClient {
 
   /** The time to wait to try to reconnect. */
   public static final int CONNECTION_LOST_TIMER = 5;
@@ -50,18 +51,18 @@ public class OcppBadCallId extends WebSocketClient {
   private final MessageQueue queue = new MessageQueue();
 
   /** Subscribe to when we receive an OCPP message. */
-  private final Map<Class<?>, ArrayList<OnOcppMessageListener>> onReceiveMessage =
+  private final Map<Class<?>, ArrayList<OnOCPPMessageListener>> onReceiveMessage =
       new ConcurrentHashMap<>();
 
   /** The previous messages we have sent. * */
-  private final Map<String, OcppMessage> previousMessages = new ConcurrentHashMap<>();
+  private final Map<String, OCPPMessage> previousMessages = new ConcurrentHashMap<>();
 
   /**
    * Create an OCPP WebSocket Client.
    *
    * @param serverUri The Websocket Address.
    */
-  public OcppBadCallId(final URI serverUri) {
+  public OCPPWebSocketClient(final URI serverUri) {
     super(serverUri, new Draft_6455(), null, CONNECT_TIMEOUT);
     this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
@@ -87,49 +88,49 @@ public class OcppBadCallId extends WebSocketClient {
     }
 
     JsonArray array = element.getAsJsonArray();
-    String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
+    String msgID = array.get(MESSAGE_ID_INDEX).getAsString();
     String messageName;
     JsonObject data;
 
-    int callId = array.get(CALL_ID_INDEX).getAsInt();
-    switch (callId) {
-      case OcppMessage.CALL_ID_REQUEST -> {
+    int callID = array.get(CALL_ID_INDEX).getAsInt();
+    switch (callID) {
+      case OCPPMessage.CALL_ID_REQUEST -> {
         // handling a simple Call
         messageName = array.get(NAME_INDEX).getAsString();
         data = array.get(PAYLOAD_INDEX).getAsJsonObject();
       }
-      case OcppMessage.CALL_ID_RESPONSE -> {
+      case OCPPMessage.CALL_ID_RESPONSE -> {
         // handling a CallResult
-        if (this.previousMessages.get(msgId) == null) {
-          throw new OcppCannotProcessResponse(s, msgId);
+        if (this.previousMessages.get(msgID) == null) {
+          throw new OCPPCannotProcessResponse(s, msgID);
         }
 
-        OcppMessageInfo info =
-            this.previousMessages.remove(msgId).getClass().getAnnotation(OcppMessageInfo.class);
+        OCPPMessageInfo info =
+            this.previousMessages.remove(msgID).getClass().getAnnotation(OCPPMessageInfo.class);
         messageName = info.messageName() + "Response";
         data = array.get(PAYLOAD_INDEX - 1).getAsJsonObject();
       }
-      case OcppMessage.CALL_ID_ERROR -> {
+      case OCPPMessage.CALL_ID_ERROR -> {
         // handling a CallError.
-        OcppMessageError error = new OcppMessageError(array);
-        this.onReceiveMessage(OcppMessageError.class, error);
+        OCPPMessageError error = new OCPPMessageError(array);
+        this.onReceiveMessage(OCPPMessageError.class, error);
         return;
       }
-      default -> throw new com.sim_backend.websockets.exceptions.OcppBadCallId(callId, s);
+      default -> throw new OCPPBadCallID(callID, s);
     }
 
     if (messageName == null) {
-      throw new OcppUnsupportedMessage(s, "null");
+      throw new OCPPUnsupportedMessage(s, "null");
     }
 
     // We found our class
-    Class<?> messageClass = OcppMessage.getMessageByName(messageName);
+    Class<?> messageClass = OCPPMessage.getMessageByName(messageName);
     if (messageClass == null) {
-      throw new OcppUnsupportedMessage(s, messageName);
+      throw new OCPPUnsupportedMessage(s, messageName);
     }
 
-    OcppMessage message = (OcppMessage) gson.fromJson(data, messageClass);
-    message.setMessageId(msgId);
+    OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
+    message.setMessageID(msgID);
     this.onReceiveMessage(messageClass, message);
   }
 
@@ -147,15 +148,15 @@ public class OcppBadCallId extends WebSocketClient {
    * @param currClass The class of the message we received.
    * @param message The Message we received
    */
-  private void onReceiveMessage(final Class<?> currClass, final OcppMessage message) {
-    if (!OcppMessage.class.isAssignableFrom(currClass)) {
+  private void onReceiveMessage(final Class<?> currClass, final OCPPMessage message) {
+    if (!OCPPMessage.class.isAssignableFrom(currClass)) {
       return;
     }
     Optional.ofNullable(this.onReceiveMessage.get(currClass))
         .ifPresent(
             listeners -> {
-              for (OnOcppMessageListener listener : listeners) {
-                listener.onMessageReceieved(new OnOcppMessage(message));
+              for (OnOCPPMessageListener listener : listeners) {
+                listener.onMessageReceieved(new OnOCPPMessage(message));
               }
             });
   }
@@ -167,8 +168,8 @@ public class OcppBadCallId extends WebSocketClient {
    * @param currClass The class we want to set a listener for.
    */
   public void onReceiveMessage(
-      final Class<?> currClass, final OnOcppMessageListener onReceiveMessageListener) {
-    if (!OcppMessage.class.isAssignableFrom(currClass)) {
+      final Class<?> currClass, final OnOCPPMessageListener onReceiveMessageListener) {
+    if (!OCPPMessage.class.isAssignableFrom(currClass)) {
       return;
     }
     this.onReceiveMessage
@@ -181,7 +182,7 @@ public class OcppBadCallId extends WebSocketClient {
    *
    * @param message the message to be sent.
    */
-  public void pushMessage(final OcppMessage message) {
+  public void pushMessage(final OCPPMessage message) {
     queue.pushMessage(message);
   }
 
@@ -208,12 +209,12 @@ public class OcppBadCallId extends WebSocketClient {
    *
    * @return The Send OCPP Message.
    */
-  public OcppMessage popMessage() throws OcppMessageFailure, InterruptedException {
+  public OCPPMessage popMessage() throws OCPPMessageFailure, InterruptedException {
     return queue.popMessage(this);
   }
 
   /** Pop the entire send queue. */
-  public void popAllMessages() throws OcppMessageFailure, InterruptedException {
+  public void popAllMessages() throws OCPPMessageFailure, InterruptedException {
     queue.popAllMessages(this);
   }
 
@@ -222,7 +223,7 @@ public class OcppBadCallId extends WebSocketClient {
    *
    * @param msg The message we wish to add.
    */
-  public void addPreviousMessage(final OcppMessage msg) {
-    this.previousMessages.put(msg.getMessageId(), msg);
+  public void addPreviousMessage(final OCPPMessage msg) {
+    this.previousMessages.put(msg.getMessageID(), msg);
   }
 }

@@ -7,40 +7,41 @@ import static org.mockito.Mockito.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.enums.ErrorCode;
-import com.sim_backend.websockets.events.OnOcppMessage;
-import com.sim_backend.websockets.events.OnOcppMessageListener;
-import com.sim_backend.websockets.exceptions.OcppCannotProcessResponse;
-import com.sim_backend.websockets.exceptions.OcppMessageFailure;
-import com.sim_backend.websockets.exceptions.OcppUnsupportedMessage;
+import com.sim_backend.websockets.events.OnOCPPMessage;
+import com.sim_backend.websockets.events.OnOCPPMessageListener;
+import com.sim_backend.websockets.exceptions.OCPPBadCallID;
+import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
+import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
+import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.messages.HeartBeat;
 import com.sim_backend.websockets.messages.HeartBeatResponse;
-import com.sim_backend.websockets.types.OcppMessageError;
+import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class OcppBadCallIdTest {
+public class OCPPWebSocketClientTest {
 
-  OcppBadCallId client;
+  OCPPWebSocketClient client;
   MessageQueue queue;
-  OnOcppMessage onOcppMessageMock;
+  OnOCPPMessage onOCPPMessageMock;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
-    onOcppMessageMock = mock(OnOcppMessage.class);
-    client = spy(new OcppBadCallId(new URI("")));
+    onOCPPMessageMock = mock(OnOCPPMessage.class);
+    client = spy(new OCPPWebSocketClient(new URI("")));
     queue = mock(MessageQueue.class);
   }
 
   @Test
-  public void testPopOnEmptyQueue() throws OcppMessageFailure, InterruptedException {
+  public void testPopOnEmptyQueue() throws OCPPMessageFailure, InterruptedException {
     assert client.popMessage() == null;
   }
 
   @Test
-  public void testPushThenPop() throws OcppMessageFailure, InterruptedException {
+  public void testPushThenPop() throws OCPPMessageFailure, InterruptedException {
     HeartBeat heartbeat = new HeartBeat();
     doReturn(heartbeat).when(client).popMessage();
     client.pushMessage(heartbeat);
@@ -49,7 +50,7 @@ public class OcppBadCallIdTest {
   }
 
   @Test
-  public void testPopMessage() throws OcppMessageFailure, InterruptedException {
+  public void testPopMessage() throws OCPPMessageFailure, InterruptedException {
     Pattern pattern = Pattern.compile("^\\[2,\\s*\".*?\",\\s*\"HeartBeat\",\\s*\\{}]$");
     doAnswer(
             invocation -> {
@@ -66,7 +67,7 @@ public class OcppBadCallIdTest {
   }
 
   @Test
-  void testPopAllMessages() throws OcppMessageFailure, InterruptedException {
+  void testPopAllMessages() throws OCPPMessageFailure, InterruptedException {
     Pattern pattern = Pattern.compile("^\\[2,\\s*\".*?\",\\s*\"HeartBeat\",\\s*\\{}]$");
     doAnswer(
             invocation -> {
@@ -96,14 +97,14 @@ public class OcppBadCallIdTest {
     HeartBeat beat = new HeartBeat();
     doAnswer(
             invocation -> {
-              com.sim_backend.websockets.exceptions.OcppBadCallId badResponse =
+              OCPPBadCallID badResponse =
                   assertThrows(
-                      com.sim_backend.websockets.exceptions.OcppBadCallId.class,
+                      OCPPBadCallID.class,
                       () -> {
                         client.onMessage(badResponseMsg);
                       });
               assert badResponse.getFullMessage().equals(badResponseMsg);
-              assert badResponse.getBadCallId() == 1;
+              assert badResponse.getBadCallID() == 1;
               return null;
             })
         .when(client)
@@ -123,14 +124,14 @@ public class OcppBadCallIdTest {
     HeartBeat beat = new HeartBeat();
     doAnswer(
             invocation -> {
-              com.sim_backend.websockets.exceptions.OcppBadCallId badResponse =
+              OCPPBadCallID badResponse =
                   assertThrows(
-                      com.sim_backend.websockets.exceptions.OcppBadCallId.class,
+                      OCPPBadCallID.class,
                       () -> {
                         client.onMessage(badResponseMsg);
                       });
               assert badResponse.getFullMessage().equals(badResponseMsg);
-              assert badResponse.getBadCallId() == 5;
+              assert badResponse.getBadCallID() == 5;
               return null;
             })
         .when(client)
@@ -146,17 +147,17 @@ public class OcppBadCallIdTest {
 
   @Test
   public void testOnReceiveError() {
-    OnOcppMessageListener listener = mock(OnOcppMessageListener.class);
-    OcppMessageError messageError =
-        new OcppMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
+    OnOCPPMessageListener listener = mock(OnOCPPMessageListener.class);
+    OCPPMessageError messageError =
+        new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
     String fullMessage = GsonUtilities.toString(messageError.generateMessage());
 
     client.onReceiveMessage(
-        OcppMessageError.class,
+        OCPPMessageError.class,
         message -> {
-          assert message.getMessage() instanceof OcppMessageError;
-          OcppMessageError receivedError = (OcppMessageError) message.getMessage();
+          assert message.getMessage() instanceof OCPPMessageError;
+          OCPPMessageError receivedError = (OCPPMessageError) message.getMessage();
           assert receivedError.getErrorCode() == ErrorCode.FormatViolation;
           assert receivedError.getErrorDescription().equals("Not Found");
           assert receivedError.getErrorDetails() != null;
@@ -168,17 +169,17 @@ public class OcppBadCallIdTest {
 
   @Test
   public void testOnReceiveMulti() {
-    OnOcppMessageListener listener = mock(OnOcppMessageListener.class);
-    OcppMessageError messageError =
-        new OcppMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
+    OnOCPPMessageListener listener = mock(OnOCPPMessageListener.class);
+    OCPPMessageError messageError =
+        new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
     String fullMessage = GsonUtilities.toString(messageError.generateMessage());
 
     client.onReceiveMessage(
-        OcppMessageError.class,
+        OCPPMessageError.class,
         message -> {
-          assert message.getMessage() instanceof OcppMessageError;
-          OcppMessageError receivedError = (OcppMessageError) message.getMessage();
+          assert message.getMessage() instanceof OCPPMessageError;
+          OCPPMessageError receivedError = (OCPPMessageError) message.getMessage();
           assert receivedError.getErrorCode() == ErrorCode.FormatViolation;
           assert receivedError.getErrorDescription().equals("Not Found");
           assert receivedError.getErrorDetails() != null;
@@ -195,22 +196,22 @@ public class OcppBadCallIdTest {
   }
 
   @Test
-  public void testOnReceiveMessageNoMatchingMsg() throws OcppMessageFailure, InterruptedException {
+  public void testOnReceiveMessageNoMatchingMsg() throws OCPPMessageFailure, InterruptedException {
     HeartBeatResponse response = new HeartBeatResponse();
 
     HeartBeat beat = new HeartBeat();
     doAnswer(
             invocation -> {
-              response.setMessageId(beat.getMessageId());
+              response.setMessageID(beat.getMessageID());
               String fullMessage = GsonUtilities.toString(response.generateMessage());
-              OcppCannotProcessResponse badResponse =
+              OCPPCannotProcessResponse badResponse =
                   assertThrows(
-                      OcppCannotProcessResponse.class,
+                      OCPPCannotProcessResponse.class,
                       () -> {
                         client.onMessage(fullMessage);
                       });
               assert badResponse.getReceivedMessage().equals(fullMessage);
-              assert badResponse.getBadMessageId().equals(beat.getMessageId());
+              assert badResponse.getBadMessageId().equals(beat.getMessageID());
 
               return null;
             })
@@ -226,14 +227,14 @@ public class OcppBadCallIdTest {
   }
 
   @Test
-  public void testOnReceiveMessage() throws OcppMessageFailure, InterruptedException {
+  public void testOnReceiveMessage() throws OCPPMessageFailure, InterruptedException {
     HeartBeatResponse response = new HeartBeatResponse();
 
     HeartBeat beat = new HeartBeat();
     doAnswer(
             invocation -> {
               client.addPreviousMessage(beat);
-              response.setMessageId(beat.getMessageId());
+              response.setMessageID(beat.getMessageID());
               client.onMessage(GsonUtilities.toString(response.generateMessage()));
               return null;
             })
@@ -255,7 +256,7 @@ public class OcppBadCallIdTest {
   }
 
   @Test
-  public void testReceiveBadMessage() throws OcppMessageFailure, InterruptedException {
+  public void testReceiveBadMessage() throws OCPPMessageFailure, InterruptedException {
     doAnswer(
             invocation -> {
               client.onMessage("{}");
@@ -274,7 +275,7 @@ public class OcppBadCallIdTest {
   }
 
   @Test
-  public void testOnReceiveBadMessageType() throws OcppMessageFailure, InterruptedException {
+  public void testOnReceiveBadMessageType() throws OCPPMessageFailure, InterruptedException {
     String msgToSend = "[2, \"Woah\", \"AbsoluteTrash\", {}]";
     doAnswer(
             invocation -> {
@@ -288,24 +289,24 @@ public class OcppBadCallIdTest {
 
     client.pushMessage(beat);
     client.onReceiveMessage(HeartBeatResponse.class, message -> {});
-    OcppUnsupportedMessage err =
-        assertThrows(OcppUnsupportedMessage.class, () -> client.popAllMessages());
+    OCPPUnsupportedMessage err =
+        assertThrows(OCPPUnsupportedMessage.class, () -> client.popAllMessages());
     assert err != null;
     assert err.getMessageName().equals("AbsoluteTrash");
     assert err.getMessage().equals(msgToSend);
   }
 
   @Test
-  public void testAllThrowsException() throws OcppMessageFailure {
+  public void testAllThrowsException() throws OCPPMessageFailure {
 
     HeartBeat beat = new HeartBeat();
 
     client.pushMessage(beat);
     assert client.size() == 1;
 
-    OcppMessageFailure exception =
+    OCPPMessageFailure exception =
         assertThrows(
-            OcppMessageFailure.class,
+            OCPPMessageFailure.class,
             () -> {
               client.popAllMessages();
             });
@@ -317,16 +318,16 @@ public class OcppBadCallIdTest {
   }
 
   @Test
-  public void testThrowsException() throws OcppMessageFailure {
+  public void testThrowsException() throws OCPPMessageFailure {
 
     HeartBeat beat = new HeartBeat();
 
     client.pushMessage(beat);
     assert client.size() == 1;
 
-    OcppMessageFailure exception =
+    OCPPMessageFailure exception =
         assertThrows(
-            OcppMessageFailure.class,
+            OCPPMessageFailure.class,
             () -> {
               client.popMessage();
             });
@@ -337,7 +338,7 @@ public class OcppBadCallIdTest {
   }
 
   @Test
-  public void testRetryAfterFirstAttempt() throws OcppMessageFailure, InterruptedException {
+  public void testRetryAfterFirstAttempt() throws OCPPMessageFailure, InterruptedException {
     HeartBeat beat = new HeartBeat();
 
     client.pushMessage(beat);
@@ -355,7 +356,7 @@ public class OcppBadCallIdTest {
                       invocation2 -> {
                         this.client.addPreviousMessage(beat);
                         HeartBeatResponse response = new HeartBeatResponse();
-                        response.setMessageId(beat.getMessageId());
+                        response.setMessageID(beat.getMessageID());
                         client.onMessage(GsonUtilities.toString(response.generateMessage()));
                         return null;
                       })

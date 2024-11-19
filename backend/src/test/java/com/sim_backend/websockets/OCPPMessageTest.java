@@ -1,14 +1,14 @@
 package com.sim_backend.websockets;
 
 import com.sim_backend.websockets.messages.HeartBeat;
-import com.sim_backend.websockets.types.OcppMessage;
+import com.sim_backend.websockets.types.OCPPMessage;
 import org.junit.jupiter.api.Test;
 
-public class OcppMessageTest {
+public class OCPPMessageTest {
 
   @Test
   public void testIncrementTries() {
-    OcppMessage message = new HeartBeat();
+    OCPPMessage message = new HeartBeat();
     int tries = message.incrementTries();
     assert tries == 1;
     tries = message.incrementTries();

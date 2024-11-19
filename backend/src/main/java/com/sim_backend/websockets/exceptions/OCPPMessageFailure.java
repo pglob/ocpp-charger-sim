@@ -1,16 +1,16 @@
 package com.sim_backend.websockets.exceptions;
 
-import com.sim_backend.websockets.types.OcppMessage;
+import com.sim_backend.websockets.types.OCPPMessage;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 /** Thrown when we could not send a message after a certain number of reattempts. */
-public class OcppMessageFailure extends RuntimeException {
+public class OCPPMessageFailure extends RuntimeException {
 
   /** The Inner WebsocketException. */
   private final WebsocketNotConnectedException innerException;
 
   /** The failed Message. */
-  private final OcppMessage failedMessage;
+  private final OCPPMessage failedMessage;
 
   /**
    * A wrapper for a WebsocketNotConnectedException.
@@ -18,8 +18,8 @@ public class OcppMessageFailure extends RuntimeException {
    * @param message The message.
    * @param innerExp The inner exception.
    */
-  public OcppMessageFailure(
-      final OcppMessage message, final WebsocketNotConnectedException innerExp) {
+  public OCPPMessageFailure(
+      final OCPPMessage message, final WebsocketNotConnectedException innerExp) {
     super(message.toString());
     this.failedMessage = message;
     innerException = innerExp;
@@ -39,7 +39,7 @@ public class OcppMessageFailure extends RuntimeException {
    *
    * @return The OCPPMessage that failed to send.
    */
-  public OcppMessage getFailedMessage() {
+  public OCPPMessage getFailedMessage() {
     return failedMessage;
   }
 }
