@@ -1,8 +1,6 @@
-package com.sim_backend.websockets.messages;
+package com.sim_backend.rest.model;
 
 import com.google.gson.annotations.SerializedName;
-import com.sim_backend.websockets.OCPPMessage;
-import com.sim_backend.websockets.OCPPMessageInfo;
 
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "AuthorizeResponse")
 public class AuthorizeResponse extends OCPPMessage {

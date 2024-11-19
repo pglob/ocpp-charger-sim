@@ -3,6 +3,7 @@ package com.sim_backend.websockets.messages;
 import com.networknt.schema.InputFormat;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
+import com.sim_backend.rest.model.BootNotification;
 import com.sim_backend.websockets.GsonUtilities;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;

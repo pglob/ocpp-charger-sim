@@ -1,5 +1,6 @@
 package com.sim_backend.websockets;
 
+import com.sim_backend.rest.model.OCPPMessage;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 public class OCPPMessageFailure extends RuntimeException {

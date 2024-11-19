@@ -1,5 +1,6 @@
 package com.sim_backend.websockets;
 
+import com.sim_backend.rest.model.OCPPMessage;
 import java.util.Deque;
 import java.util.LinkedList;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
