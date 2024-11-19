@@ -9,7 +9,7 @@ import java.time.ZonedDateTime;
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "HeartBeatResponse")
 public final class HeartBeatResponseMessage extends OCPPMessage {
 
-  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSX", timezone = "UTC")
+  /** The HeartBeat's time. */
   private final ZonedDateTime currentTime;
 
   /** The response message for a HeartBeat, currentTime will be set to now. */
