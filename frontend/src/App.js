@@ -17,6 +17,7 @@ function App() {
     <div>
       <h1>Frontend</h1>
       <p data-testid="message">Message from backend: {message}</p>
+      <Button />
     </div>
   );
 }
