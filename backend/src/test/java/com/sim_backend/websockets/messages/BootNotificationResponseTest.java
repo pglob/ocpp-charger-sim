@@ -4,24 +4,34 @@ import com.networknt.schema.InputFormat;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
+import com.sim_backend.websockets.enums.BootStatus;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 public class BootNotificationResponseTest {
 
-  private static @NotNull BootNotificationResponse getBootNotificationResponse() {
-    BootNotificationResponse response =
-        new BootNotificationResponse("Accepted", "2024-02-20T12:34:56Z", 5);
+  private static @NotNull BootNotificationResponse getBootNotificationResponse(
+      ZonedDateTime dateTime) {
+    BootNotificationResponse response = new BootNotificationResponse("Accepted", dateTime, 5);
 
-    assert response.getStatus().equals("Accepted");
+    assert response.getStatus().getValue().equals("Accepted");
+    assert response.getStatus() == BootStatus.ACCEPTED;
+    assert response.getCurrentTime() == dateTime;
     assert response.getInterval() == 5;
     return response;
   }
 
   @Test
   public void testBootNotificationResponse() {
-    BootNotificationResponse response = getBootNotificationResponse();
+    ZonedDateTime testDateTime =
+        ZonedDateTime.of(
+            2024, 11, 20, 20, 0, 0, 0, ZoneId.of("UTC") // Replace with desired ZoneId
+            );
+
+    BootNotificationResponse response = getBootNotificationResponse(testDateTime);
 
     // Ensure message generation works
     assert response.generateMessage().size() == 4;
@@ -37,8 +47,9 @@ public class BootNotificationResponseTest {
     }
 
     // Check expected message structure
+    System.out.println(message);
     assert message.equals(
-        "{\"status\":\"Accepted\",\"currentTime\":\"2024-02-20T12:34:56Z\",\"interval\":5}");
+        "{\"status\":\"Accepted\",\"currentTime\":\"2024-11-20T20:00:00Z\",\"interval\":5}");
     assert errors.isEmpty();
   }
 }

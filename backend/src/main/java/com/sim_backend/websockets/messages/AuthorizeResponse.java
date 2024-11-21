@@ -7,6 +7,7 @@ package com.sim_backend.websockets.messages;
 import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.OCPPMessage;
 import com.sim_backend.websockets.OCPPMessageInfo;
+import com.sim_backend.websockets.enums.AuthorizationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,10 +28,10 @@ public class AuthorizeResponse extends OCPPMessage {
   public static class IdTagInfo {
 
     @SerializedName("status")
-    private String status; // One of: Accepted, Blocked, Expired, Invalid, ConcurrentTx
+    private AuthorizationStatus status; // One of: Accepted, Blocked, Expired, Invalid, ConcurrentTx
   }
 
   public AuthorizeResponse(String status) {
-    this.idTagInfo = new IdTagInfo(status);
+    this.idTagInfo = new IdTagInfo(AuthorizationStatus.fromString(status));
   }
 }

@@ -4,6 +4,7 @@ import com.networknt.schema.InputFormat;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
+import com.sim_backend.websockets.enums.AuthorizationStatus;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,8 @@ public class AuthorizeResponseTest {
     AuthorizeResponse response = new AuthorizeResponse("Accepted");
 
     // Verify the authorization request is created correctly
-    assert response.getIdTagInfo().getStatus().equals("Accepted");
+    assert response.getIdTagInfo().getStatus().getValue().equals("Accepted");
+    assert response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED;
     return response;
   }
 

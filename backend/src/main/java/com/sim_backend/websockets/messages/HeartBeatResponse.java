@@ -4,6 +4,7 @@
  */
 package com.sim_backend.websockets.messages;
 
+import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.OCPPMessage;
 import com.sim_backend.websockets.OCPPMessageInfo;
 import java.time.ZoneId;
@@ -17,6 +18,7 @@ import lombok.Getter;
 public final class HeartBeatResponse extends OCPPMessage {
 
   /** The HeartBeat's time. */
+  @SerializedName("currentTime")
   private final ZonedDateTime currentTime;
 
   /** The response message for a HeartBeat, currentTime will be set to now. */
