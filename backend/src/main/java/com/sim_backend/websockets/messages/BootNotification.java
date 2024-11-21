@@ -5,8 +5,8 @@
 package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
-import com.sim_backend.websockets.OCPPMessage;
-import com.sim_backend.websockets.OCPPMessageInfo;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -17,8 +17,8 @@ public class HeartBeatResponseTest {
     HeartBeatResponse response = new HeartBeatResponse();
 
     // Ensure message generation works
-    assert response.generateMessage().size() == 4;
-    String message = GsonUtilities.toString(response.generateMessage().get(3));
+    assert response.generateMessage().size() == 3;
+    String message = GsonUtilities.toString(response.generateMessage().get(2));
 
     // Match JSON message to regex
     String regex = "\\{\"currentTime\":\"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z\"\\}";

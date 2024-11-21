@@ -25,8 +25,8 @@ public class AuthorizeResponseTest {
     AuthorizeResponse response = getAuthorizeResponse();
 
     // Ensure message generation works
-    assert response.generateMessage().size() == 4;
-    String message = GsonUtilities.toString(response.generateMessage().get(3));
+    assert response.generateMessage().size() == 3;
+    String message = GsonUtilities.toString(response.generateMessage().get(2));
 
     // Validate against schema
     JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/AuthorizeResponse.json");
