@@ -75,6 +75,12 @@
             <artifactId>reflections</artifactId>
             <version>0.10.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- ADD NEW DEPENDENCIES HERE -->
         <!-- <dependency>
             <groupId>group.id.here</groupId>
