@@ -1,22 +1,19 @@
 package com.sim_backend.websockets.enums;
 
-public enum Status {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum BootStatus {
   ACCEPTED("Accepted"),
   PENDING("Pending"),
   REJECTED("Rejected");
 
   private final String value;
 
-  Status(String value) {
-    this.value = value;
-  }
-
-  public String getValue() {
-    return value;
-  }
-
-  public static Status fromString(String value) {
-    for (Status status : Status.values()) {
+  public static BootStatus fromString(String value) {
+    for (BootStatus status : BootStatus.values()) {
       if (status.value.equalsIgnoreCase(value)) {
         return status;
       }

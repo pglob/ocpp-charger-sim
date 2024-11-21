@@ -22,6 +22,9 @@ public class BootNotificationResponse extends OCPPMessage {
   @SerializedName("status")
   private String status; // Status of the BootNotification (Accepted, Rejected)
 
+  @SerializedName("currentTime")
+  private String currentTime; // Current time in ISO 8601 format
+
   @SerializedName("interval")
   private int interval; // Interval (time in seconds) for next BootNotification
 }

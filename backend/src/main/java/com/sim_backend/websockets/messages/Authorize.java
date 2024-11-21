@@ -1,6 +1,6 @@
 /**
- * Represents an OCPP 1.6 Authorize Request sent by a Charge Point
- * to request authorization for a given idTag.
+ * Represents an OCPP 1.6 Authorize Request sent by a Charge Point to request authorization for a
+ * given idTag.
  */
 package com.sim_backend.websockets.messages;
 
