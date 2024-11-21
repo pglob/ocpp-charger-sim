@@ -1,7 +1,7 @@
 # Frontend Dockerfile
 
 # Use the official Node.js image
-FROM node:18
+FROM node:18 AS build
 
 # Set the working directory
 WORKDIR /app
@@ -10,8 +10,16 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 
+# Set CI environment variable to ensure Jest runs in non-interactive mode
+ENV CI=true
+
 # Copy the rest of the application source code
 COPY . .
+
+# Run the tests
+FROM build AS test
+
+RUN npm test
 
 # Set the PORT environment variable
 ENV PORT=${FRONTEND_PORT}
@@ -21,3 +29,4 @@ EXPOSE ${FRONTEND_PORT}
 
 # Start the application
 CMD ["npm", "start"]
+
