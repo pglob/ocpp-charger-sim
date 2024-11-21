@@ -26,7 +26,7 @@ public class HeartBeatResponseTest {
     Pattern pattern = Pattern.compile(regex);
 
     // Validate against schema
-    JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/HeartBeatResponse.json");
+    JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/HeartbeatResponse.json");
     Set<ValidationMessage> errors = jsonSchema.validate(message, InputFormat.JSON);
     if (!errors.isEmpty()) {
       for (ValidationMessage error : errors) {
