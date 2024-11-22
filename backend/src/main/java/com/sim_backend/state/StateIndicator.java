@@ -1,5 +1,5 @@
 package com.sim_backend.state;
 
 public interface StateIndicator {
-    void onStateChanged(SimulatorState newState);
+  void onStateChanged(SimulatorState newState);
 }

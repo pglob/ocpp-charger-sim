@@ -6,7 +6,7 @@ package com.sim_backend.state;
 // Available -> useCharger() function -> in_use
 // Cehckavailable -> check if it's available
 public enum SimulatorState {
-    PowerOff,
-    BootingUp,
-    Available,
+  PowerOff,
+  BootingUp,
+  Available,
 }
