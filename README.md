@@ -61,9 +61,7 @@ Use the linter on the backend
    lint_backend
 ```
 
-```bash
-   make docker
-```
+Compose and run docker file
 
 ```bash
    make docker
