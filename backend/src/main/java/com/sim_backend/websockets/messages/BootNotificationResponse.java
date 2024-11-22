@@ -7,7 +7,7 @@ package com.sim_backend.websockets.messages;
 import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.OCPPMessage;
 import com.sim_backend.websockets.OCPPMessageInfo;
-import com.sim_backend.websockets.enums.BootStatus;
+import com.sim_backend.websockets.enums.BootNotificationStatus;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +22,7 @@ import lombok.Setter;
 public class BootNotificationResponse extends OCPPMessage {
 
   @SerializedName("status")
-  private BootStatus status; // Status of the BootNotification (Accepted, Rejected)
+  private BootNotificationStatus status; // Status of the BootNotification (Accepted, Rejected)
 
   @SerializedName("currentTime")
   private ZonedDateTime currentTime; // Current time in ISO 8601 format
@@ -31,7 +31,7 @@ public class BootNotificationResponse extends OCPPMessage {
   private int interval; // Interval (time in seconds) for next BootNotification
 
   public BootNotificationResponse(String status, ZonedDateTime currentTime, int interval) {
-    this.status = BootStatus.fromString(status);
+    this.status = BootNotificationStatus.fromString(status);
     this.currentTime = currentTime;
     this.interval = interval;
   }
