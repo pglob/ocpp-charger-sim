@@ -2,10 +2,9 @@ package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
-import com.sim_backend.websockets.enums.BootStatus;
+import com.sim_backend.websockets.enums.BootNotificationStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
-import com.sim_backend.websockets.enums.BootNotificationStatus;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

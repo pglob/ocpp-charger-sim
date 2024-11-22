@@ -26,10 +26,7 @@ public class BootNotificationResponseTest {
 
   @Test
   public void testBootNotificationResponse() {
-    ZonedDateTime testDateTime =
-        ZonedDateTime.of(
-            2024, 11, 20, 20, 0, 0, 0, ZoneId.of("UTC")
-            );
+    ZonedDateTime testDateTime = ZonedDateTime.of(2024, 11, 20, 20, 0, 0, 0, ZoneId.of("UTC"));
 
     BootNotificationResponse response = getBootNotificationResponse(testDateTime);
 
