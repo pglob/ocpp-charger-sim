@@ -16,7 +16,9 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URI;
 import java.net.URISyntaxException;
+import lombok.Getter;
 
+@Getter
 public class MessageController extends ControllerBase {
 
   private OCPPWebSocketClient webSocketClient;
@@ -26,13 +28,13 @@ public class MessageController extends ControllerBase {
     this.webSocketClient = new OCPPWebSocketClient(new URI(""));
   }
 
-  private void authorize(Context ctx) {
+  public void authorize(Context ctx) {
     Authorize msg = new Authorize();
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
 
-  private void boot(Context ctx) {
+  public void boot(Context ctx) {
     BootNotification msg =
         new BootNotification(
             "CP Vendor",
@@ -48,17 +50,17 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
-  private void heartbeat(Context ctx) {
+  public void heartbeat(Context ctx) {
     HeartBeat msg = new HeartBeat();
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
 
-  private void online(Context ctx) {
+  public void online(Context ctx) {
     ctx.result("OK");
   }
 
-  private void offline(Context ctx) {
+  public void offline(Context ctx) {
     ctx.result("OK");
   }
 

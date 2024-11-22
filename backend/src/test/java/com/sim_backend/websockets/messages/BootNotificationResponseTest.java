@@ -28,7 +28,7 @@ public class BootNotificationResponseTest {
   public void testBootNotificationResponse() {
     ZonedDateTime testDateTime =
         ZonedDateTime.of(
-            2024, 11, 20, 20, 0, 0, 0, ZoneId.of("UTC") // Replace with desired ZoneId
+            2024, 11, 20, 20, 0, 0, 0, ZoneId.of("UTC")
             );
 
     BootNotificationResponse response = getBootNotificationResponse(testDateTime);

@@ -1,7 +1,10 @@
 package com.sim_backend;
 
 import com.sim_backend.rest.TestMessageController;
+import com.sim_backend.rest.controllers.ControllerBase;
+import com.sim_backend.rest.controllers.MessageController;
 import io.javalin.Javalin;
+import java.net.URISyntaxException;
 
 public final class Main {
   private Main() {}
@@ -38,6 +41,13 @@ public final class Main {
                 })
             .start(backendPort); // Start the server
 
+    ControllerBase messageController = null;
+    try {
+      messageController = new MessageController(app);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+    messageController.registerRoutes(app);
     // Register a test route
     TestMessageController.registerRoutes(app);
   }
