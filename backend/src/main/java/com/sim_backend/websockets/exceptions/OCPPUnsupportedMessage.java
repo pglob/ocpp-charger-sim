@@ -1,6 +1,7 @@
-package com.sim_backend.websockets;
+package com.sim_backend.websockets.exceptions;
 
-public class OCPPUnsupportedMessage extends RuntimeException {
+/** Thrown when we receive an OCPP message name we cannot serialize. */
+public class OCPPUnsupportedMessage extends Exception {
 
   /** The OCPP message that failed to process. */
   private final String message;
@@ -23,7 +24,7 @@ public class OCPPUnsupportedMessage extends RuntimeException {
    *
    * @return The failed message.
    */
-  public String getMessage() {
+  public String getFullMessage() {
     return message;
   }
 
@@ -34,5 +35,16 @@ public class OCPPUnsupportedMessage extends RuntimeException {
    */
   public String getMessageName() {
     return messageName;
+  }
+
+  /**
+   * Get a String representation of an exception thrown when we get a Message Name we do not
+   * support.
+   *
+   * @return The exception as a string.
+   */
+  @Override
+  public String getMessage() {
+    return String.format("Received unknown message name \"%s\": %s", messageName, message);
   }
 }

@@ -1,25 +1,26 @@
-/**
- * Represents an OCPP 1.6 Boot Notification Response sent by the Central System to acknowledge a
- * Boot Notification Request and provide registration status and interval.
- */
 package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
-import com.sim_backend.websockets.OCPPMessage;
-import com.sim_backend.websockets.OCPPMessageInfo;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.BootNotificationStatus;
+import com.sim_backend.websockets.types.OCPPMessage;
+import com.sim_backend.websockets.types.OCPPMessageResponse;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Represents an OCPP 1.6 Boot Notification Response sent by the Central System to acknowledge a
+ * Boot Notification Request and provide registration status and interval.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "BootNotificationResponse")
-public class BootNotificationResponse extends OCPPMessage {
+public class BootNotificationResponse extends OCPPMessageResponse {
 
   @SerializedName("status")
   private BootNotificationStatus status; // Status of the BootNotification (Accepted, Rejected)
