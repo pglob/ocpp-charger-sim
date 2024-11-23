@@ -4,7 +4,7 @@ import java.util.*;
 
 public class SimulatorStateMachine {
   private SimulatorState currentState;
-  private Map<SimulatorState, Set<SimulatorState>> validTransition = new HashMap<>();
+  private Map<SimulatorState, Set<SimulatorState>> validTransitions = new HashMap<>();
   private List<StateIndicator> indicators = new ArrayList<>();
 
   // Start from Poweroff
@@ -24,7 +24,7 @@ public class SimulatorStateMachine {
 
   // define which state can be used for a certain state
   public void initValidation() {
-    validTransition =
+    validTransitions =
         Map.of(
             SimulatorState.PowerOff,
             Set.of(SimulatorState.BootingUp),
@@ -35,19 +35,13 @@ public class SimulatorStateMachine {
   }
 
   // State Transition
-  public boolean transition(SimulatorState userInput) {
-    try {
-      if (validTransition.getOrDefault(currentState, null).contains(userInput)) {
-        currentState = userInput;
-        notifyIndicator();
-        return true;
-      } else {
-        throw new IllegalStateException(
-            "Invalid state transition from" + userInput + "to" + currentState);
-      }
-    } catch (IllegalStateException e) {
-      System.out.println(e.getMessage());
-      return false;
+  public void transition(SimulatorState userInput) {
+    if (validTransitions.getOrDefault(currentState, null).contains(userInput)) {
+      currentState = userInput;
+      notifyIndicator();
+    } else {
+      throw new IllegalStateException(
+          "Invalid state transition from" + currentState + "to" + userInput);
     }
   }
 
