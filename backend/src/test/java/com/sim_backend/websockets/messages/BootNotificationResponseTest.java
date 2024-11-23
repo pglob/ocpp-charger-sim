@@ -26,16 +26,13 @@ public class BootNotificationResponseTest {
 
   @Test
   public void testBootNotificationResponse() {
-    ZonedDateTime testDateTime =
-        ZonedDateTime.of(
-            2024, 11, 20, 20, 0, 0, 0, ZoneId.of("UTC")
-            );
+    ZonedDateTime testDateTime = ZonedDateTime.of(2024, 11, 20, 20, 0, 0, 0, ZoneId.of("UTC"));
 
     BootNotificationResponse response = getBootNotificationResponse(testDateTime);
 
     // Ensure message generation works
-    assert response.generateMessage().size() == 4;
-    String message = GsonUtilities.toString(response.generateMessage().get(3));
+    assert response.generateMessage().size() == 3;
+    String message = GsonUtilities.toString(response.generateMessage().get(2));
 
     // Validate against schema
     JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/BootNotificationResponse.json");

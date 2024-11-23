@@ -1,20 +1,21 @@
-/**
- * Represents an OCPP 1.6 Authorize Request sent by a Charge Point to request authorization for a
- * given idTag.
- */
 package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
-import com.sim_backend.websockets.OCPPMessage;
-import com.sim_backend.websockets.OCPPMessageInfo;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.types.OCPPMessage;
+import com.sim_backend.websockets.types.OCPPMessageRequest;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Represents an OCPP 1.6 Authorize Request sent by a Charge Point to request authorization for a
+ * given idTag.
+ */
 @Getter
 @Setter
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "Authorize")
-public class Authorize extends OCPPMessage {
+public class Authorize extends OCPPMessageRequest {
 
   @SerializedName("idTag")
   private String idTag;

@@ -6,6 +6,7 @@ import com.sim_backend.rest.controllers.MessageController;
 import io.javalin.Javalin;
 import java.net.URISyntaxException;
 
+/** The entry into our program. */
 public final class Main {
   private Main() {}
 
