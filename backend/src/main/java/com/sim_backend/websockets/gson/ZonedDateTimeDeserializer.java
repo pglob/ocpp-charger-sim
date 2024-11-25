@@ -1,10 +1,14 @@
 package com.sim_backend.websockets.gson;
 
-import com.google.gson.*;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+/** A Deserializer for a ZonedDateTime in the format OCPP expects. */
 public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime> {
   /** The Date Format wanted for the json schemas. */
   private static final DateTimeFormatter DATE_TIME_FORMATTER =
@@ -18,7 +22,6 @@ public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime
    * @param jsonDeserializationContext The Deserialization Context.
    * @return A Serialized ZonedDateTime.
    */
-  @SuppressWarnings("checkstyle:FinalParameters")
   @Override
   public ZonedDateTime deserialize(
       JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext)

@@ -3,6 +3,7 @@ package com.sim_backend.rest;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
+/** A test rest API. */
 public final class TestMessageController {
 
   private TestMessageController() {}
