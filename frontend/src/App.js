@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from './Button';
+import { Button } from './components/Button';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -15,8 +15,9 @@ function App() {
   // Render the component
   return (
     <div>
-      <h1>Frontend</h1
-      <p data-testid="message">Message from backend: {message}</p> <Button />
+      <h1>Frontend</h1>
+      <p data-testid="message">Message from backend: {message}</p>
+      <Button />
     </div>
   );
 }
