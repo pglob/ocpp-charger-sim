@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import AuthorizeButton from '../components/buttons/AuthorizeButton';
 import BootButton from '../components/buttons/BootButton';
 import HeartbeatButton from '../components/buttons/HeartbeatButton';
+import ButtonBase from './buttons/ButtonBase';
 
 // Implementation of the button component, which includes a drop-down menu and an online/offline button
 function Button() {
@@ -21,10 +22,7 @@ function Button() {
     const buttonName = isOnline ? 'Take Offline' : 'Bring Online';
 
     // Use the base class for online/offline behavior
-    const onlineOfflineButton = new buttons[0].constructor(
-      buttonName,
-      endpoint
-    );
+    const onlineOfflineButton = new ButtonBase(buttonName, endpoint);
     onlineOfflineButton.postRequest(); // Call the placeholder postRequest
     setIsOnline(!isOnline);
   };
