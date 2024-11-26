@@ -159,6 +159,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @param currClass The class of the message we received.
    * @param message The Message we received
+   * @throws OCPPBadClass Class given was not a OCPPMessage.
    */
   private void onReceiveMessage(final Class<?> currClass, final OCPPMessage message)
       throws OCPPBadClass {
@@ -179,6 +180,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @param onReceiveMessageListener The Received OCPPMessage.
    * @param currClass The class we want to set a listener for.
+   * @throws OCPPBadClass Class given was not a OCPPMessage.
    */
   public void onReceiveMessage(
       final Class<?> currClass, final OnOCPPMessageListener onReceiveMessageListener)
@@ -189,6 +191,45 @@ public class OCPPWebSocketClient extends WebSocketClient {
     this.onReceiveMessage
         .computeIfAbsent(currClass, k -> new CopyOnWriteArrayList<>())
         .add(onReceiveMessageListener);
+  }
+
+  /**
+   * Remove all listeners for an OCPP message name.
+   *
+   * @param classToClear The message Name to clear.
+   * @throws OCPPBadClass Class given was not a OCPPMessage.
+   */
+  public void clearOnReceiveMessage(final Class<?> classToClear) throws OCPPBadClass {
+    if (!OCPPMessage.class.isAssignableFrom(classToClear)) {
+      throw new OCPPBadClass();
+    }
+
+    this.onReceiveMessage.remove(classToClear);
+  }
+
+  /**
+   * Remove an OCPPMessageListener.
+   *
+   * @param classToDelete The class the listener is registered.
+   * @param listener The listener to delete.
+   * @throws OCPPBadClass Class given was not a OCPPMessage.
+   */
+  public void deleteOnReceiveMessage(final Class<?> classToDelete, OnOCPPMessageListener listener)
+      throws OCPPBadClass {
+    if (!OCPPMessage.class.isAssignableFrom(classToDelete)) {
+      throw new OCPPBadClass();
+    }
+
+    this.onReceiveMessage.compute(
+        classToDelete,
+        (key, currentValue) -> {
+          if (currentValue != null) {
+            currentValue.remove(listener);
+
+            return currentValue.isEmpty() ? null : currentValue;
+          }
+          return null;
+        });
   }
 
   /**
