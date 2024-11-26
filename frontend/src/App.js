@@ -15,7 +15,7 @@ function App() {
   // Render the component
   return (
     <div>
-      <h1>Frontend</h1
+      <h1>Frontend</h1>
       <p data-testid="message">Message from backend: {message}</p> <Button />
     </div>
   );
