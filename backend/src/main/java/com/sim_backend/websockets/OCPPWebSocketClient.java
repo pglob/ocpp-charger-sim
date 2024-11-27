@@ -21,12 +21,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
 
 /** A WebSocket client for handling OCPP Messages. */
+@Slf4j
 public class OCPPWebSocketClient extends WebSocketClient {
 
   /** The time to wait to try to reconnect. */
@@ -87,7 +90,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     try {
       this.handleMessage(s);
     } catch (Exception exception) {
-      System.err.println(exception.getMessage());
+      log.error("Received Bad OCPP Message: ", exception);
     }
   }
 
@@ -114,7 +117,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
     JsonArray array = element.getAsJsonArray();
     String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
-    String messageName;
+    String messageName = "";
     JsonObject data;
 
     int callId = array.get(CALL_ID_INDEX).getAsInt();
@@ -127,6 +130,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
       case OCPPMessage.CALL_ID_RESPONSE -> {
         // handling a CallResult
         if (this.previousMessages.get(msgId) == null) {
+          log.warn("Received OCPP message with message unknown ID {}: {}", msgId, s);
           throw new OCPPCannotProcessResponse(s, msgId);
         }
 
@@ -138,25 +142,28 @@ public class OCPPWebSocketClient extends WebSocketClient {
       case OCPPMessage.CALL_ID_ERROR -> {
         // handling a CallError.
         OCPPMessageError error = new OCPPMessageError(array);
-        this.onReceiveMessage(OCPPMessageError.class, error);
+        this.handleReceivedMessage(OCPPMessageError.class, error);
+        log.warn("Received OCPPError {}: {}", error.toString(), s);
         return;
       }
       default -> throw new OCPPBadCallID(callId, s);
     }
 
-    if (messageName == null) {
+    if (messageName.isEmpty()) {
+      log.warn("Received OCPP message with bad message name: {}", s);
       throw new OCPPUnsupportedMessage(s, "null");
     }
 
     // We found our class
     Class<?> messageClass = OCPPMessage.getMessageByName(messageName);
     if (messageClass == null) {
+      log.warn("Could not find matching class for message name {}: {}", messageName, s);
       throw new OCPPUnsupportedMessage(s, messageName);
     }
 
     OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
     message.setMessageID(msgId);
-    this.onReceiveMessage(messageClass, message);
+    this.handleReceivedMessage(messageClass, message);
   }
 
   @Override
@@ -172,9 +179,10 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message The Message we received
    * @throws OCPPBadClass Class given was not a OCPPMessage.
    */
-  private void onReceiveMessage(final Class<?> currClass, final OCPPMessage message)
+  private void handleReceivedMessage(final Class<?> currClass, final OCPPMessage message)
       throws OCPPBadClass {
     if (!OCPPMessage.class.isAssignableFrom(currClass)) {
+      log.warn("Bad Class given to handleReceivedMessage: {}", currClass);
       throw new OCPPBadClass();
     }
     Optional.ofNullable(this.onReceiveMessage.get(currClass))
@@ -197,6 +205,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
       final Class<?> currClass, final OnOCPPMessageListener onReceiveMessageListener)
       throws OCPPBadClass {
     if (!OCPPMessage.class.isAssignableFrom(currClass)) {
+      log.warn("Bad Class given to onReceiveMessage: {}", currClass);
       throw new OCPPBadClass();
     }
     this.onReceiveMessage
