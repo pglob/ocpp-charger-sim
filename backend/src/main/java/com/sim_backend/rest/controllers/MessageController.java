@@ -28,6 +28,11 @@ public class MessageController extends ControllerBase {
     this.webSocketClient = new OCPPWebSocketClient(new URI(""));
   }
 
+  public MessageController(Javalin app, OCPPWebSocketClient webSocketClient) {
+    super(app);
+    this.webSocketClient = webSocketClient;
+  }
+
   public void authorize(Context ctx) {
     Authorize msg = new Authorize();
     webSocketClient.pushMessage(msg);
