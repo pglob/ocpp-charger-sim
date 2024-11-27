@@ -1,5 +1,6 @@
 package com.sim_backend.websockets;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -56,14 +57,12 @@ public class OCPPTimeTest {
 
   @Test
   public void testOCPPTime2() throws InterruptedException, OCPPMessageFailure {
-    try (OCPPTime time = new OCPPTime(null)) {
+    IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
+      try (OCPPTime time = new OCPPTime(null)) {
+        client.popAllMessages();
+      }
+    });
 
-      client.popAllMessages();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    verify(client, times(0))
-        .deleteOnReceiveMessage(any(Class.class), any(OnOCPPMessageListener.class));
   }
 
   @Test
