@@ -5,20 +5,24 @@ import com.sim_backend.websockets.messages.HeartBeatResponse;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.concurrent.atomic.AtomicReference;
+import lombok.extern.slf4j.Slf4j;
 
 /** Get Synchronized Time with our last received HeartBeatResponse. */
+@Slf4j
 public class OCPPTime implements AutoCloseable {
+  /** UTC ZoneID */
+  public static final ZoneId UTC = ZoneId.of("UTC");
 
   /** Our stored offset based on the time we received in our last HeartBeatResponse. */
-  private Duration offset = Duration.ZERO;
+  private final AtomicReference<Duration> offset = new AtomicReference<>(Duration.ZERO);
 
   /** Our stored OCPPMessageListener. */
   private final OnOCPPMessageListener listener =
       message -> {
         HeartBeatResponse response = (HeartBeatResponse) message.getMessage();
 
-        this.offset =
-            Duration.between(ZonedDateTime.now(ZoneId.of("UTC")), response.getCurrentTime());
+        offset.set(Duration.between(ZonedDateTime.now(UTC), response.getCurrentTime()));
       };
 
   /** The client we are listening on. */
@@ -30,10 +34,12 @@ public class OCPPTime implements AutoCloseable {
    * @param currClient The client you want to listen for time from.
    */
   public OCPPTime(OCPPWebSocketClient currClient) {
-    this.client = currClient;
-    if (this.client != null) {
-      client.onReceiveMessage(HeartBeatResponse.class, listener);
+    if (currClient == null) {
+      throw new IllegalArgumentException("Client cannot be null");
     }
+
+    this.client = currClient;
+    this.client.onReceiveMessage(HeartBeatResponse.class, listener);
   }
 
   /**
@@ -42,7 +48,7 @@ public class OCPPTime implements AutoCloseable {
    * @return The Synchronized time.
    */
   public ZonedDateTime getSynchronizedTime() {
-    return this.getSynchronizedTime(ZonedDateTime.now(ZoneId.of("UTC")));
+    return this.getSynchronizedTime(ZonedDateTime.now(UTC));
   }
 
   /**
@@ -52,7 +58,7 @@ public class OCPPTime implements AutoCloseable {
    * @return The Synchronized time.
    */
   public ZonedDateTime getSynchronizedTime(ZonedDateTime time) {
-    return time.plus(offset);
+    return time.plus(offset.get());
   }
 
   /**
@@ -64,6 +70,8 @@ public class OCPPTime implements AutoCloseable {
   public void close() throws Exception {
     if (this.client != null) {
       this.client.deleteOnReceiveMessage(HeartBeatResponse.class, listener);
+    } else {
+      log.warn("Client is null, cannot deregister message listener.");
     }
   }
 }
