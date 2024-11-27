@@ -55,7 +55,7 @@ public class MessageScheduler implements AutoCloseable {
         this.client.pushMessage(message);
         message.refreshMessage();
       } catch (Exception exception) {
-        log.error("Error while scheduling message: {}. Error: {}", message, exception);
+        log.error("Error while scheduling message: {}", message, exception);
       }
     };
   }
