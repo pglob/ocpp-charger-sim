@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import lombok.Getter;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
@@ -59,6 +60,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** The previous messages we have sent. * */
   private final Map<String, OCPPMessage> previousMessages = new ConcurrentHashMap<>();
 
+  /** Our message scheduler. */
+  @Getter private MessageScheduler scheduler = null;
+
   /**
    * Create an OCPP WebSocket Client.
    *
@@ -84,6 +88,13 @@ public class OCPPWebSocketClient extends WebSocketClient {
       this.handleMessage(s);
     } catch (Exception exception) {
       System.err.println(exception.getMessage());
+    }
+  }
+
+  /** Attach a message scheduler to our client. */
+  public void attachScheduler() {
+    if (this.scheduler == null) {
+      this.scheduler = new MessageScheduler(this);
     }
   }
 

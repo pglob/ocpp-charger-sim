@@ -8,8 +8,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 
-public class MessageScheduler {
+/** An OCPPMessageScheduler. */
+@Slf4j
+public class MessageScheduler implements AutoCloseable {
   /** Our Synchronized Time. */
   private final OCPPTime time;
 
@@ -17,7 +20,12 @@ public class MessageScheduler {
   private final OCPPWebSocketClient client;
 
   /** Our message scheduler. */
-  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+
+  /**
+   * Our set heartbeat interval, we don't want this too common but every 4 minutes should be enough.
+   */
+  private static final long HEARTBEAT_INTERVAL = 240L; // seconds
 
   /**
    * An OCPPMessage Scheduler.
@@ -28,7 +36,7 @@ public class MessageScheduler {
     this.client = targetClient;
     this.time = new OCPPTime(targetClient);
 
-    this.periodicJob(240, TimeUnit.SECONDS, new HeartBeat());
+    this.periodicJob(0, HEARTBEAT_INTERVAL, TimeUnit.SECONDS, new HeartBeat());
   }
 
   /**
@@ -38,24 +46,40 @@ public class MessageScheduler {
    * @return The created Runnable instance.
    */
   private Runnable createRunnable(final OCPPMessage message) {
+    if (message == null) {
+      throw new IllegalArgumentException("message must not be null");
+    }
+
     return () -> {
-      this.client.pushMessage(message);
-      message.refreshMessage();
+      try {
+        this.client.pushMessage(message);
+        message.refreshMessage();
+      } catch (Exception exception) {
+        log.error("Error while scheduling message: {}. Error: {}", message, exception);
+      }
     };
   }
 
   /**
    * Create a Periodic Job.
    *
+   * @param initialDelay the initial delay.
    * @param delay The delay between messages.
    * @param timeUnit The time units you wish to use.
    * @param message The message.
    * @return A ScheduledFuture representing the job.
    */
-  public ScheduledFuture<?> periodicJob(int delay, TimeUnit timeUnit, OCPPMessage message) {
-    Runnable job = this.createRunnable(message);
+  public ScheduledFuture<?> periodicJob(
+      long initialDelay, long delay, TimeUnit timeUnit, OCPPMessage message) {
+    if (message == null) {
+      throw new IllegalArgumentException("message must not be null");
+    }
 
-    return scheduler.scheduleAtFixedRate(job, 0, delay, timeUnit);
+    if (initialDelay < 0 || delay <= 0) {
+      throw new IllegalArgumentException("Initial delay and delay must be positive");
+    }
+    Runnable job = this.createRunnable(message);
+    return scheduler.scheduleAtFixedRate(job, initialDelay, delay, timeUnit);
   }
 
   /**
@@ -66,7 +90,15 @@ public class MessageScheduler {
    * @param message The message.
    * @return A ScheduledFuture representing the job.
    */
-  public ScheduledFuture<?> registerJob(int delay, TimeUnit timeUnit, OCPPMessage message) {
+  public ScheduledFuture<?> registerJob(long delay, TimeUnit timeUnit, OCPPMessage message) {
+    if (message == null) {
+      throw new IllegalArgumentException("message must not be null");
+    }
+
+    if (delay <= 0) {
+      throw new IllegalArgumentException("Initial delay and delay must be positive");
+    }
+
     Runnable job = this.createRunnable(message);
 
     return scheduler.schedule(job, delay, timeUnit);
@@ -80,14 +112,33 @@ public class MessageScheduler {
    * @return A ScheduledFuture representing the job.
    */
   public ScheduledFuture<?> registerJob(ZonedDateTime timeToSend, OCPPMessage message) {
+    if (timeToSend == null || message == null) {
+      throw new IllegalArgumentException("timeToSend and message must not be null");
+    }
+
     ZonedDateTime currentTime = time.getSynchronizedTime();
     ZonedDateTime synchronizedTime = time.getSynchronizedTime(timeToSend);
 
     if (currentTime.isAfter(synchronizedTime)) {
-      return null;
+      throw new IllegalArgumentException("Scheduled time is in the past: " + synchronizedTime);
     }
     Duration duration = Duration.between(currentTime, synchronizedTime);
 
-    return this.registerJob(duration.getNano(), TimeUnit.NANOSECONDS, message);
+    return this.registerJob(duration.toMillis(), TimeUnit.MILLISECONDS, message);
+  }
+
+  @Override
+  public void close() {
+    scheduler.shutdown();
+    try {
+      if (!scheduler.awaitTermination(60, TimeUnit.SECONDS)) {
+        log.warn("Forcing scheduler shutdown due to timeout");
+        scheduler.shutdownNow();
+      }
+    } catch (InterruptedException e) {
+      log.error("Interrupted during scheduler shutdown", e);
+      Thread.currentThread().interrupt();
+      scheduler.shutdownNow();
+    }
   }
 }

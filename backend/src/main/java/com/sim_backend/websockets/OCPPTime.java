@@ -31,7 +31,9 @@ public class OCPPTime implements AutoCloseable {
    */
   public OCPPTime(OCPPWebSocketClient currClient) {
     this.client = currClient;
-    client.onReceiveMessage(HeartBeatResponse.class, listener);
+    if (this.client != null) {
+      client.onReceiveMessage(HeartBeatResponse.class, listener);
+    }
   }
 
   /**
@@ -40,8 +42,7 @@ public class OCPPTime implements AutoCloseable {
    * @return The Synchronized time.
    */
   public ZonedDateTime getSynchronizedTime() {
-    ZonedDateTime time = ZonedDateTime.now();
-    return time.plus(offset);
+    return this.getSynchronizedTime(ZonedDateTime.now(ZoneId.of("UTC")));
   }
 
   /**
