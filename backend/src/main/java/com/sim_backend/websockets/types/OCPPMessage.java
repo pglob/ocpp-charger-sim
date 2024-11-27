@@ -8,6 +8,8 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import java.security.SecureRandom;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
@@ -29,7 +31,7 @@ public abstract class OCPPMessage {
   private transient int tries = 0;
 
   /** The Message ID we send this message with. */
-  protected transient String messageID;
+  @Getter @Setter protected transient String messageID;
 
   /** The constructor for an OCPP message. */
   protected OCPPMessage() {
@@ -65,24 +67,6 @@ public abstract class OCPPMessage {
     return tries;
   }
 
-  /**
-   * Get the message ID.
-   *
-   * @return the current message ID.
-   */
-  public String getMessageID() {
-    return messageID;
-  }
-
-  /**
-   * Set the current message ID.
-   *
-   * @param msgID Set the message ID.
-   */
-  public void setMessageID(final String msgID) {
-    this.messageID = msgID;
-  }
-
   /** The Characters we are allowed in a Message ID. */
   private static final String CHARACTERS =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -103,6 +87,11 @@ public abstract class OCPPMessage {
       sb.append(CHARACTERS.charAt(randomIndex));
     }
     return sb.toString();
+  }
+
+  /** Refreshes a message, resetting its message ID to something new. */
+  public void refreshMessage() {
+    this.messageID = generateMessageID();
   }
 
   /**

@@ -61,6 +61,8 @@ public class OCPPTime implements AutoCloseable {
    */
   @Override
   public void close() throws Exception {
-    this.client.deleteOnReceiveMessage(HeartBeatResponse.class, listener);
+    if (this.client != null) {
+      this.client.deleteOnReceiveMessage(HeartBeatResponse.class, listener);
+    }
   }
 }
