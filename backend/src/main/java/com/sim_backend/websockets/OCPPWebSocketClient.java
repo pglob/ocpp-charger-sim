@@ -21,9 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
@@ -149,11 +148,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
       default -> throw new OCPPBadCallID(callId, s);
     }
 
-    if (messageName.isEmpty()) {
-      log.warn("Received OCPP message with bad message name: {}", s);
-      throw new OCPPUnsupportedMessage(s, "null");
-    }
-
     // We found our class
     Class<?> messageClass = OCPPMessage.getMessageByName(messageName);
     if (messageClass == null) {
@@ -221,6 +215,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   public void clearOnReceiveMessage(final Class<?> classToClear) throws OCPPBadClass {
     if (!OCPPMessage.class.isAssignableFrom(classToClear)) {
+      log.warn("Bad Class given to clearOnReceiveMessage: {}", classToClear);
       throw new OCPPBadClass();
     }
 
@@ -237,6 +232,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void deleteOnReceiveMessage(final Class<?> classToDelete, OnOCPPMessageListener listener)
       throws OCPPBadClass {
     if (!OCPPMessage.class.isAssignableFrom(classToDelete)) {
+      log.warn("Bad Class given to clearOnReceiveMessage: {} {}", classToDelete, listener);
       throw new OCPPBadClass();
     }
 

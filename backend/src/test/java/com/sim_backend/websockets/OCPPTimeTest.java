@@ -57,12 +57,14 @@ public class OCPPTimeTest {
 
   @Test
   public void testOCPPTime2() throws InterruptedException, OCPPMessageFailure {
-    IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
-      try (OCPPTime time = new OCPPTime(null)) {
-        client.popAllMessages();
-      }
-    });
-
+    IllegalArgumentException illegalArgumentException =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              try (OCPPTime time = new OCPPTime(null)) {
+                client.popAllMessages();
+              }
+            });
   }
 
   @Test

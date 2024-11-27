@@ -193,7 +193,8 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testHandleReceivedMessageNoMatchingMsg() throws OCPPMessageFailure, InterruptedException {
+  public void testHandleReceivedMessageNoMatchingMsg()
+      throws OCPPMessageFailure, InterruptedException {
     HeartBeatResponse response = new HeartBeatResponse();
 
     HeartBeat beat = new HeartBeat();
