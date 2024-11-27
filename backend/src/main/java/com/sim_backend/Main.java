@@ -3,53 +3,99 @@ package com.sim_backend;
 import com.sim_backend.rest.TestMessageController;
 import com.sim_backend.rest.controllers.ControllerBase;
 import com.sim_backend.rest.controllers.MessageController;
+import com.sim_backend.websockets.OCPPWebSocketClient;
 import io.javalin.Javalin;
-import java.net.URISyntaxException;
+import java.net.URI;
 
 /** The entry into our program. */
 public final class Main {
   private Main() {}
 
-  /**
-   * The main method that starts the Javalin web server.
-   *
-   * @param args command line arguments
-   */
   public static void main(final String[] args) {
-    // Retrieve environment variables
+    // Initialize environment variables and configurations
+    SimConfig config = loadConfig();
+
+    // Start Javalin server
+    Javalin app = initializeFrontendAPI(config);
+
+    // Initialize WebSocket client
+    // TODO: Get central system URI from frontend or command line
+    OCPPWebSocketClient wsClient = initializeWebSocketClient("mock-server", "12345");
+
+    // Register REST API controllers and routes
+    registerRoutes(app, wsClient);
+
+    // Run the main simulator loop
+    SimulatorLoop.runSimulatorLoop(wsClient);
+  }
+
+  /**
+   * Load configuration from environment variables or defaults.
+   *
+   * @return configuration object
+   */
+  private static SimConfig loadConfig() {
     String host =
         System.getenv("FRONTEND_HOST") != null ? System.getenv("FRONTEND_HOST") : "localhost";
-    String frontendPortString =
-        System.getenv("FRONTEND_PORT") != null ? System.getenv("FRONTEND_PORT") : "3030";
-    String backendPortString =
-        System.getenv("BACKEND_PORT") != null ? System.getenv("BACKEND_PORT") : "8080";
+    int frontendPort =
+        Integer.parseInt(
+            System.getenv("FRONTEND_PORT") != null ? System.getenv("FRONTEND_PORT") : "3030");
+    int backendPort =
+        Integer.parseInt(
+            System.getenv("BACKEND_PORT") != null ? System.getenv("BACKEND_PORT") : "8080");
 
-    int frontendPort = Integer.parseInt(frontendPortString);
-    int backendPort = Integer.parseInt(backendPortString);
+    return new SimConfig(host, frontendPort, backendPort);
+  }
 
-    // Setup the REST API for the frontend to use
-    Javalin app =
-        Javalin.create(
-                config -> {
-                  config.bundledPlugins.enableCors(
-                      cors -> {
-                        // Allow CORS from the frontend host and port
-                        cors.addRule(
-                            it -> {
-                              it.allowHost("http://" + host + ":" + frontendPort);
-                            });
-                      });
-                })
-            .start(backendPort); // Start the server
+  /**
+   * Initialize and start the Javalin web server.
+   *
+   * @param config configuration object
+   * @return initialized Javalin instance
+   */
+  private static Javalin initializeFrontendAPI(SimConfig config) {
+    return Javalin.create(
+            cfg -> {
+              cfg.bundledPlugins.enableCors(
+                  cors ->
+                      cors.addRule(
+                          it -> it.allowHost("http://" + config.host + ":" + config.frontendPort)));
+            })
+        .start(config.backendPort);
+  }
 
-    ControllerBase messageController = null;
-    try {
-      messageController = new MessageController(app);
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
+  /**
+   * Initialize the WebSocket client.
+   *
+   * @return initialized OCPPWebSocketClient instance
+   */
+  private static OCPPWebSocketClient initializeWebSocketClient(String name, String port) {
+    URI wsUri = URI.create("ws://" + name + ":" + port);
+    return new OCPPWebSocketClient(wsUri);
+  }
+
+  /**
+   * Register API routes with the Javalin app.
+   *
+   * @param app the Javalin app
+   * @param wsClient the WebSocket client
+   */
+  private static void registerRoutes(Javalin app, OCPPWebSocketClient wsClient) {
+    ControllerBase messageController = new MessageController(app, wsClient);
     messageController.registerRoutes(app);
-    // Register a test route
     TestMessageController.registerRoutes(app);
+  }
+
+  /** Configuration object to hold server settings. */
+  private static class SimConfig {
+    final String host;
+    final int frontendPort;
+    final int backendPort;
+
+    SimConfig(String host, int frontendPort, int backendPort) {
+      this.host = host;
+      this.frontendPort = frontendPort;
+      this.backendPort = backendPort;
+    }
   }
 }
