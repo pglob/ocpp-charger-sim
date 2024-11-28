@@ -22,25 +22,13 @@ public class OCPPMessageError extends OCPPMessage {
   /** The error details index in a received JsonArray. */
   private static final int DETAIL_INDEX = 4;
 
-  /**
-   * The given error code. -- GETTER -- Get the error code.
-   *
-   * @return The given error code.
-   */
+  /** The given error code. */
   private final transient ErrorCode errorCode;
 
-  /**
-   * The given error description. -- GETTER -- Get the error description.
-   *
-   * @return The given error description.
-   */
+  /** The given error description. */
   private final transient String errorDescription;
 
-  /**
-   * Any error details. -- GETTER -- Get the error details JsonObject.
-   *
-   * @return The given Json Object.
-   */
+  /** Any error details. */
   private final transient JsonObject errorDetails;
 
   /**
