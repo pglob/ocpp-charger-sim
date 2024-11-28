@@ -7,5 +7,5 @@ public interface OnOCPPMessageListener {
    *
    * @param message The OCPP message event.
    */
-  void onMessageReceieved(OnOCPPMessage message);
+  void onMessageReceived(OnOCPPMessage message);
 }

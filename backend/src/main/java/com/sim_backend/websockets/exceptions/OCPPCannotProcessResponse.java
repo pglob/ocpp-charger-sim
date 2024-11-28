@@ -1,6 +1,9 @@
 package com.sim_backend.websockets.exceptions;
 
+import lombok.Getter;
+
 /** Thrown when we receive a message ID we did not send. */
+@Getter
 public class OCPPCannotProcessResponse extends Exception {
 
   /** The Received message we could not process due to us not having a matching message ID. */
@@ -18,16 +21,6 @@ public class OCPPCannotProcessResponse extends Exception {
   public OCPPCannotProcessResponse(final String receivedMsg, final String badMsgId) {
     this.receivedMessage = receivedMsg;
     this.badMessageId = badMsgId;
-  }
-
-  /** Get The unable to be matched messageID. */
-  public String getBadMessageId() {
-    return badMessageId;
-  }
-
-  /** Get the full message we received. */
-  public String getReceivedMessage() {
-    return receivedMessage;
   }
 
   /**

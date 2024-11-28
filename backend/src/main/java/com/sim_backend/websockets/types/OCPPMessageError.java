@@ -4,8 +4,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ErrorCode;
+import lombok.Getter;
 
 /** A CallError message for OCPP. */
+@Getter
 public class OCPPMessageError extends OCPPMessage {
 
   /** The message id index in a received JsonArray. */
@@ -20,13 +22,25 @@ public class OCPPMessageError extends OCPPMessage {
   /** The error details index in a received JsonArray. */
   private static final int DETAIL_INDEX = 4;
 
-  /** The given error code. */
+  /**
+   * The given error code. -- GETTER -- Get the error code.
+   *
+   * @return The given error code.
+   */
   private final transient ErrorCode errorCode;
 
-  /** The given error description. */
+  /**
+   * The given error description. -- GETTER -- Get the error description.
+   *
+   * @return The given error description.
+   */
   private final transient String errorDescription;
 
-  /** Any error details. */
+  /**
+   * Any error details. -- GETTER -- Get the error details JsonObject.
+   *
+   * @return The given Json Object.
+   */
   private final transient JsonObject errorDetails;
 
   /**
@@ -72,32 +86,5 @@ public class OCPPMessageError extends OCPPMessage {
     array.add(GsonUtilities.getGson().toJsonTree(this.errorDetails));
 
     return array;
-  }
-
-  /**
-   * Get the error details JsonObject.
-   *
-   * @return The given Json Object.
-   */
-  public JsonObject getErrorDetails() {
-    return errorDetails;
-  }
-
-  /**
-   * Get the error description.
-   *
-   * @return The given error description.
-   */
-  public String getErrorDescription() {
-    return errorDescription;
-  }
-
-  /**
-   * Get the error code.
-   *
-   * @return The given error code.
-   */
-  public ErrorCode getErrorCode() {
-    return errorCode;
   }
 }
