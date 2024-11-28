@@ -26,7 +26,7 @@ public enum ErrorCode {
    * Payload for Action is syntactically correct but at least one of the fields violates occurrence
    * constraints.
    */
-  OccurrenceConstraintViolation,
+  OccurenceConstraintViolation,
   /**
    * Payload for Action is syntactically correct but at least one of the fields violates data type
    * constraints (e.g. “somestring”: 12)
