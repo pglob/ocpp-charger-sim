@@ -169,7 +169,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
         .ifPresent(
             listeners -> {
               for (OnOCPPMessageListener listener : listeners) {
-                listener.onMessageReceieved(new OnOCPPMessage(message));
+                listener.onMessageReceived(new OnOCPPMessage(message));
               }
             });
   }
