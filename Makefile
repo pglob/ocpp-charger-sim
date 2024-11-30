@@ -1,7 +1,10 @@
-.PHONY: build
+.PHONY: build docker integration_test
 
 docker:
-	docker-compose up --build
+	docker-compose --profile core up --build
+
+integration_test:
+	docker-compose --env-file .env.internal --profile integration-test up --build
 
 build_backend:
 	cd ./backend && mvn spotless:apply && mvn clean && mvn package
