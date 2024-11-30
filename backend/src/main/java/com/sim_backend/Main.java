@@ -20,7 +20,7 @@ public final class Main {
 
     // Initialize WebSocket client
     // TODO: Get central system URI from frontend or command line
-    OCPPWebSocketClient wsClient = initializeWebSocketClient("mock-server", "12345");
+    OCPPWebSocketClient wsClient = initializeWebSocketClient("dummy-server", "9000");
 
     // Register REST API controllers and routes
     registerRoutes(app, wsClient);
@@ -59,7 +59,8 @@ public final class Main {
               cfg.bundledPlugins.enableCors(
                   cors ->
                       cors.addRule(
-                          it -> it.allowHost("http://" + config.host + ":" + config.frontendPort)));
+                          // TODO: Determine best CORS policy or swap to reverse proxy
+                          it -> it.anyHost()));
             })
         .start(config.backendPort);
   }
