@@ -6,16 +6,15 @@ import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
-import java.security.SecureRandom;
 import java.util.Set;
+import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 /** An OCPP message. */
 public abstract class OCPPMessage {
-  /** The maximum allowed message ID length. */
-  public static final int MAX_MESSAGE_ID_LENGTH = 20;
-
   /** The call ID for a request. */
   public static final int CALL_ID_REQUEST = 2;
 
@@ -29,7 +28,7 @@ public abstract class OCPPMessage {
   private transient int tries = 0;
 
   /** The Message ID we send this message with. */
-  protected transient String messageID;
+  @Getter @Setter protected transient String messageID;
 
   /** The constructor for an OCPP message. */
   protected OCPPMessage() {
@@ -66,43 +65,13 @@ public abstract class OCPPMessage {
   }
 
   /**
-   * Get the message ID.
-   *
-   * @return the current message ID.
-   */
-  public String getMessageID() {
-    return messageID;
-  }
-
-  /**
-   * Set the current message ID.
-   *
-   * @param msgID Set the message ID.
-   */
-  public void setMessageID(final String msgID) {
-    this.messageID = msgID;
-  }
-
-  /** The Characters we are allowed in a Message ID. */
-  private static final String CHARACTERS =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  /** Our random generator. */
-  private static final SecureRandom RANDOM = new SecureRandom();
-
-  /**
-   * Generates a message ID of a given length.
+   * Generates a 36 Character UUID
    *
    * @return A randomly generated message ID.
    */
   @NotNull
   private static String generateMessageID() {
-    StringBuilder sb = new StringBuilder(OCPPMessage.MAX_MESSAGE_ID_LENGTH);
-    for (int i = 0; i < OCPPMessage.MAX_MESSAGE_ID_LENGTH; i++) {
-      int randomIndex = RANDOM.nextInt(CHARACTERS.length());
-      sb.append(CHARACTERS.charAt(randomIndex));
-    }
-    return sb.toString();
+    return UUID.randomUUID().toString();
   }
 
   /**

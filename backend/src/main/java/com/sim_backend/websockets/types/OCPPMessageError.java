@@ -4,8 +4,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ErrorCode;
+import lombok.Getter;
 
 /** A CallError message for OCPP. */
+@Getter
 public class OCPPMessageError extends OCPPMessage {
 
   /** The message id index in a received JsonArray. */
@@ -72,32 +74,5 @@ public class OCPPMessageError extends OCPPMessage {
     array.add(GsonUtilities.getGson().toJsonTree(this.errorDetails));
 
     return array;
-  }
-
-  /**
-   * Get the error details JsonObject.
-   *
-   * @return The given Json Object.
-   */
-  public JsonObject getErrorDetails() {
-    return errorDetails;
-  }
-
-  /**
-   * Get the error description.
-   *
-   * @return The given error description.
-   */
-  public String getErrorDescription() {
-    return errorDescription;
-  }
-
-  /**
-   * Get the error code.
-   *
-   * @return The given error code.
-   */
-  public ErrorCode getErrorCode() {
-    return errorCode;
   }
 }

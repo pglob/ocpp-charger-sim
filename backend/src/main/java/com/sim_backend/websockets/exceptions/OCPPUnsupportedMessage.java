@@ -1,5 +1,7 @@
 package com.sim_backend.websockets.exceptions;
 
+import lombok.Getter;
+
 /** Thrown when we receive an OCPP message name we cannot serialize. */
 public class OCPPUnsupportedMessage extends Exception {
 
@@ -7,7 +9,7 @@ public class OCPPUnsupportedMessage extends Exception {
   private final String message;
 
   /** The failed Message Name. */
-  private final String messageName;
+  @Getter private final String messageName;
 
   /**
    * An Exception thrown when we fail to process an OCPPMessage.
@@ -26,15 +28,6 @@ public class OCPPUnsupportedMessage extends Exception {
    */
   public String getFullMessage() {
     return message;
-  }
-
-  /**
-   * Get the message name of message we do not support.
-   *
-   * @return The Failed message name.
-   */
-  public String getMessageName() {
-    return messageName;
   }
 
   /**

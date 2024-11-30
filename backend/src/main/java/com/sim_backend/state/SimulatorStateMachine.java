@@ -1,9 +1,10 @@
 package com.sim_backend.state;
 
 import java.util.*;
+import lombok.Getter;
 
 public class SimulatorStateMachine {
-  private SimulatorState currentState;
+  @Getter private SimulatorState currentState;
   private Map<SimulatorState, Set<SimulatorState>> validTransitions = new HashMap<>();
   private List<StateIndicator> indicators = new ArrayList<>();
 
@@ -54,10 +55,5 @@ public class SimulatorStateMachine {
     for (StateIndicator indicator : indicators) {
       indicator.onStateChanged(currentState);
     }
-  }
-
-  // Getter
-  public SimulatorState getCurrentState() {
-    return currentState;
   }
 }
