@@ -7,6 +7,9 @@ class ButtonBase {
 
   // Generic method for sending POST requests to the backend
   postRequest(data) {
+    // TODO: Look into options for dynamically setting this url.
+    // Something like `${window.location.protocol}//${window.location.hostname}:8080`.
+    // The above works for external browsers, but not the internal docker network.
     const url = `${process.env.REACT_APP_BACKEND_URL}${this.endpoint}`;
 
     return fetch(url, {
