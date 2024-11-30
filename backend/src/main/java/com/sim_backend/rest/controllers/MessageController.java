@@ -11,7 +11,7 @@ package com.sim_backend.rest.controllers;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.BootNotification;
-import com.sim_backend.websockets.messages.HeartBeat;
+import com.sim_backend.websockets.messages.Heartbeat;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URI;
@@ -56,7 +56,7 @@ public class MessageController extends ControllerBase {
   }
 
   public void heartbeat(Context ctx) {
-    HeartBeat msg = new HeartBeat();
+    Heartbeat msg = new Heartbeat();
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }

@@ -1,7 +1,7 @@
 package com.sim_backend.websockets;
 
 import com.sim_backend.websockets.exceptions.*;
-import com.sim_backend.websockets.messages.HeartBeat;
+import com.sim_backend.websockets.messages.Heartbeat;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.junit.jupiter.api.Test;
 
@@ -31,13 +31,13 @@ public class ExceptionTests {
 
   @Test
   public void testOCPPMessageFailure() {
-    HeartBeat beat = new HeartBeat();
+    Heartbeat beat = new Heartbeat();
     beat.setMessageID("Why");
     OCPPMessageFailure exception =
         new OCPPMessageFailure(beat, new WebsocketNotConnectedException());
     String message = exception.getMessage();
     assert message.contains(
-        "Could not Send Message class com.sim_backend.websockets.messages.HeartBeat = [2,\"Why\",\"HeartBeat\",{}]: null");
+        "Could not Send Message class com.sim_backend.websockets.messages.Heartbeat = [2,\"Why\",\"Heartbeat\",{}]: null");
   }
 
   @Test
