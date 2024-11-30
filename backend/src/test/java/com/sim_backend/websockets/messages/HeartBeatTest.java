@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class HeartBeatTest {
+public class HeartbeatTest {
 
   OCPPWebSocketClient client;
 
@@ -28,15 +28,15 @@ public class HeartBeatTest {
   }
 
   @Test
-  public void testHeartBeatConstructor() {
+  public void testHeartbeatConstructor() {
     ZonedDateTime time = ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC"));
-    HeartBeatResponse heartBeat = new HeartBeatResponse(time);
+    HeartbeatResponse heartBeat = new HeartbeatResponse(time);
     assert heartBeat.getCurrentTime() == time;
   }
 
   @Test
   public void testSendMessage() {
-    Pattern pattern = Pattern.compile("^\\[2,\\s*\".*?\",\\s*\"HeartBeat\",\\s*\\{}]$");
+    Pattern pattern = Pattern.compile("^\\[2,\\s*\".*?\",\\s*\"Heartbeat\",\\s*\\{}]$");
     doAnswer(
             invocation -> {
               assert pattern.matcher(invocation.getArgument(0)).matches();
@@ -45,7 +45,7 @@ public class HeartBeatTest {
         .when(client)
         .send(anyString());
 
-    OCPPMessage beatResponse = new HeartBeat();
+    OCPPMessage beatResponse = new Heartbeat();
     beatResponse.sendMessage(client);
 
     verify(client, times(1)).send(anyString());
@@ -53,7 +53,7 @@ public class HeartBeatTest {
 
   @Test
   public void testResponseJSON() {
-    HeartBeatResponse heartBeat = new HeartBeatResponse();
+    HeartbeatResponse heartBeat = new HeartbeatResponse();
     JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/HeartbeatResponse.json");
     JsonElement jsonElement = heartBeat.generateMessage().get(2);
     Set<ValidationMessage> errors =
@@ -66,19 +66,19 @@ public class HeartBeatTest {
     assert errors.isEmpty();
 
     heartBeat =
-        new HeartBeatResponse(ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC")));
+        new HeartbeatResponse(ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC")));
     String json = GsonUtilities.toString(heartBeat.generateMessage().get(2));
     assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001Z\"");
 
     heartBeat =
-        new HeartBeatResponse(ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC-7")));
+        new HeartbeatResponse(ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC-7")));
     json = GsonUtilities.toString(heartBeat.generateMessage().get(2));
     assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001-07:00\"");
   }
 
   @Test
   public void testRequestJSON() {
-    HeartBeat heartBeat = new HeartBeat();
+    Heartbeat heartBeat = new Heartbeat();
     JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4);
     InputStream test = this.getClass().getResourceAsStream("schemas/Heartbeat.json");
     JsonSchema jsonSchema = factory.getSchema(test);

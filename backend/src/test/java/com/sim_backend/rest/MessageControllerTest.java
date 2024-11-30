@@ -6,7 +6,7 @@ import com.sim_backend.rest.controllers.MessageController;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.BootNotification;
-import com.sim_backend.websockets.messages.HeartBeat;
+import com.sim_backend.websockets.messages.Heartbeat;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URISyntaxException;
@@ -65,7 +65,7 @@ class MessageControllerTest {
   @Test
   void testHeartbeat() {
     // Arrange
-    doNothing().when(mockWebSocketClient).pushMessage(any(HeartBeat.class));
+    doNothing().when(mockWebSocketClient).pushMessage(any(Heartbeat.class));
 
     // Act
     messageController.heartbeat(mockContext);
