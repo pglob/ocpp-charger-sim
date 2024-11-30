@@ -10,11 +10,11 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
-public class HeartBeatResponseTest {
+public class HeartbeatResponseTest {
 
   @Test
-  public void testHeartBeatResponse() {
-    HeartBeatResponse response = new HeartBeatResponse();
+  public void testHeartbeatResponse() {
+    HeartbeatResponse response = new HeartbeatResponse();
 
     // Ensure message generation works
     assert response.generateMessage().size() == 3;

@@ -15,15 +15,15 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-@OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "HeartBeatResponse")
-public final class HeartBeatResponse extends OCPPMessageResponse {
+@OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "HeartbeatResponse")
+public final class HeartbeatResponse extends OCPPMessageResponse {
 
-  /** The HeartBeat's time. */
+  /** The Heartbeat's time. */
   @SerializedName("currentTime")
   private final ZonedDateTime currentTime;
 
-  /** The response message for a HeartBeat, currentTime will be set to now. */
-  public HeartBeatResponse() {
+  /** The response message for a Heartbeat, currentTime will be set to now. */
+  public HeartbeatResponse() {
     super();
     this.currentTime = ZonedDateTime.now(ZoneId.of("UTC"));
   }
