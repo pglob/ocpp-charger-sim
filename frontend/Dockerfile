@@ -21,6 +21,15 @@ FROM build AS test
 
 RUN npm test
 
+# === Run Stage ===
+FROM node:18 AS run
+
+# Set the working directory
+WORKDIR /app
+
+# Copy built files from the build stage
+COPY --from=build /app .
+
 # Set the PORT environment variable
 ENV PORT=${FRONTEND_PORT}
 
