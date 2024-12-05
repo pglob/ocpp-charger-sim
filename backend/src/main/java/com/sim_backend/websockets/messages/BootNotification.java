@@ -54,7 +54,10 @@ public final class BootNotification extends OCPPMessageRequest {
   @SerializedName("meterSerialNumber")
   private final String meterSerialNumber;
 
-  // Default constructor, makes use of the BootNotificationConstants
+  /**
+   * Default constructor for BootNotification.
+   * Initializes all fields using the predefined constants from {@link BootNotificationConstants}.
+   */
   public BootNotification() {
     this.chargePointVendor = BootNotificationConstants.CHARGE_POINT_VENDOR;
     this.chargePointModel = BootNotificationConstants.CHARGE_POINT_MODEL;
