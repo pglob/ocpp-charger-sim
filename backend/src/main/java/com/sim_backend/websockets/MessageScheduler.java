@@ -1,6 +1,6 @@
 package com.sim_backend.websockets;
 
-import com.sim_backend.websockets.messages.HeartBeat;
+import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.types.OCPPMessage;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -55,7 +55,7 @@ public class MessageScheduler implements AutoCloseable {
       this.heartbeat.cancel(true);
     }
 
-    return (this.heartbeat = this.periodicJob(0, interval, unit, new HeartBeat()));
+    return (this.heartbeat = this.periodicJob(0, interval, unit, new Heartbeat()));
   }
 
   /**

@@ -10,8 +10,8 @@ import static org.mockito.Mockito.verify;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
-import com.sim_backend.websockets.messages.HeartBeat;
-import com.sim_backend.websockets.messages.HeartBeatResponse;
+import com.sim_backend.websockets.messages.Heartbeat;
+import com.sim_backend.websockets.messages.HeartbeatResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -38,9 +38,9 @@ public class OCPPTimeTest {
   @Test
   public void testOCPPTime() throws InterruptedException, OCPPMessageFailure {
     try (OCPPTime time = new OCPPTime(client)) {
-      HeartBeatResponse response = new HeartBeatResponse(ZonedDateTime.now().minusSeconds(24));
+      HeartbeatResponse response = new HeartbeatResponse(ZonedDateTime.now().minusSeconds(24));
 
-      HeartBeat beat = new HeartBeat();
+      Heartbeat beat = new Heartbeat();
       client.addPreviousMessage(beat);
       response.setMessageID(beat.getMessageID());
       client.onMessage(response.toJsonString());
@@ -70,9 +70,9 @@ public class OCPPTimeTest {
   @Test
   public void testOCPPTime3() throws InterruptedException, OCPPMessageFailure {
     try (OCPPTime time = new OCPPTime(client)) {
-      HeartBeatResponse response = new HeartBeatResponse(ZonedDateTime.now().minusSeconds(45));
+      HeartbeatResponse response = new HeartbeatResponse(ZonedDateTime.now().minusSeconds(45));
 
-      HeartBeat beat = new HeartBeat();
+      Heartbeat beat = new Heartbeat();
       client.addPreviousMessage(beat);
       response.setMessageID(beat.getMessageID());
       client.onMessage(response.toJsonString());
