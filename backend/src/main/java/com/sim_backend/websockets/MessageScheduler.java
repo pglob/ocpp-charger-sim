@@ -28,6 +28,11 @@ public class MessageScheduler implements AutoCloseable {
   private static final long HEARTBEAT_INTERVAL = 240L; // seconds
 
   /**
+   * Our heartbeat job.
+   */
+  private ScheduledFuture<?> heartbeat;
+
+  /**
    * An OCPPMessage Scheduler.
    *
    * @param targetClient The client to send our messages through.
@@ -36,7 +41,21 @@ public class MessageScheduler implements AutoCloseable {
     this.client = targetClient;
     this.time = new OCPPTime(targetClient);
 
-    this.periodicJob(0, HEARTBEAT_INTERVAL, TimeUnit.SECONDS, new HeartBeat());
+    this.setHeartbeatInterval(HEARTBEAT_INTERVAL, TimeUnit.SECONDS);
+  }
+
+  /**
+   * Set our interval between heartbeats.
+   * @param interval The Duration between heartbeats.
+   * @param unit The unit of your interval.
+   * @return The created job.
+   */
+  public ScheduledFuture<?> setHeartbeatInterval(Long interval, TimeUnit unit) {
+    if (this.heartbeat != null) {
+      this.heartbeat.cancel(true);
+    }
+
+    return (this.heartbeat = this.periodicJob(0, interval, unit, new HeartBeat()));
   }
 
   /**

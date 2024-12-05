@@ -1,0 +1,13 @@
+{
+    "name": "dummy-server",
+    "version": "1.0.0",
+    "main": "DummyServer.js",
+    "scripts": {
+      "start": "node DummyServer.js"
+    },
+    "dependencies": {
+      "express": "^4.21.1",
+      "ws": "^8.18.0"
+    },
+    "devDependencies": {}
+  }

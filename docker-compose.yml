@@ -9,6 +9,13 @@ services:
       - BACKEND_HOST=${BACKEND_HOST}
       - BACKEND_PORT=${BACKEND_PORT}
       - FRONTEND_URL=http://${FRONTEND_HOST}:${FRONTEND_PORT}
+    profiles:
+      - core
+      - integration-test
+      - unit_test
+    networks:
+      - core-network
+
   backend-test:
     depends_on:
       - backend
@@ -16,16 +23,25 @@ services:
       context: ./backend
       target: test
     profiles:
-      - test
+      - unit_test
+
   frontend:
     build:
       context: ./frontend
+      target: run
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
       - backend
     environment:
       - REACT_APP_BACKEND_URL=http://${BACKEND_HOST}:${BACKEND_PORT}
+    profiles:
+      - core
+      - integration-test
+      - unit_test
+    networks:
+      - core-network
+
   frontend-test:
     depends_on:
       - frontend
@@ -33,4 +49,39 @@ services:
       context: ./frontend
       target: test
     profiles:
-      - test
+      - unit_test
+
+  dummy-server:
+    build:
+      context: ./dummy_server
+    ports:
+      - "9000:9000" # WebSocket port
+      - "9001:9001" # HTTP port
+    profiles:
+      - dummy-server
+      - integration-test
+    environment:
+      - NODE_ENV=production
+    networks:
+      - core-network
+
+  integration-test:
+    build:
+      context: ./integration_test
+    depends_on:
+      - dummy-server
+      - backend
+      - frontend
+    profiles:
+      - integration-test
+    environment:
+      - BACKEND_URL=http://${BACKEND_HOST}:${BACKEND_PORT}
+      - FRONTEND_URL=http://${FRONTEND_HOST}:${FRONTEND_PORT}
+    volumes:
+      - ./integration_test:/app/integration_test
+    networks:
+      - core-network
+
+networks:
+  core-network:
+    driver: bridge

@@ -1,9 +1,11 @@
 package com.sim_backend.websockets.exceptions;
 
 import com.sim_backend.websockets.types.OCPPMessage;
+import lombok.Getter;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 /** Thrown when we could not send a message after a certain number of reattempts. */
+@Getter
 public class OCPPMessageFailure extends Exception {
 
   /** The Inner WebsocketException. */
@@ -23,24 +25,6 @@ public class OCPPMessageFailure extends Exception {
     super(message.toString());
     this.failedMessage = message;
     innerException = innerExp;
-  }
-
-  /**
-   * Get the Inner WebsocketException.
-   *
-   * @return The WebsocketNotConnectedException.
-   */
-  public WebsocketNotConnectedException getInnerException() {
-    return innerException;
-  }
-
-  /**
-   * Get the failed Message.
-   *
-   * @return The OCPPMessage that failed to send.
-   */
-  public OCPPMessage getFailedMessage() {
-    return failedMessage;
   }
 
   /**
