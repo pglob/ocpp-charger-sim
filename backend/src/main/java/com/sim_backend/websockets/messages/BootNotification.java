@@ -6,6 +6,7 @@ package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.constants.BootNotificationConstants;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import lombok.AllArgsConstructor;
@@ -52,4 +53,17 @@ public final class BootNotification extends OCPPMessageRequest {
   /** Meter Serial Number. */
   @SerializedName("meterSerialNumber")
   private final String meterSerialNumber;
+
+  // Default constructor, makes use of the BootNotificationConstants
+  public BootNotification() {
+    this.chargePointVendor = BootNotificationConstants.CHARGE_POINT_VENDOR;
+    this.chargePointModel = BootNotificationConstants.CHARGE_POINT_MODEL;
+    this.chargePointSerialNumber = BootNotificationConstants.CHARGE_POINT_SERIAL_NUMBER;
+    this.chargeBoxSerialNumber = BootNotificationConstants.CHARGE_BOX_SERIAL_NUMBER;
+    this.firmwareVersion = BootNotificationConstants.FIRMWARE_VERSION;
+    this.iccid = BootNotificationConstants.ICCID;
+    this.imsi = BootNotificationConstants.IMSI;
+    this.meterType = BootNotificationConstants.METER_TYPE;
+    this.meterSerialNumber = BootNotificationConstants.METER_SERIAL_NUMBER;
+  }
 }
