@@ -17,10 +17,10 @@ public class OCPPMessageHandler implements OnOCPPMessageListener {
 
   @Override
   public void onMessageReceived(OnOCPPMessage message) {
-    System.out.println("Received OCPP Message: : " + message);
+    System.out.println("Received OCPP Message: : ");
   }
 
-  @Override
+  //@Override
   public void onAuthorizeReceived(AuthorizeResponse response) {
     System.out.println("Received Authorize Response");
     handleAuthorize(response);

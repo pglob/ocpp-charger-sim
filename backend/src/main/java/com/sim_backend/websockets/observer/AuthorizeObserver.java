@@ -17,7 +17,7 @@ public class AuthorizeObserver {
 
   public void notifyAuth(AuthorizeResponse response) {
     for (OCPPMessageHandler observer : observers) {
-      if (response != null) {
+     if (response != null) {
         observer.onAuthorizeReceived(response);
       } else {
         throw new IllegalAuthorizeResponse("Invalid Response Received : NULL");
