@@ -1,14 +1,11 @@
 package com.sim_backend.websockets.constants;
 
-/**
- * A utility class that contains constant values used for initializing
- * BootNotification fields
- */
+/** A utility class that contains constant values used for initializing BootNotification fields */
 public final class BootNotificationConstants {
 
   /**
-   * Private constructor to prevent instantiation.
-   * This class is meant to be used as a static utility class.
+   * Private constructor to prevent instantiation. This class is meant to be used as a static
+   * utility class.
    */
   private BootNotificationConstants() {}
 

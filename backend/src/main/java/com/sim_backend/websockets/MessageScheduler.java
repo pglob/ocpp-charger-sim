@@ -27,9 +27,7 @@ public class MessageScheduler implements AutoCloseable {
    */
   private static final long HEARTBEAT_INTERVAL = 240L; // seconds
 
-  /**
-   * Our heartbeat job.
-   */
+  /** Our heartbeat job. */
   private ScheduledFuture<?> heartbeat;
 
   /**
@@ -46,6 +44,7 @@ public class MessageScheduler implements AutoCloseable {
 
   /**
    * Set our interval between heartbeats.
+   *
    * @param interval The Duration between heartbeats.
    * @param unit The unit of your interval.
    * @return The created job.
@@ -65,10 +64,6 @@ public class MessageScheduler implements AutoCloseable {
    * @return The created Runnable instance.
    */
   private Runnable createRunnable(final OCPPMessage message) {
-    if (message == null) {
-      throw new IllegalArgumentException("message must not be null");
-    }
-
     return () -> {
       try {
         this.client.pushMessage(message);
@@ -82,7 +77,7 @@ public class MessageScheduler implements AutoCloseable {
   /**
    * Create a Periodic Job.
    *
-   * @param initialDelay the initial delay.
+   * @param initialDelay The initial delay before we send our first message.
    * @param delay The delay between messages.
    * @param timeUnit The time units you wish to use.
    * @param message The message.
@@ -115,7 +110,7 @@ public class MessageScheduler implements AutoCloseable {
     }
 
     if (delay <= 0) {
-      throw new IllegalArgumentException("Initial delay and delay must be positive");
+      throw new IllegalArgumentException("Delay must be positive");
     }
 
     Runnable job = this.createRunnable(message);

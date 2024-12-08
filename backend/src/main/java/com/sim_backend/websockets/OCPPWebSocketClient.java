@@ -56,7 +56,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
   private final MessageQueue queue = new MessageQueue();
 
   /** Subscribe to when we receive an OCPP message. */
-  private final Map<Class<?>, CopyOnWriteArrayList<OnOCPPMessageListener>> onReceiveMessage =
+  @VisibleForTesting
+  public final Map<Class<?>, CopyOnWriteArrayList<OnOCPPMessageListener>> onReceiveMessage =
       new ConcurrentHashMap<>();
 
   /** The previous messages we have sent. * */
@@ -142,7 +143,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
         // handling a CallError.
         OCPPMessageError error = new OCPPMessageError(array);
         this.handleReceivedMessage(OCPPMessageError.class, error);
-        log.warn("Received OCPPError {}: {}", error.toString(), s);
+        log.warn("Received OCPPError {}", error.toString());
         return;
       }
       default -> throw new OCPPBadCallID(callId, s);
@@ -183,7 +184,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
         .ifPresent(
             listeners -> {
               for (OnOCPPMessageListener listener : listeners) {
-                listener.onMessageReceived(new OnOCPPMessage(message));
+                listener.onMessageReceived(new OnOCPPMessage(message, this));
               }
             });
   }
