@@ -11,5 +11,5 @@ public interface OnOCPPMessageListener {
    */
   void onMessageReceived(OnOCPPMessage message);
 
-  void onAuthorizeReceived(AuthorizeResponse response);
+  //void onAuthorizeReceived(AuthorizeResponse response);
 }
