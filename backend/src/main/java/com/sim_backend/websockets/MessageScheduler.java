@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.types.OCPPMessage;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -27,9 +28,11 @@ public class MessageScheduler {
 
   public static class RepeatingTimedTask extends TimedTask {
     long repeatDelay;
+    ChronoUnit unit;
 
-    RepeatingTimedTask(ZonedDateTime time, long repeatTime, Runnable task) {
+    RepeatingTimedTask(ZonedDateTime time, long repeatTime, ChronoUnit unit, Runnable task) {
       super(time, task);
+      this.unit = unit;
       this.repeatDelay = repeatTime;
     }
   }
@@ -114,6 +117,7 @@ public class MessageScheduler {
         new RepeatingTimedTask(
             getTime().getSynchronizedTime().plus(initialDelay, timeUnit.toChronoUnit()),
             delay,
+            timeUnit.toChronoUnit(),
             job);
     tasks.add(task);
     return task;
@@ -177,10 +181,14 @@ public class MessageScheduler {
     for (TimedTask task : toExecute) {
       task.task.run();
       if (task instanceof RepeatingTimedTask repeatingTask) {
-        ZonedDateTime nextExecutionTime = task.time.plusSeconds(repeatingTask.repeatDelay);
+        ZonedDateTime nextExecutionTime =
+            task.time.plus(repeatingTask.repeatDelay, repeatingTask.unit);
         tasks.add(
             new RepeatingTimedTask(
-                nextExecutionTime, repeatingTask.repeatDelay, repeatingTask.task));
+                nextExecutionTime,
+                repeatingTask.repeatDelay,
+                repeatingTask.unit,
+                repeatingTask.task));
       }
     }
   }

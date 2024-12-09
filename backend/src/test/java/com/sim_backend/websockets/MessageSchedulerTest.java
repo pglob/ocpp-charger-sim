@@ -8,6 +8,7 @@ import com.sim_backend.websockets.types.OCPPMessage;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -181,7 +182,8 @@ public class MessageSchedulerTest {
 
     // Create a repeating task
     MessageScheduler.RepeatingTimedTask repeatingTask =
-        new MessageScheduler.RepeatingTimedTask(initialTime, repeatDelay, taskRunnable);
+        new MessageScheduler.RepeatingTimedTask(
+            initialTime, repeatDelay, ChronoUnit.SECONDS, taskRunnable);
 
     // Add the task manually
     scheduler.tasks.add(repeatingTask);
