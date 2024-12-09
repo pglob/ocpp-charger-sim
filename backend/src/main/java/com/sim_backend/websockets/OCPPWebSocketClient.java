@@ -64,7 +64,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   private final Map<String, OCPPMessage> previousMessages = new ConcurrentHashMap<>();
 
   /** Our message scheduler. */
-  @Getter private MessageScheduler scheduler = null;
+  @Getter private final MessageScheduler scheduler = new MessageScheduler(this);
 
   /**
    * Create an OCPP WebSocket Client.
@@ -91,13 +91,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
       this.handleMessage(s);
     } catch (Exception exception) {
       log.error("Received Bad OCPP Message: ", exception);
-    }
-  }
-
-  /** Attach a message scheduler to our client. */
-  public void attachScheduler() {
-    if (this.scheduler == null) {
-      this.scheduler = new MessageScheduler(this);
     }
   }
 

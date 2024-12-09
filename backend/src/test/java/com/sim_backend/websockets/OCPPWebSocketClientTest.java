@@ -379,13 +379,6 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testAttachScheduler() {
-    assertNull(client.getScheduler());
-    client.attachScheduler();
-    assertNotNull(client.getScheduler());
-  }
-
-  @Test
   public void testClearOnReceivedMessage() {
     assertThrows(
         OCPPBadClass.class,
