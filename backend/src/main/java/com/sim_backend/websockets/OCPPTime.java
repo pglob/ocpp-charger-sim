@@ -1,5 +1,6 @@
 package com.sim_backend.websockets;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.HeartbeatResponse;
 import java.time.Duration;
@@ -18,11 +19,15 @@ public class OCPPTime implements AutoCloseable {
   private final AtomicReference<Duration> offset = new AtomicReference<>(Duration.ZERO);
 
   /** Our stored OCPPMessageListener. */
-  private final OnOCPPMessageListener listener =
+  @VisibleForTesting
+  final OnOCPPMessageListener listener =
       message -> {
         HeartbeatResponse response = (HeartbeatResponse) message.getMessage();
 
-        offset.set(Duration.between(ZonedDateTime.now(UTC), response.getCurrentTime()));
+        // Always work in UTC
+        Duration calculatedOffset =
+            Duration.between(ZonedDateTime.now(UTC), response.getCurrentTime());
+        offset.set(calculatedOffset);
       };
 
   /** The client we are listening on. */
