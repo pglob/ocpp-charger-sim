@@ -13,6 +13,7 @@ public class SimulatorLoop {
   static void runSimulatorLoop(OCPPWebSocketClient wsClient) {
     while (true) {
       try {
+        wsClient.getScheduler().tick();
         wsClient.popAllMessages();
       } catch (OCPPMessageFailure e) {
         // TODO: Add error handling for OCPP message failures

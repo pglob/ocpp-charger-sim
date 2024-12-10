@@ -1,6 +1,6 @@
 package com.sim_backend.websockets;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -376,5 +376,61 @@ public class OCPPWebSocketClientTest {
         () -> {
           client.onReceiveMessage(MessageQueue.class, message -> {});
         });
+  }
+
+  @Test
+  public void testClearOnReceivedMessage() {
+    assertThrows(
+        OCPPBadClass.class,
+        () -> {
+          client.clearOnReceiveMessage(String.class);
+        });
+
+    client.onReceiveMessage(Heartbeat.class, message -> {});
+    client.onReceiveMessage(Heartbeat.class, message -> {});
+    client.onReceiveMessage(Heartbeat.class, message -> {});
+    assertEquals(3, client.onReceiveMessage.get(Heartbeat.class).size());
+
+    client.clearOnReceiveMessage(Heartbeat.class);
+
+    assertNull(client.onReceiveMessage.get(Heartbeat.class));
+  }
+
+  @Test
+  public void testDeleteOnReceivedMessage() {
+    assertThrows(
+        OCPPBadClass.class,
+        () -> {
+          client.deleteOnReceiveMessage(
+              String.class,
+              new OnOCPPMessageListener() {
+                @Override
+                public void onMessageReceived(OnOCPPMessage message) {}
+              });
+        });
+    OnOCPPMessageListener listener =
+        new OnOCPPMessageListener() {
+          @Override
+          public void onMessageReceived(OnOCPPMessage message) {}
+        };
+
+    client.deleteOnReceiveMessage(Heartbeat.class, listener);
+    assertNull(client.onReceiveMessage.get(Heartbeat.class));
+
+    client.onReceiveMessage(Heartbeat.class, listener);
+
+    assertNotEquals(-1, client.onReceiveMessage.get(Heartbeat.class).indexOf(listener));
+
+    client.deleteOnReceiveMessage(Heartbeat.class, listener);
+    assertNull(client.onReceiveMessage.get(Heartbeat.class));
+
+    client.onReceiveMessage(Heartbeat.class, message -> {});
+    client.onReceiveMessage(Heartbeat.class, message -> {});
+    client.onReceiveMessage(Heartbeat.class, listener);
+
+    assertNotEquals(-1, client.onReceiveMessage.get(Heartbeat.class).indexOf(listener));
+
+    client.deleteOnReceiveMessage(Heartbeat.class, listener);
+    assertEquals(-1, client.onReceiveMessage.get(Heartbeat.class).indexOf(listener));
   }
 }
