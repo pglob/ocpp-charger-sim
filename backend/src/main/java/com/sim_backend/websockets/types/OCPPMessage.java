@@ -74,6 +74,11 @@ public abstract class OCPPMessage {
     return UUID.randomUUID().toString();
   }
 
+  /** Refreshes a message, resetting its message ID to something new. */
+  public void refreshMessage() {
+    this.messageID = generateMessageID();
+  }
+
   /**
    * Get a message Class by the message Name.
    *
