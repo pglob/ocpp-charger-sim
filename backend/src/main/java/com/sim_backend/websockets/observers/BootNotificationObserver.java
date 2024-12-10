@@ -12,16 +12,16 @@ import com.sim_backend.websockets.messages.BootNotificationResponse;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Observer that handles BootNotification requests and responses
- * as part of the OCPP protocol communication with the Central System.
+ * Observer that handles BootNotification requests and responses as part of the OCPP protocol
+ * communication with the Central System.
  */
 public class BootNotificationObserver implements OnOCPPMessageListener {
 
   private OCPPWebSocketClient webSocketClient;
 
   /**
-   * Handles sending a BootNotification request to the Central System if the simulator
-   * is in the correct state.
+   * Handles sending a BootNotification request to the Central System if the simulator is in the
+   * correct state.
    *
    * @param currState the current state machine of the simulator.
    * @throws IllegalStateException if the simulator is not in the booting state.
@@ -37,8 +37,8 @@ public class BootNotificationObserver implements OnOCPPMessageListener {
   }
 
   /**
-   * Processes incoming BootNotificationResponse messages and handles the response based on
-   * the registration status provided by the Central System.
+   * Processes incoming BootNotificationResponse messages and handles the response based on the
+   * registration status provided by the Central System.
    *
    * @param message the received OCPP message, expected to be a BootNotificationResponse.
    * @throws ClassCastException if the message is not a BootNotificationResponse.
