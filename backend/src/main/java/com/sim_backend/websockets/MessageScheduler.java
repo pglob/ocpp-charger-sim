@@ -46,7 +46,7 @@ public class MessageScheduler {
   /**
    * Our set heartbeat interval, we don't want this too common but every 4 minutes should be enough.
    */
-  private static final long HEARTBEAT_INTERVAL = 240L; // seconds
+  @Getter private static final long HEARTBEAT_INTERVAL = 240L; // seconds
 
   /** Our heartbeat job. */
   private TimedTask heartbeat;
