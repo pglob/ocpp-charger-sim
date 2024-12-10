@@ -35,14 +35,6 @@ class BootNotificationObserverTest {
   @BeforeEach
   void setUp() {
     observer = new BootNotificationObserver();
-    try {
-      java.lang.reflect.Field field =
-          BootNotificationObserver.class.getDeclaredField("webSocketClient");
-      field.setAccessible(true);
-      field.set(observer, webSocketClient);
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to set webSocketClient field", e);
-    }
   }
 
   @Test
@@ -52,7 +44,7 @@ class BootNotificationObserverTest {
     when(stateMachine.getCurrentState()).thenReturn(SimulatorState.BootingUp);
 
     // Act
-    observer.handleBootNotificationRequest(stateMachine);
+    observer.handleBootNotificationRequest(webSocketClient, stateMachine);
 
     // Assert
     verify(webSocketClient).pushMessage(isBootNotification());
@@ -66,7 +58,8 @@ class BootNotificationObserverTest {
 
     // Act & Assert
     org.junit.jupiter.api.Assertions.assertThrows(
-        IllegalStateException.class, () -> observer.handleBootNotificationRequest(stateMachine));
+        IllegalStateException.class,
+        () -> observer.handleBootNotificationRequest(webSocketClient, stateMachine));
   }
 
   @Test

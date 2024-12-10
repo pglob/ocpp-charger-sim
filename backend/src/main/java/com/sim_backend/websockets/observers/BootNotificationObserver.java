@@ -17,8 +17,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class BootNotificationObserver implements OnOCPPMessageListener {
 
-  private OCPPWebSocketClient webSocketClient;
-
   /**
    * Handles sending a BootNotification request to the Central System if the simulator is in the
    * correct state.
@@ -26,7 +24,8 @@ public class BootNotificationObserver implements OnOCPPMessageListener {
    * @param currState the current state machine of the simulator.
    * @throws IllegalStateException if the simulator is not in the booting state.
    */
-  public void handleBootNotificationRequest(SimulatorStateMachine currState) {
+  public void handleBootNotificationRequest(
+      OCPPWebSocketClient webSocketClient, SimulatorStateMachine currState) {
 
     // Ensure current state is booting
     if (currState.getCurrentState() == SimulatorState.BootingUp) {
