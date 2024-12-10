@@ -64,8 +64,24 @@ public class AuthorizeObserverTest {
 
   @Test
   void testAuthorizeMessage() {
-    AuthorizeResponse response = new AuthorizeResponse("Accepted");
-    when(testMessage.getMessage()).thenReturn(response);
+    AuthorizeResponse responseAccepted = new AuthorizeResponse("Accepted");
+    when(testMessage.getMessage()).thenReturn(responseAccepted);
+    testObserver.onMessageReceived(testMessage);
+
+    AuthorizeResponse responseBlocked = new AuthorizeResponse("Blocked");
+    when(testMessage.getMessage()).thenReturn(responseBlocked);
+    testObserver.onMessageReceived(testMessage);
+
+    AuthorizeResponse responseExpired = new AuthorizeResponse("Expired");
+    when(testMessage.getMessage()).thenReturn(responseExpired);
+    testObserver.onMessageReceived(testMessage);
+
+    AuthorizeResponse responseInvalid = new AuthorizeResponse("Invalid");
+    when(testMessage.getMessage()).thenReturn(responseInvalid);
+    testObserver.onMessageReceived(testMessage);
+
+    AuthorizeResponse responseConcurrent = new AuthorizeResponse("ConcurrentTx");
+    when(testMessage.getMessage()).thenReturn(responseConcurrent);
     testObserver.onMessageReceived(testMessage);
   }
 }
