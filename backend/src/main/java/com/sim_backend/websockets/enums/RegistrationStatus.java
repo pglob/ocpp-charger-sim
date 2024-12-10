@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum BootNotificationStatus {
+public enum RegistrationStatus {
   @SerializedName("Accepted")
   ACCEPTED("Accepted"),
 
@@ -18,8 +18,8 @@ public enum BootNotificationStatus {
 
   private final String value;
 
-  public static BootNotificationStatus fromString(String value) {
-    for (BootNotificationStatus status : BootNotificationStatus.values()) {
+  public static RegistrationStatus fromString(String value) {
+    for (RegistrationStatus status : RegistrationStatus.values()) {
       if (status.value.equalsIgnoreCase(value)) {
         return status;
       }

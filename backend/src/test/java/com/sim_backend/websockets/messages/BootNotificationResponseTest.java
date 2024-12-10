@@ -4,7 +4,7 @@ import com.networknt.schema.InputFormat;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.enums.BootNotificationStatus;
+import com.sim_backend.websockets.enums.RegistrationStatus;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Set;
@@ -18,7 +18,7 @@ public class BootNotificationResponseTest {
     BootNotificationResponse response = new BootNotificationResponse("Accepted", dateTime, 5);
 
     assert response.getStatus().getValue().equals("Accepted");
-    assert response.getStatus() == BootNotificationStatus.ACCEPTED;
+    assert response.getStatus() == RegistrationStatus.ACCEPTED;
     assert response.getCurrentTime() == dateTime;
     assert response.getInterval() == 5;
     return response;
