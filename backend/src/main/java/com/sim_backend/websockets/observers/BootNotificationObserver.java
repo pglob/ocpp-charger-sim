@@ -57,7 +57,8 @@ public class BootNotificationObserver implements OnOCPPMessageListener {
         break;
 
       case PENDING, REJECTED:
-        // Central system is pending, set minimum wait time before next BootNotification request
+        // Central system is pending or rejected the request, set minimum wait time before next
+        // BootNotification request
         if (interval <= 0) {
           // Use default heartbeat interval if none given from central system.
           interval = MessageScheduler.getHEARTBEAT_INTERVAL();
