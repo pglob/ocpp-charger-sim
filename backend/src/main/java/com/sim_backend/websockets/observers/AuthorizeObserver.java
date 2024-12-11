@@ -1,20 +1,24 @@
 package com.sim_backend.websockets.observers;
 
-import com.sim_backend.websockets.OCPPWebSocketClient;
-import com.sim_backend.websockets.enums.AuthorizationStatus;
 import com.sim_backend.websockets.events.*;
 import com.sim_backend.websockets.messages.*;
 
+/**
+ * The Authorize Observer is responsible for handling AuthorizeResponse message
+ * received from the Central System.
+ * 
+ */
 public class AuthorizeObserver implements OnOCPPMessageListener {
-
-  public void handleAuthorize(OCPPWebSocketClient client, AuthorizeResponse response) {
-    if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
-      client.pushMessage(new AuthorizeResponse(response.getIdTagInfo()));
-    } else {
-      System.out.println("Failed Authorize");
-    }
-  }
-
+  
+    /**
+   * Process AuthorizeResponse based on status that is provided by Central System
+   * 
+   * If the message is not an instance of AuthorizeResponse,
+   * ClassCastException is thrown.
+   * 
+   * @param message OCPP AuthorizeResponse Message
+   * @throws ClassCastException if message is not an AuthorizeResponse
+   */
   @Override
   public void onMessageReceived(OnOCPPMessage message) {
     if (!(message.getMessage() instanceof AuthorizeResponse response)) {
