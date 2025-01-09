@@ -3,8 +3,11 @@
 docker:
 	docker-compose --profile core up --build
 
+docker_debug:
+	DEBUG_STAGE=suspend-debug docker-compose --profile core up --build
+
 integration_test:
-	docker-compose --env-file .env.internal --profile integration-test up --build
+	DEBUG_STAGE=run-debug docker-compose --env-file .env.internal --profile integration-test up --build
 
 build_backend:
 	cd ./backend && mvn spotless:apply && mvn clean && mvn package
