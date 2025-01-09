@@ -22,10 +22,33 @@ COPY --from=build /app/target/ocpp-charger-sim-backend-1.0-SNAPSHOT.jar /app/app
 # Expose the backend port
 EXPOSE ${BACKEND_PORT}
 
-# Run the application
 CMD ["java", "-jar", "/app/app.jar"]
 
-# Run tests
+# Stage 3: Run with debugging
+FROM build AS run-debug
+
+# Copy the packaged jar file from the build stage
+COPY --from=build /app/target/ocpp-charger-sim-backend-1.0-SNAPSHOT.jar /app/app.jar
+
+# Expose the backend port and debug port
+EXPOSE ${BACKEND_PORT}
+EXPOSE ${DEBUG_PORT:-5005}
+
+CMD ["sh", "-c", "java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT:-5005} -jar /app/app.jar"]
+
+# Stage 4: Run with debugging, start suspended
+FROM build AS suspend-debug
+
+# Copy the packaged jar file from the build stage
+COPY --from=build /app/target/ocpp-charger-sim-backend-1.0-SNAPSHOT.jar /app/app.jar
+
+# Expose the backend port and debug port
+EXPOSE ${BACKEND_PORT}
+EXPOSE ${DEBUG_PORT:-5005}
+
+CMD ["sh", "-c", "java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:${DEBUG_PORT:-5005} -jar /app/app.jar"]
+
+# Stage 5: Run Tests
 FROM build AS test
 
 # Set the working directory
