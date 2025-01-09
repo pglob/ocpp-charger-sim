@@ -22,7 +22,7 @@ describe("Stateless OCPP message test", () => {
 
     // Verify the HeartBeat message
     getLastMessage().then((messageArray) => {
-      verifyCallFields(messageArray, "HeartBeat");
+      verifyCallFields(messageArray, "Heartbeat");
       expect(messageArray[3]).to.deep.eq({}); // Verify empty payload
     });
   });
