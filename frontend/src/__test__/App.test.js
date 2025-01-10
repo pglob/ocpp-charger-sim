@@ -5,7 +5,7 @@ import App from '../App';
 beforeEach(() => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
-      text: () => Promise.resolve('Helllo from the backend!'), // Mocked response
+      text: () => Promise.resolve('Hello from the backend!'), // Mocked response
     })
   );
 });
@@ -22,7 +22,7 @@ describe('dummy test for App.js', () => {
     await waitFor(() => {
       const messageElement = screen.getByTestId('message');
       expect(messageElement.textContent).toBe(
-        'Message from backend: Helllo from the backend!'
+        'Message from backend: Hello from the backend!'
       );
     });
   });

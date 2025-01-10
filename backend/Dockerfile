@@ -9,7 +9,7 @@ COPY src /app/src
 
 # Set the working directory
 WORKDIR /app
-
+#
 # Package the application
 RUN mvn clean package -DskipTests
 
