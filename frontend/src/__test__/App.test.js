@@ -22,7 +22,7 @@ describe('dummy test for App.js', () => {
     await waitFor(() => {
       const messageElement = screen.getByTestId('message');
       expect(messageElement.textContent).toBe(
-        'Message from backend: Hello from the backend!'
+        'Message from backend: Hello fsrom the backend!'
       );
     });
   });
