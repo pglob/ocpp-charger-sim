@@ -67,14 +67,13 @@ public class OCPPTime implements AutoCloseable {
   }
 
   /**
-   * Synchronizes the clock to match the Central System's current time.
-   * Used when a BootNotificationResponse returns an Accepted status.
+   * Synchronizes the clock to match the Central System's current time. Used when a
+   * BootNotificationResponse returns an Accepted status.
    *
    * @param time the time you wish to sync up.
    */
-  public void setOffset(ZonedDateTime time){
-    Duration calculatedOffset =
-            Duration.between(ZonedDateTime.now(UTC), time);
+  public void setOffset(ZonedDateTime time) {
+    Duration calculatedOffset = Duration.between(ZonedDateTime.now(UTC), time);
     offset.set(calculatedOffset);
   }
 
