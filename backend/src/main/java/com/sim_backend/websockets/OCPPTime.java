@@ -23,11 +23,7 @@ public class OCPPTime implements AutoCloseable {
   final OnOCPPMessageListener listener =
       message -> {
         HeartbeatResponse response = (HeartbeatResponse) message.getMessage();
-
-        // Always work in UTC
-        Duration calculatedOffset =
-            Duration.between(ZonedDateTime.now(UTC), response.getCurrentTime());
-        offset.set(calculatedOffset);
+        setOffset(response.getCurrentTime());
       };
 
   /** The client we are listening on. */
