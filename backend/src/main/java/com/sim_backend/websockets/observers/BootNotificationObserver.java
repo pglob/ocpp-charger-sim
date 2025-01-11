@@ -3,6 +3,7 @@ package com.sim_backend.websockets.observers;
 import com.sim_backend.state.IllegalStateException;
 import com.sim_backend.state.SimulatorState;
 import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.state.StateIndicator;
 import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.events.OnOCPPMessage;
@@ -10,22 +11,22 @@ import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.BootNotificationResponse;
 import java.util.concurrent.TimeUnit;
+import lombok.AllArgsConstructor;
 
 /**
  * Observer that handles BootNotification requests and responses as part of the OCPP protocol
  * communication with the Central System.
  */
-public class BootNotificationObserver implements OnOCPPMessageListener {
+@AllArgsConstructor
+public class BootNotificationObserver implements OnOCPPMessageListener, StateIndicator {
+  private OCPPWebSocketClient webSocketClient;
+  private SimulatorStateMachine currState;
 
   /**
    * Handles sending a BootNotification request to the Central System if the simulator is in the
    * correct state.
-   *
-   * @param currState the current state machine of the simulator.
-   * @throws IllegalStateException if the simulator is not in the booting state.
    */
-  public void handleBootNotificationRequest(
-      OCPPWebSocketClient webSocketClient, SimulatorStateMachine currState) {
+  public void handleBootNotificationRequest() {
 
     // Ensure current state is booting
     if (currState.getCurrentState() == SimulatorState.BootingUp) {
@@ -54,12 +55,14 @@ public class BootNotificationObserver implements OnOCPPMessageListener {
       case ACCEPTED:
         // Registration successful, set heartbeat from interval
         scheduler.setHeartbeatInterval(interval, TimeUnit.SECONDS);
+        currState.transition(SimulatorState.Available);
+
         break;
 
       case PENDING, REJECTED:
         // Central system is pending or rejected the request, set minimum wait time before next
         // BootNotification request
-        if (interval < 0){
+        if (interval < 0) {
           throw new IllegalArgumentException("Invalid heartbeat interval: " + interval);
         }
 
@@ -74,6 +77,13 @@ public class BootNotificationObserver implements OnOCPPMessageListener {
       default:
         System.err.println("Unknown status received in BootNotificationResponse.");
         break;
+    }
+  }
+
+  @Override
+  public void onStateChanged(SimulatorState newState) {
+    if (newState == SimulatorState.BootingUp) {
+      handleBootNotificationRequest();
     }
   }
 }

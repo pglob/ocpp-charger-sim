@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class BootNotificationObserverTest {
 
   @Mock private OCPPWebSocketClient webSocketClient;
+  @Mock private SimulatorStateMachine stateMachine;
 
   private BootNotificationObserver observer;
 
@@ -34,17 +35,16 @@ class BootNotificationObserverTest {
 
   @BeforeEach
   void setUp() {
-    observer = new BootNotificationObserver();
+    observer = new BootNotificationObserver(webSocketClient, stateMachine);
   }
 
   @Test
   void handleBootNotificationRequest_WhenBooting_SendsNotification() {
     // Arrange
-    SimulatorStateMachine stateMachine = mock(SimulatorStateMachine.class);
     when(stateMachine.getCurrentState()).thenReturn(SimulatorState.BootingUp);
 
     // Act
-    observer.handleBootNotificationRequest(webSocketClient, stateMachine);
+    observer.handleBootNotificationRequest();
 
     // Assert
     verify(webSocketClient).pushMessage(isBootNotification());
@@ -53,35 +53,33 @@ class BootNotificationObserverTest {
   @Test
   void handleBootNotificationRequest_WhenNotBooting_ThrowsException() {
     // Arrange
-    SimulatorStateMachine stateMachine = mock(SimulatorStateMachine.class);
     when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Available);
 
     // Act & Assert
     org.junit.jupiter.api.Assertions.assertThrows(
-        IllegalStateException.class,
-        () -> observer.handleBootNotificationRequest(webSocketClient, stateMachine));
+        IllegalStateException.class, () -> observer.handleBootNotificationRequest());
   }
 
   @Test
-  void onMessageReceived_WhenStatusAccepted_SetsHeartbeat() {
+  void onMessageReceived_WhenStatusAccepted_SetsHeartbeatAndTransitionsState() {
     // Arrange
     BootNotificationResponse response = mock(BootNotificationResponse.class);
     when(response.getStatus()).thenReturn(RegistrationStatus.ACCEPTED);
     when(response.getInterval()).thenReturn(30);
 
-    OCPPWebSocketClient client = mock(OCPPWebSocketClient.class);
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
-    when(client.getScheduler()).thenReturn(messageScheduler);
+    when(webSocketClient.getScheduler()).thenReturn(messageScheduler);
 
     OnOCPPMessage message = mock(OnOCPPMessage.class);
     when(message.getMessage()).thenReturn(response);
-    when(message.getClient()).thenReturn(client);
+    when(message.getClient()).thenReturn(webSocketClient);
 
     // Act
     observer.onMessageReceived(message);
 
     // Assert
     verify(messageScheduler).setHeartbeatInterval(30L, TimeUnit.SECONDS);
+    verify(stateMachine).transition(SimulatorState.Available);
   }
 
   @Test
@@ -91,13 +89,12 @@ class BootNotificationObserverTest {
     when(response.getStatus()).thenReturn(RegistrationStatus.PENDING);
     when(response.getInterval()).thenReturn(15);
 
-    OCPPWebSocketClient client = mock(OCPPWebSocketClient.class);
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
-    when(client.getScheduler()).thenReturn(messageScheduler);
+    when(webSocketClient.getScheduler()).thenReturn(messageScheduler);
 
     OnOCPPMessage message = mock(OnOCPPMessage.class);
     when(message.getMessage()).thenReturn(response);
-    when(message.getClient()).thenReturn(client);
+    when(message.getClient()).thenReturn(webSocketClient);
 
     // Act
     observer.onMessageReceived(message);
@@ -113,13 +110,12 @@ class BootNotificationObserverTest {
     when(response.getStatus()).thenReturn(RegistrationStatus.REJECTED);
     when(response.getInterval()).thenReturn(0);
 
-    OCPPWebSocketClient client = mock(OCPPWebSocketClient.class);
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
-    when(client.getScheduler()).thenReturn(messageScheduler);
+    when(webSocketClient.getScheduler()).thenReturn(messageScheduler);
 
     OnOCPPMessage message = mock(OnOCPPMessage.class);
     when(message.getMessage()).thenReturn(response);
-    when(message.getClient()).thenReturn(client);
+    when(message.getClient()).thenReturn(webSocketClient);
 
     // Act
     observer.onMessageReceived(message);
@@ -142,5 +138,26 @@ class BootNotificationObserverTest {
     // Act & Assert
     org.junit.jupiter.api.Assertions.assertThrows(
         ClassCastException.class, () -> observer.onMessageReceived(message));
+  }
+
+  @Test
+  void onStateChanged_WhenBootingUp_SendsNotification() {
+    // Arrange
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.BootingUp);
+
+    // Act
+    observer.onStateChanged(SimulatorState.BootingUp);
+
+    // Assert
+    verify(webSocketClient).pushMessage(isBootNotification());
+  }
+
+  @Test
+  void onStateChanged_WhenNotBootingUp_DoesNotSendNotification() {
+    // Act
+    observer.onStateChanged(SimulatorState.Available);
+
+    // Assert
+    verify(webSocketClient, never()).pushMessage(any());
   }
 }
