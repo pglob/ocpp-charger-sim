@@ -46,7 +46,7 @@ public class MessageScheduler {
   /**
    * Our set heartbeat interval, we don't want this too common but every 4 minutes should be enough.
    */
-  private static final long HEARTBEAT_INTERVAL = 240L; // seconds
+  @Getter private static final long HEARTBEAT_INTERVAL = 240L; // seconds
 
   /** Our heartbeat job. */
   private TimedTask heartbeat;
@@ -75,6 +75,14 @@ public class MessageScheduler {
     tasks.remove(this.heartbeat);
 
     return (this.heartbeat = this.periodicJob(0, interval, unit, new Heartbeat()));
+  }
+
+  /**
+   * Sets the OCPPTime to match that of the Central Server
+   * @param time The time of the Central Server to synchronize to
+   */
+  public void synchronizeTime(ZonedDateTime time) {
+    this.time.setOffset(time);
   }
 
   /**
