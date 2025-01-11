@@ -77,6 +77,10 @@ public class MessageScheduler {
     return (this.heartbeat = this.periodicJob(0, interval, unit, new Heartbeat()));
   }
 
+  /**
+   * Sets the OCPPTime to match that of the Central Server
+   * @param time The time of the Central Server to synchronize to
+   */
   public void synchronizeTime(ZonedDateTime time) {
     this.time.setOffset(time);
   }

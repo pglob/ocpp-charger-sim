@@ -27,14 +27,15 @@ public final class Main {
     // Register REST API controllers and routes
     registerRoutes(app, wsClient);
 
-    // Run the main simulator loop
-    SimulatorLoop.runSimulatorLoop(wsClient);
-
     // Create Simulator State
     SimulatorStateMachine stateMachine = new SimulatorStateMachine();
     // Create Observers
     // TODO: Add other observers
     BootNotificationObserver bootObserver = new BootNotificationObserver(wsClient, stateMachine);
+
+    // Run the main simulator loop
+    SimulatorLoop.runSimulatorLoop(wsClient);
+
   }
 
   /**
