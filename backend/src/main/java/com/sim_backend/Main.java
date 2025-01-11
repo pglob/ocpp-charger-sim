@@ -3,7 +3,9 @@ package com.sim_backend;
 import com.sim_backend.rest.TestMessageController;
 import com.sim_backend.rest.controllers.ControllerBase;
 import com.sim_backend.rest.controllers.MessageController;
+import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.observers.BootNotificationObserver;
 import io.javalin.Javalin;
 import java.net.URI;
 
@@ -25,8 +27,15 @@ public final class Main {
     // Register REST API controllers and routes
     registerRoutes(app, wsClient);
 
+    // Create Simulator State
+    SimulatorStateMachine stateMachine = new SimulatorStateMachine();
+    // Create Observers
+    // TODO: Add other observers
+    BootNotificationObserver bootObserver = new BootNotificationObserver(wsClient, stateMachine);
+
     // Run the main simulator loop
     SimulatorLoop.runSimulatorLoop(wsClient);
+
   }
 
   /**
