@@ -59,10 +59,15 @@ public class BootNotificationObserver implements OnOCPPMessageListener {
       case PENDING, REJECTED:
         // Central system is pending or rejected the request, set minimum wait time before next
         // BootNotification request
-        if (interval <= 0) {
+        if (interval < 0){
+          throw new IllegalArgumentException("Invalid heartbeat interval: " + interval);
+        }
+
+        if (interval == 0) {
           // Use default heartbeat interval if none given from central system.
           interval = MessageScheduler.getHEARTBEAT_INTERVAL();
         }
+
         scheduler.registerJob(interval, TimeUnit.SECONDS, new BootNotification());
         break;
 
