@@ -77,6 +77,10 @@ public class MessageScheduler {
     return (this.heartbeat = this.periodicJob(0, interval, unit, new Heartbeat()));
   }
 
+  public void synchronizeTime(ZonedDateTime time) {
+    this.time.setOffset(time);
+  }
+
   /**
    * Create a Runnable instance for our job functions.
    *

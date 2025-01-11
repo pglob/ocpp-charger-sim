@@ -56,7 +56,7 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateInd
         // Registration successful, set heartbeat from interval
         scheduler.setHeartbeatInterval(interval, TimeUnit.SECONDS);
         currState.transition(SimulatorState.Available);
-
+        scheduler.synchronizeTime(response.getCurrentTime());
         break;
 
       case PENDING, REJECTED:
