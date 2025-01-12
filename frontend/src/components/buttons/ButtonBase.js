@@ -24,7 +24,12 @@ class ButtonBase {
           console.log(
             `${this.name} button request to ${this.endpoint} successful!`
           );
-          return response.json(); // Return the parsed response
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            return response.json(); // Return JSON
+          } else {
+            return response.text(); // Return text
+          }
         } else {
           console.error(
             `${this.name} button request to ${this.endpoint} failed with status:`,
