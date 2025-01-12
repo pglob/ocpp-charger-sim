@@ -24,7 +24,7 @@ describe('ButtonBase PostRequest', () => {
 
         expect(response).toBe(mockTextResponse); 
         expect(global.fetch).toHaveBeenCalledWith(
-            `http://localhost:8080/test-endpoint`, 
+            `${process.env.REACT_APP_BACKEND_URL}/test-endpoint`, 
             {
                 method: 'POST', 
                 headers: {
@@ -50,7 +50,7 @@ describe('ButtonBase PostRequest', () => {
 
         expect(response).toEqual(mockJsonResponse); 
         expect(global.fetch).toHaveBeenCalledWith(
-            `http://localhost:8080/test-endpoint`, 
+            `${process.env.REACT_APP_BACKEND_URL}/test-endpoint`, 
             {
                 method: 'POST', 
                 headers: {

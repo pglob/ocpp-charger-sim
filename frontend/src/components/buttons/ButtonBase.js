@@ -10,7 +10,7 @@ class ButtonBase {
     // TODO: Look into options for dynamically setting this url.
     // Something like `${window.location.protocol}//${window.location.hostname}:8080`.
     // The above works for external browsers, but not the internal docker network.
-    const url = `http://localhost:8080${this.endpoint}`;
+    const url = `${process.env.REACT_APP_BACKEND_URL}${this.endpoint}`;
 
     return fetch(url, {
       method: 'POST',
