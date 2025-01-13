@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from './Button';
 
 function ChargerFrame() {
+  const [isOnline, setIsOnline] = useState(true); // Track online/offline state
+
   const textContent = [
-    { label: 'State', value: 'Available' },
+    { label: 'State', value: isOnline ? 'Available' : 'Offline' },
     { label: 'Meter Value', value: '123456 w/h' },
     { label: 'Max Current', value: '40A' },
     { label: 'Current Flow', value: '0' },
@@ -46,34 +48,37 @@ function ChargerFrame() {
           </p>
         </div>
       ))}
-
-      <button
-        style={{
-          width: '200px',
-          padding: '10px',
-          margin: '10px 0',
-          border: '2px solid #000',
-          borderRadius: '8px',
-          backgroundColor: '#fff',
-          cursor: 'pointer',
-        }}
-      >
-        Plug in Vehicle
-      </button>
-      <button
-        style={{
-          width: '200px',
-          padding: '10px',
-          margin: '10px 0',
-          border: '2px solid #000',
-          borderRadius: '8px',
-          backgroundColor: '#fff',
-          cursor: 'pointer',
-        }}
-      >
-        Send custom message
-      </button>
-      <Button />
+      {isOnline && (
+        <>
+          <button
+            style={{
+              width: '200px',
+              padding: '10px',
+              margin: '10px 0',
+              border: '2px solid #000',
+              borderRadius: '8px',
+              backgroundColor: '#fff',
+              cursor: 'pointer',
+            }}
+          >
+            Plug in Vehicle
+          </button>
+          <button
+            style={{
+              width: '200px',
+              padding: '10px',
+              margin: '10px 0',
+              border: '2px solid #000',
+              borderRadius: '8px',
+              backgroundColor: '#fff',
+              cursor: 'pointer',
+            }}
+          >
+            Send custom message
+          </button>
+        </>
+      )}
+      <Button isOnline={isOnline} setIsOnline={setIsOnline} />
     </div>
   );
 }
