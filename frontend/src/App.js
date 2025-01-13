@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 // import { Button } from './components/Button';
-import ChargerFrame from './components/charger_frame';
+import ChargerFrame from './components/ChargerFrame';
 
 function App() {
   const [message, setMessage] = useState('');

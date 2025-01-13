@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types'; // Import PropTypes
 import AuthorizeButton from '../components/buttons/AuthorizeButton';
 import BootButton from '../components/buttons/BootButton';
 import HeartbeatButton from '../components/buttons/HeartbeatButton';
 import ButtonBase from './buttons/ButtonBase';
 
 // Implementation of the button component, which includes a drop-down menu and an online/offline button
-function Button() {
-  const [isOnline, setIsOnline] = useState(false); // Track online/offline state
+function Button({ isOnline, setIsOnline }) {
+  //const [isOnline, setIsOnline] = useState(false); // Track online/offline state
   const [openDropdown, setOpenDropdown] = useState(false); // Track dropdown open/close state
 
   // Create instances of each button class
@@ -77,5 +78,10 @@ function Button() {
     </div>
   );
 }
+
+Button.propTypes = {
+  isOnline: PropTypes.bool.isRequired, // 'isOnline' should be a boolean
+  setIsOnline: PropTypes.func.isRequired, // 'setIsOnline' should be a function
+};
 
 export { Button };
