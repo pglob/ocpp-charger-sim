@@ -7,7 +7,6 @@ import ButtonBase from './buttons/ButtonBase';
 
 // Implementation of the button component, which includes a drop-down menu and an online/offline button
 function Button({ isOnline, setIsOnline }) {
-  //const [isOnline, setIsOnline] = useState(false); // Track online/offline state
   const [openDropdown, setOpenDropdown] = useState(false); // Track dropdown open/close state
 
   // Create instances of each button class
