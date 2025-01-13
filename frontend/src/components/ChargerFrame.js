@@ -3,11 +3,10 @@ import { Button } from './Button';
 
 function ChargerFrame() {
   const textContent = [
-    // { label: 'Charger Name', value: 'Sample A' },
     { label: 'State', value: 'Available' },
-    { label: 'Meter Value', value: '123456' },
-    { label: 'Max Power', value: '40A' },
-    { label: 'Current Power', value: '0' },
+    { label: 'Meter Value', value: '123456 w/h' },
+    { label: 'Max Current', value: '40A' },
+    { label: 'Current Flow', value: '0' },
   ];
 
   return (
