@@ -6,7 +6,7 @@ function ChargerFrame() {
 
   const textContent = [
     { label: 'State', value: isOnline ? 'Available' : 'Offline' },
-    { label: 'Meter Value', value: '123456 w/h' },
+    { label: 'Meter Value', value: '123456 W/h' },
     { label: 'Max Current', value: '40A' },
     { label: 'Current Flow', value: '0' },
   ];
