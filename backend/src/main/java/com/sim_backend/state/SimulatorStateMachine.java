@@ -3,57 +3,71 @@ package com.sim_backend.state;
 import java.util.*;
 import lombok.Getter;
 
+/**
+ * State machine for managing a simulated charger.
+ * The states here include OCPP protocol defined states, in addition
+ * to other states that are relevant for charger operation.
+ */
 public class SimulatorStateMachine {
   @Getter private SimulatorState currentState;
-  private Map<SimulatorState, Set<SimulatorState>> validTransitions = new HashMap<>();
-  private List<StateIndicator> indicators = new ArrayList<>();
 
-  // Start from Poweroff
+  private List<StateObserver> observers = new ArrayList<>();
+  private Map<SimulatorState, Set<SimulatorState>> validTransitions =
+    Map.of(
+      SimulatorState.PoweredOff, Set.of(SimulatorState.BootingUp),
+      SimulatorState.BootingUp, Set.of(SimulatorState.Available),
+      SimulatorState.Available, Set.of(SimulatorState.PoweredOff)
+    );
+
+  /**
+   * Initializes the state machine in the PoweredOff state.
+   */
   public SimulatorStateMachine() {
-    currentState = SimulatorState.PowerOff;
-    initValidation();
-    notifyIndicator();
+    currentState = SimulatorState.PoweredOff;
+    notifyObservers();
   }
 
-  // If there is an indicator begin with
-  public SimulatorStateMachine(StateIndicator initalIndicator) {
-    addIndicator(initalIndicator);
-    currentState = SimulatorState.PowerOff;
-    initValidation();
-    notifyIndicator();
+  /**
+   * Initializes the state machine in the desired state.
+   * 
+   * @param initialState the state to start in
+   */
+  public SimulatorStateMachine(SimulatorState initalState) {
+    currentState = initalState;
+    notifyObservers();
   }
 
-  // define which state can be used for a certain state
-  public void initValidation() {
-    validTransitions =
-        Map.of(
-            SimulatorState.PowerOff,
-            Set.of(SimulatorState.BootingUp),
-            SimulatorState.BootingUp,
-            Set.of(SimulatorState.Available),
-            SimulatorState.Available,
-            Set.of(SimulatorState.PowerOff));
-  }
-
-  // State Transition
-  public void transition(SimulatorState userInput) {
-    if (validTransitions.getOrDefault(currentState, null).contains(userInput)) {
-      currentState = userInput;
-      notifyIndicator();
+  /**
+   * Attempts to transition to a new state.
+   *
+   * @param newState the target state to transition to.
+   * @throws IllegalStateException if the transition is invalid.
+   */
+  public void transition(SimulatorState newState) {
+    if (validTransitions.getOrDefault(currentState, null).contains(newState)) {
+      currentState = newState;
+      notifyObservers();
     } else {
       throw new IllegalStateException(
-          "Invalid state transition from" + currentState + "to" + userInput);
+          "Invalid state transition from" + currentState + "to" + newState);
     }
   }
 
-  public void addIndicator(StateIndicator indicator) {
-    indicators.add(indicator);
+  /**
+   * Adds a state observer.
+   *
+   * @param observer the state observer to add.
+   */
+  public void addObserver(StateObserver newObserver) {
+    observers.add(newObserver);
   }
 
-  // Popup Message State Change
-  private void notifyIndicator() {
-    for (StateIndicator indicator : indicators) {
-      indicator.onStateChanged(currentState);
+  /**
+   * Notifies all registered state observers about a state transition.
+   */
+  private void notifyObservers() {
+    for (StateObserver observer : observers) {
+      observer.onStateChanged(currentState);
     }
   }
 }

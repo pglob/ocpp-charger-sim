@@ -62,7 +62,6 @@ public class MessageScheduler {
   public MessageScheduler(OCPPWebSocketClient targetClient) {
     this.client = targetClient;
     this.time = new OCPPTime(targetClient);
-    this.setHeartbeatInterval(HEARTBEAT_INTERVAL, TimeUnit.SECONDS);
   }
 
   /**
