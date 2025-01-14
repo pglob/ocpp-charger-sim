@@ -1,2 +1,2 @@
-/** This package contains the backend logic for the EV Charger Simulator. */
+/** This package contains the logic for the simulator state machine. */
 package com.sim_backend.state;

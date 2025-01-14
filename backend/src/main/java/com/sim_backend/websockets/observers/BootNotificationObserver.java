@@ -3,7 +3,7 @@ package com.sim_backend.websockets.observers;
 import com.sim_backend.state.IllegalStateException;
 import com.sim_backend.state.SimulatorState;
 import com.sim_backend.state.SimulatorStateMachine;
-import com.sim_backend.state.StateIndicator;
+import com.sim_backend.state.StateObserver;
 import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.events.OnOCPPMessage;
@@ -18,7 +18,7 @@ import lombok.AllArgsConstructor;
  * communication with the Central System.
  */
 @AllArgsConstructor
-public class BootNotificationObserver implements OnOCPPMessageListener, StateIndicator {
+public class BootNotificationObserver implements OnOCPPMessageListener, StateObserver {
   private OCPPWebSocketClient webSocketClient;
   private SimulatorStateMachine currState;
 

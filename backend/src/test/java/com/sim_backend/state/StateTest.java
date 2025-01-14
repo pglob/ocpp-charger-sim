@@ -19,31 +19,31 @@ public class StateTest {
   @Test
   void testInit() {
     assertEquals(
-        SimulatorState.PowerOff,
+        SimulatorState.PoweredOff,
         testStateMachine.getCurrentState(),
-        "StateMachine Should Initalize to PowerOff");
+        "StateMachine Should Initalize to PoweredOff");
   }
 
   @Test
   void testTransition() {
     assertEquals(
-        SimulatorState.PowerOff,
+        SimulatorState.PoweredOff,
         testStateMachine.getCurrentState(),
-        "StateMachine Should Initalize to PowerOff");
+        "StateMachine Should Initalize to PoweredOff");
     testStateMachine.transition(SimulatorState.BootingUp);
     assertEquals(
         SimulatorState.BootingUp,
         testStateMachine.getCurrentState(),
-        "Current State is Not BootingUp : Poweroff to BootingUp Failed");
+        "Current State is Not BootingUp : PoweredOff to BootingUp Failed");
     testStateMachine.transition(SimulatorState.Available);
     assertEquals(
         SimulatorState.Available,
         testStateMachine.getCurrentState(),
         "Current State is Not Available : BootingUp to Available Failed");
-    testStateMachine.transition(SimulatorState.PowerOff);
+    testStateMachine.transition(SimulatorState.PoweredOff);
     assertEquals(
-        SimulatorState.PowerOff,
+        SimulatorState.PoweredOff,
         testStateMachine.getCurrentState(),
-        "Current State is Not PowerOff : Available to PowerOff Failed");
+        "Current State is Not PoweredOff : Available to PoweredOff Failed");
   }
 }
