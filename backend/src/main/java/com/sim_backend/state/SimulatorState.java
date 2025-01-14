@@ -1,7 +1,7 @@
 package com.sim_backend.state;
 
 public enum SimulatorState {
-  PowerOff,
+  PoweredOff,
   BootingUp,
   Available,
 }

@@ -1,4 +1,4 @@
-import ButtonBase from '../../../src/compenents/buttons/ButtonBase';
+import ButtonBase from '../../../components/buttons/ButtonBase';
 
 beforeEach(() => {
     global.fetch = jest.fn();

@@ -3,8 +3,10 @@ package com.sim_backend;
 import com.sim_backend.rest.TestMessageController;
 import com.sim_backend.rest.controllers.ControllerBase;
 import com.sim_backend.rest.controllers.MessageController;
+import com.sim_backend.state.SimulatorState;
 import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.messages.BootNotificationResponse;
 import com.sim_backend.websockets.observers.BootNotificationObserver;
 import io.javalin.Javalin;
 import java.net.URI;
@@ -32,6 +34,15 @@ public final class Main {
     // Create Observers
     // TODO: Add other observers
     BootNotificationObserver bootObserver = new BootNotificationObserver(wsClient, stateMachine);
+
+    // Register observers with the state machine
+    stateMachine.addObserver(bootObserver);
+
+    // Register observers with the Websocket client
+    wsClient.onReceiveMessage(BootNotificationResponse.class, bootObserver);
+
+    // Boot the charger
+    stateMachine.transition(SimulatorState.BootingUp);
 
     // Run the main simulator loop
     SimulatorLoop.runSimulatorLoop(wsClient);
