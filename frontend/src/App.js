@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from './components/Button';
+import ChargerFrame from './components/ChargerFrame';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -17,7 +17,7 @@ function App() {
     <div>
       <h1>Frontend</h1>
       <p data-testid="message">Message from backend: {message}</p>
-      <Button />
+      <ChargerFrame />
     </div>
   );
 }

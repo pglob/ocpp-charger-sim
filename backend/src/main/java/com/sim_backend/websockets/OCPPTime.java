@@ -23,11 +23,7 @@ public class OCPPTime implements AutoCloseable {
   final OnOCPPMessageListener listener =
       message -> {
         HeartbeatResponse response = (HeartbeatResponse) message.getMessage();
-
-        // Always work in UTC
-        Duration calculatedOffset =
-            Duration.between(ZonedDateTime.now(UTC), response.getCurrentTime());
-        offset.set(calculatedOffset);
+        setOffset(response.getCurrentTime());
       };
 
   /** The client we are listening on. */
@@ -64,6 +60,17 @@ public class OCPPTime implements AutoCloseable {
    */
   public ZonedDateTime getSynchronizedTime(ZonedDateTime time) {
     return time.plus(offset.get());
+  }
+
+  /**
+   * Synchronizes the clock to match the Central System's current time. Used when a
+   * BootNotificationResponse returns an Accepted status.
+   *
+   * @param time the time you wish to sync up.
+   */
+  public void setOffset(ZonedDateTime time) {
+    Duration calculatedOffset = Duration.between(ZonedDateTime.now(UTC), time);
+    offset.set(calculatedOffset);
   }
 
   /**

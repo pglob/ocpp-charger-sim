@@ -1,10 +1,19 @@
-.PHONY: build docker integration_test
+.PHONY: build docker docker_debug integration_test dummy_server
 
 docker:
 	docker-compose --profile core up --build
 
+docker_debug:
+	DEBUG_STAGE=suspend-debug docker-compose --profile core up --build
+
 integration_test:
-	docker-compose --env-file .env.internal --profile integration-test up --build
+	DEBUG_STAGE=run-debug docker-compose --env-file .env.internal --profile integration-test up --build
+
+dummy_server:
+	docker compose --profile core --profile dummy-server up --build
+
+dummy_server_debug:
+	DEBUG_STAGE=suspend-debug docker compose --profile core --profile dummy-server up --build
 
 build_backend:
 	cd ./backend && mvn spotless:apply && mvn clean && mvn package

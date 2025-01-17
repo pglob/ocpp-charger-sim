@@ -1,0 +1,12 @@
+{
+    "configurations": [
+      {
+        "name": "Attach to Backend Debugger",
+        "type": "java",
+        "request": "attach",
+        "hostName": "localhost",
+        "port": 5005
+      }
+    ]
+  }
+  

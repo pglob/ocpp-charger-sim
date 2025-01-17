@@ -2,13 +2,15 @@ services:
   backend:
     build:
       context: ./backend
-      target: run
+      target: ${DEBUG_STAGE:-run}
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
+      - "5005:5005"
     environment:
       - BACKEND_HOST=${BACKEND_HOST}
       - BACKEND_PORT=${BACKEND_PORT}
       - FRONTEND_URL=http://${FRONTEND_HOST}:${FRONTEND_PORT}
+      - DEBUG_PORT=5005
     profiles:
       - core
       - integration-test
