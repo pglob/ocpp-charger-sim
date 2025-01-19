@@ -101,7 +101,7 @@ public class StartTransactionHandlerTest {
         .when(client)
         .onReceiveMessage(eq(StartTransactionResponse.class), any());
 
-    handler.initiateStartTransaction(1, "Accepted", 0);
+    handler.initiateStartTransaction(1, "Accepted");
 
     verify(client).pushMessage(any(StartTransaction.class));
     verify(stateMachine).transition(SimulatorState.Charging);

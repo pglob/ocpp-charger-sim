@@ -13,7 +13,7 @@ import lombok.Getter;
 
 /*
  * This class handles sending an authorize request, followed by a StartTransaction message.
- * 
+ *
  */
 @Getter
 public class StartTransactionHandler {
@@ -27,13 +27,12 @@ public class StartTransactionHandler {
   }
 
   /**
-   *  Authorization Process before Start Transaction
-   *  When Authorize is accepted, change a stateMachine status to Preparing
-   *  Stays Available otherwise 
-   * 
-   *  @param connectorId ID of the connector
-   *  @param idTag ID of the user
-   *  @throws IllegalStateException if stateMachine status is not available 
+   * Authorization Process before Start Transaction When Authorize is accepted, change a
+   * stateMachine status to Preparing Stays Available otherwise
+   *
+   * @param connectorId ID of the connector
+   * @param idTag ID of the user
+   * @throws IllegalStateException if stateMachine status is not available
    */
   public void preAuthorize(int connectorId, String idTag) {
     if (stateMachine.getCurrentState() != SimulatorState.Available) {
@@ -62,22 +61,20 @@ public class StartTransactionHandler {
   }
 
   /**
-   * Initiate Start Transaction
-   * Handling StartTransaction Request, Response and simulator status
-   * If authorization is accepted, change a stateMachine status to Charging
-   * Switch to Available otherwise
-   * 
+   * Initiate Start Transaction Handling StartTransaction Request, Response and simulator status If
+   * authorization is accepted, change a stateMachine status to Charging Switch to Available
+   * otherwise
+   *
    * @param connectorId ID of connector
    * @param connectorId ID of user
    * @param meterStart initial value of meter
-   * 
    */
-  public void initiateStartTransaction(int connectorId, String idTag, int meterStart) {
+  public void initiateStartTransaction(int connectorId, String idTag) {
 
     /*
-     * TODO : Swap meterStart value, Time info
+     * TODO : Swap meterStart value
      */
-    int mterStart = 0;
+    int meterStart = 0;
 
     OCPPTime ocppTime = client.getScheduler().getTime();
     ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
