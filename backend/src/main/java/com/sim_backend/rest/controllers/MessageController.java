@@ -12,6 +12,7 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.Heartbeat;
+import com.sim_backend.websockets.messages.StatusNotification;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URI;
@@ -69,6 +70,12 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
+  public void status(Context ctx) {
+    StatusNotification msg = new StatusNotification();
+    webSocketClient.pushMessage(msg);
+    ctx.result("OK");
+  }
+
   @Override
   public void registerRoutes(Javalin app) {
     app.post("/api/message/authorize", this::authorize);
@@ -76,5 +83,6 @@ public class MessageController extends ControllerBase {
     app.post("/api/message/heartbeat", this::heartbeat);
     app.post("/api/state/online", this::online);
     app.post("/api/state/offline", this::offline);
+    app.post("/api/state/status", this::status);
   }
 }

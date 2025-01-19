@@ -93,6 +93,18 @@ class MessageControllerTest {
   }
 
   @Test
+  void testStatus() {
+    // Arrange
+    doNothing().when(mockWebSocketClient).pushMessage(any(StatusNotification.class));
+
+    // Act
+    messageController.status(mockContext);
+
+    // Assert
+    verify(mockContext).result("OK");
+  }
+
+  @Test
   void testRegisterRoutes() {
     // Act
     messageController.registerRoutes(mockApp);
