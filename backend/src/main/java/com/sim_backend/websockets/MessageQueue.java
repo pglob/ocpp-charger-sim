@@ -79,7 +79,7 @@ public class MessageQueue {
       throws OCPPMessageFailure, InterruptedException {
     OCPPMessage message = queue.poll();
     if (message != null) {
-      if (isBusy() && message instanceof OCPPMessageRequest) {
+      if (message instanceof OCPPMessageRequest && isBusy()) {
         queue.addLast(message);
         return null;
       }
