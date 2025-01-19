@@ -36,7 +36,7 @@ public class StopTransactionResponseTest {
         System.out.println(error);
       }
     }
-    // Check expected message structure
+
     assert message.equals("{\"idTagInfo\":{\"status\":\"Accepted\"}}");
     assert errors.isEmpty();
   }

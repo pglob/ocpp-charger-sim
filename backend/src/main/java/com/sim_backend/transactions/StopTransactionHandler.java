@@ -8,6 +8,7 @@ import com.sim_backend.websockets.enums.*;
 import com.sim_backend.websockets.messages.*;
 import lombok.Getter;
 
+
 /*
  * This class handles sending an authorize request, followed by a StopTransaction message.
  *

@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-
 /**
  * Represents an OCPP 1.6 StopTransactionResponse sent by the Central System for transaction
  * details.

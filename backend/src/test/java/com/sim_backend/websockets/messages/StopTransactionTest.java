@@ -8,6 +8,7 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+
 public class StopTransactionTest {
 
   private static @NotNull StopTransaction getStopTransaction() {

@@ -7,7 +7,6 @@ import com.sim_backend.websockets.types.OCPPMessageRequest;
 import lombok.Getter;
 import lombok.Setter;
 
-
 /*
  * Represents an OCPP 1.6 StopTransaction Request sent by a Charge Point to initiate a Stop Charging transaction.
  */
