@@ -77,12 +77,13 @@ public class MessageQueue {
    */
   public OCPPMessage popMessage(final OCPPWebSocketClient client)
       throws OCPPMessageFailure, InterruptedException {
-    if (isBusy()) {
-      return null;
-    }
-
     OCPPMessage message = queue.poll();
     if (message != null) {
+      if (isBusy() && message instanceof OCPPMessageRequest) {
+        queue.addLast(message);
+        return null;
+      }
+
       try {
         message.sendMessage(client);
       } catch (WebsocketNotConnectedException ex) {
@@ -91,7 +92,7 @@ public class MessageQueue {
         } else {
           client.reconnectBlocking();
           queue.addFirst(message);
-          this.popMessage(client);
+          return this.popMessage(client);
         }
       }
     }
@@ -105,10 +106,8 @@ public class MessageQueue {
    */
   public void popAllMessages(final OCPPWebSocketClient client)
       throws OCPPMessageFailure, InterruptedException {
-    if (isBusy()) {
-      return;
-    }
-    while (!queue.isEmpty()) {
+    int size = queue.size();
+    for (int i = 0; i < size; i++) {
       popMessage(client);
     }
   }
