@@ -1,7 +1,5 @@
 package com.sim_backend.websockets.messages;
 
-import static org.mockito.Mockito.*;
-
 import com.networknt.schema.InputFormat;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
@@ -39,7 +37,7 @@ public class StopTransactionTest {
         System.out.println(error);
       }
     }
-
+    // Check expected message structure
     assert message.equals(
         "{\"transactionId\":1,\"meterStop\":10,\"timestamp\":\"2025-01-01T00:00:00Z\"}");
     assert errors.isEmpty();
