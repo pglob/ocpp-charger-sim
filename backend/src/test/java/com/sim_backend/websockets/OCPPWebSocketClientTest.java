@@ -65,10 +65,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   void testPopAllMessages() throws OCPPMessageFailure, InterruptedException {
-    doAnswer(
-            invocation -> null)
-        .when(client)
-        .send(anyString());
+    doAnswer(invocation -> null).when(client).send(anyString());
 
     Heartbeat beat = new Heartbeat();
     HeartbeatResponse beat2 = new HeartbeatResponse();
@@ -145,6 +142,9 @@ public class OCPPWebSocketClientTest {
         new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
     String fullMessage = messageError.toJsonString();
+    Heartbeat beat = new Heartbeat();
+    beat.setMessageID(messageError.getMessageID());
+    client.addPreviousMessage(beat);
 
     client.onReceiveMessage(
         OCPPMessageError.class,
@@ -167,6 +167,9 @@ public class OCPPWebSocketClientTest {
         new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
     String fullMessage = messageError.toJsonString();
+    Heartbeat beat = new Heartbeat();
+    beat.setMessageID(messageError.getMessageID());
+    client.addPreviousMessage(beat);
 
     client.onReceiveMessage(
         OCPPMessageError.class,
