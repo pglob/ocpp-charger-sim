@@ -78,6 +78,7 @@ public class MessageScheduler {
 
   /**
    * Sets the OCPPTime to match that of the Central Server
+   *
    * @param time The time of the Central Server to synchronize to
    */
   public void synchronizeTime(ZonedDateTime time) {

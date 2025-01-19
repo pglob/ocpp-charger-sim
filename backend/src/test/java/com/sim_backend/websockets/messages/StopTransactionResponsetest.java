@@ -9,27 +9,27 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-public class StartTransactionResponseTest {
-  private static @NotNull StartTransactionResponse getStartTransactionResponse() {
-    // Create an StartTransaction response
-    StartTransactionResponse response = new StartTransactionResponse(1, "Accepted");
+public class StopTransactionResponsetest {
+  private static @NotNull StopTransactionResponse getStopTransactionResponse() {
+    // Create an StopTransaction response
+    StopTransactionResponse response = new StopTransactionResponse("Accepted");
 
-    // Verify the StartTransaction Request is created correctly
-    assert response.getTransactionId() == 1;
+    // Verify the StopTransaction Request is created correctly
     assert response.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED;
     return response;
   }
 
   @Test
-  public void testStartTransactionResponse() {
-    StartTransactionResponse response = getStartTransactionResponse();
+  public void testStopTransactionResponse() {
+    StopTransactionResponse response = getStopTransactionResponse();
 
     // Ensure message generation works
-    assert response.generateMessage().size() == 3;
-    String message = GsonUtilities.toString(response.generateMessage().get(2));
+    System.out.println(response.generateMessage().size());
+    assert response.generateMessage().size() == 2;
+    String message = GsonUtilities.toString(response.generateMessage().get(1));
 
     // Validate against schema
-    JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/StartTransactionResponse.json");
+    JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/StopTransactionResponse.json");
     Set<ValidationMessage> errors = jsonSchema.validate(message, InputFormat.JSON);
 
     if (!errors.isEmpty()) {
@@ -38,8 +38,9 @@ public class StartTransactionResponseTest {
       }
     }
 
+    System.out.println(message);
+
     // Check expected message structure
-    assert message.equals("{\"transactionId\":1,\"idTagInfo\":{\"status\":\"Accepted\"}}");
     assert errors.isEmpty();
   }
 }

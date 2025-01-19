@@ -6,11 +6,10 @@ import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.*;
 import com.sim_backend.websockets.messages.*;
-import java.time.Instant;
 import lombok.Getter;
 
 /*
- * This class is handeling start transaction, send authorize request
+ * This class handles sending an authorize request, followed by a StartTransaction message.
  *
  */
 @Getter
@@ -27,7 +26,7 @@ public class StartTransactionHandler {
   /*
    *  Start Transaction
    */
-  public void startTransaction(int connectorId, String idTag, int meterStart, String timestamp) {
+  public void preAuthorize(int connectorId, String idTag, int meterStart, String timestamp) {
     // transition to Preparing, check if StateMachine is Available
     if (stateMachine.getCurrentState() != SimulatorState.Available) {
       throw new IllegalStateException(
@@ -40,14 +39,15 @@ public class StartTransactionHandler {
     client.onReceiveMessage(
         AuthorizeResponse.class,
         message -> {
-          System.out.println("even here??");
           if (!(message.getMessage() instanceof AuthorizeResponse response)) {
             throw new ClassCastException("Message is not an AuthorizeResponse");
           }
           if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
-            System.out.println("Authorization Accepted... Proceeding Start Transaction...");
+            System.out.println("Authorization Accepted...");
+            System.out.println("Proceeding Transaction...");
             stateMachine.transition(SimulatorState.Preparing);
-            initiateTransaction(connectorId, idTag);
+            initiateStartTransaction(
+                connectorId, response.getIdTagInfo().getStatus(), meterStart, timestamp);
           } else {
             System.err.println(
                 "Authorize Denied... Status : " + response.getIdTagInfo().getStatus());
@@ -57,17 +57,23 @@ public class StartTransactionHandler {
   }
 
   /*
-   * Initiate Transaction after authorization is completed.
-   * Handeling StartTransaction Request, Response and simulator status
+   * Initiate Start Transaction after authorization is completed.
+   * Handling StartTransaction Request, Response and simulator status
    */
-  private void initiateTransaction(int connectorId, String idTag) {
+  private void initiateStartTransaction(
+      int connectorId, AuthorizationStatus idTag, int meterStart, String timestamp) {
 
-    stateMachine.transition(SimulatorState.Charging);
-    int meterStart = 0;
-    String timestamp = Instant.now().toString();
+    /*
+     * TODO : Swap meterStart value, Time info
+     */
+    int tempMeterStart = 0;
+    String tempTimestamp = "2025-01-19T00:00:00Z";
 
     StartTransaction startTransactionMessage =
-        new StartTransaction(connectorId, idTag, meterStart, timestamp);
+        /*
+         * TODO : Change temp arguments to meterStart, timestamp
+         */
+        new StartTransaction(connectorId, idTag, tempMeterStart, tempTimestamp);
     client.pushMessage(startTransactionMessage);
 
     client.onReceiveMessage(
@@ -76,9 +82,9 @@ public class StartTransactionHandler {
           if (!(message.getMessage() instanceof StartTransactionResponse response)) {
             throw new ClassCastException("Message is not an StartTransactionResponse");
           }
-          if (response.getIdTaginfo().getStatus() == "Accepted") {
+          if (response.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED) {
             System.out.println(
-                "Transaction Started... Transaction Id : " + response.getTransactionId());
+                "Transaction Completed... Transaction Id : " + response.getTransactionId());
             stateMachine.transition(SimulatorState.Charging);
           } else {
             System.err.println("Transaction Failed...");

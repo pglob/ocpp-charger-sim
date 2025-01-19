@@ -1,93 +1,67 @@
 package com.sim_backend.transactions;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import com.sim_backend.state.SimulatorState;
 import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.AuthorizationStatus;
-import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
+import com.sim_backend.websockets.events.OnOCPPMessage;
+import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class StartTransactionHandlerTest {
-  private SimulatorStateMachine testStateMachine;
-  private OCPPWebSocketClient client;
+  @Mock private SimulatorStateMachine stateMachine;
+  @Mock private OCPPWebSocketClient client;
+
+  private StartTransactionHandler handler;
 
   @BeforeEach
-  void setUp() throws URISyntaxException {
-    testStateMachine = new SimulatorStateMachine();
-    testStateMachine.transition(SimulatorState.BootingUp);
-    testStateMachine.transition(SimulatorState.Available);
-
-    client = spy(new OCPPWebSocketClient(new URI("")));
+  void setUp() {
+    MockitoAnnotations.openMocks(this);
+    handler = new StartTransactionHandler(stateMachine, client);
   }
 
   @Test
-  public void testStartTransaction() throws OCPPMessageFailure, InterruptedException {
-    String idTag = "Accepted";
-    int connectorId = 1;
-    int meterStart = 0;
-    String timestamp = Instant.now().toString();
+  void preAuthorizetest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Available);
 
-    // Mock Authorize Response
-    AuthorizeResponse response = new AuthorizeResponse("Accepted");
-    Authorize auth = new Authorize(idTag);
-    client.addPreviousMessage(auth);
-    client.pushMessage(auth);
+    AuthorizeResponse authorizeResponse =
+        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
+    StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
+
     doAnswer(
             invocation -> {
-              client.addPreviousMessage(auth);
-              response.setMessageID(auth.getMessageID());
-              client.onMessage(response.toJsonString());
+              OnOCPPMessageListener listener = invocation.getArgument(1);
+              OnOCPPMessage message = mock(OnOCPPMessage.class);
+              when(message.getMessage()).thenReturn(authorizeResponse);
+              listener.onMessageReceived(message);
               return null;
             })
         .when(client)
-        .send(anyString());
+        .onReceiveMessage(eq(AuthorizeResponse.class), any());
 
-    client.onReceiveMessage(
-        AuthorizeResponse.class,
-        message -> {
-          assert (message.getMessage() instanceof AuthorizeResponse);
-          AuthorizeResponse response2 = (AuthorizeResponse) message.getMessage();
-          assert (response2.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED);
-          testStateMachine.transition(SimulatorState.Preparing);
-        });
-
-    client.popAllMessages();
-    assertEquals(testStateMachine.getCurrentState(), SimulatorState.Preparing);
-
-    //Mock Transaction Response
-    StartTransactionResponse response3 = new StartTransactionResponse(1, idTag);
-    StartTransaction transaction = new StartTransaction(connectorId, idTag, meterStart, timestamp);
-    client.addPreviousMessage(transaction);
-    client.pushMessage(transaction);
     doAnswer(
             invocation -> {
-              client.addPreviousMessage(transaction);
-              response3.setMessageID(transaction.getMessageID());
-              client.onMessage(response3.toJsonString());
+              OnOCPPMessageListener listener = invocation.getArgument(1);
+              OnOCPPMessage message = mock(OnOCPPMessage.class);
+              when(message.getMessage()).thenReturn(startTransactionResponse);
+              listener.onMessageReceived(message);
               return null;
             })
         .when(client)
-        .send(anyString());
+        .onReceiveMessage(eq(StartTransactionResponse.class), any());
 
-    client.onReceiveMessage(
-        StartTransactionResponse.class,
-        message -> {
-          assert (message.getMessage() instanceof StartTransactionResponse);
-          StartTransactionResponse response4 = (StartTransactionResponse) message.getMessage();
-          assertEquals(response4.getIdTaginfo().getStatus(), "Accepted");
-          testStateMachine.transition(SimulatorState.Charging);
-        });
-
-    client.popAllMessages();
-    assertEquals(testStateMachine.getCurrentState(), SimulatorState.Charging);
+    handler.preAuthorize(1, "Accepted", 0, "2025-1-19T00:00:00Z");
+    verify(client).pushMessage(any(Authorize.class));
+    verify(client).pushMessage(any(StartTransaction.class));
+    verify(stateMachine).transition(SimulatorState.Preparing);
+    verify(stateMachine).transition(SimulatorState.Charging);
   }
 }

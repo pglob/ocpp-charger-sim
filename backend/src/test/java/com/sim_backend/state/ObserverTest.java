@@ -49,6 +49,16 @@ public class ObserverTest {
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log Charging to Available");
+    testStateMachine.transition(SimulatorState.Preparing);
+    assertEquals(
+        testStateMachine.getCurrentState(),
+        testObserver.getLastState(),
+        "Observer Failed to Log Available to Prepraring");
+    testStateMachine.transition(SimulatorState.Available);
+    assertEquals(
+        testStateMachine.getCurrentState(),
+        testObserver.getLastState(),
+        "Observer Failed to Log Charging to Available");
     testStateMachine.transition(SimulatorState.PoweredOff);
     assertEquals(
         testStateMachine.getCurrentState(),
@@ -61,6 +71,8 @@ public class ObserverTest {
             SimulatorState.Available,
             SimulatorState.Preparing,
             SimulatorState.Charging,
+            SimulatorState.Available,
+            SimulatorState.Preparing,
             SimulatorState.Available,
             SimulatorState.PoweredOff);
 
