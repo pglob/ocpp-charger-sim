@@ -65,7 +65,7 @@ public class ObserverTest {
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log Charging to Available");
-        
+
     testStateMachine.transition(SimulatorState.PoweredOff);
     assertEquals(
         testStateMachine.getCurrentState(),
