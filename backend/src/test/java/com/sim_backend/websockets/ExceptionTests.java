@@ -22,8 +22,8 @@ public class ExceptionTests {
 
   @Test
   public void testOCPPCannotProcess() {
-    OCPPCannotProcessResponse exception =
-        new OCPPCannotProcessResponse("[2, \"2\", \"Woah\", {}]", "2");
+    OCPPCannotProcessMessage exception =
+        new OCPPCannotProcessMessage("[2, \"2\", \"Woah\", {}]", "2");
     String message = exception.getMessage();
     assert message.contains(
         "Received Message with ID \"2\" where we do not have a matching sent message: [2, \"2\", \"Woah\", {}]");

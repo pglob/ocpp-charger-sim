@@ -14,6 +14,9 @@ import lombok.Setter;
 @Setter
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StopTransaction")
 public class StopTransaction extends OCPPMessageRequest {
+  /*
+   * TODO : transactionData needs to be implemented
+   */
   @SerializedName("transactionId")
   private int transactionId;
 

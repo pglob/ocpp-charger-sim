@@ -27,8 +27,8 @@ public class StopTransactionHandler {
   }
 
   /**
-   *  Authorization Process before initiating Stop Transaction
-   *  
+   * Authorization Process before initiating Stop Transaction
+   *
    * @param idTag ID of an user
    * @throws IllegalStateException If stateMachine status is not a Charging state throw error
    */
@@ -48,29 +48,29 @@ public class StopTransactionHandler {
           if (!(message.getMessage() instanceof AuthorizeResponse response)) {
             throw new ClassCastException("Message is not an AuthorizeResponse");
           }
+          stateMachine.transition(SimulatorState.Preparing);
           if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
             System.out.println("Authorization Accepted...");
             System.out.println("Proceeding Transaction...");
           } else {
             System.err.println(
                 "Authorize Denied... Status : " + response.getIdTagInfo().getStatus());
+            stateMachine.transition(SimulatorState.Charging);
           }
         });
   }
 
   /**
-   * Initiate Stop Transaction
-   * Handling StopTransaction Request, Response and simulator status
-   * If authorization is accepted, change a stateMachine status from Charging to Available
-   * Stays Charging otherwise
+   * Initiate Stop Transaction Handling StopTransaction Request, Response and simulator status If
+   * authorization is accepted, change a stateMachine status from Charging to Available Stays
+   * Charging otherwise
    */
-  public void initiateStopTransaction() {
+  public void initiateStopTransaction(int transactionId) {
 
     /*
-     * TODO : Swap meterStop, transactionId Value
+     * TODO : Swap meterStop
      */
     int meterStop = 10;
-    int transactionId = 1;
 
     OCPPTime ocppTime = client.getScheduler().getTime();
     ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
@@ -82,11 +82,11 @@ public class StopTransactionHandler {
 
     client.onReceiveMessage(
         StopTransactionResponse.class,
-        message -> {
-          if (!(message.getMessage() instanceof StopTransactionResponse response)) {
-            throw new ClassCastException("Message is not an StopTransactionResponse");
+        message2 -> {
+          if (!(message2.getMessage() instanceof StopTransactionResponse response2)) {
+            throw new ClassCastException("Message is not a StopTransactionResponse");
           }
-          if (response.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED) {
+          if (response2.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED) {
             System.out.println("Transaction Completed...");
             stateMachine.transition(SimulatorState.Available);
           } else {
@@ -94,5 +94,20 @@ public class StopTransactionHandler {
             stateMachine.transition(SimulatorState.Charging);
           }
         });
+
+    client.clearOnReceiveMessage(StopTransactionResponse.class);
+  }
+
+  public void StopCharging(String preAuthidTag, String postAuthidTag, int transactionId) {
+    if (preAuthidTag != postAuthidTag) {
+      preAuthorize(postAuthidTag);
+      if (stateMachine.getCurrentState() != SimulatorState.Charging) {
+        throw new IllegalStateException(
+            "Cannot stop with the current state. current state: " + stateMachine.getCurrentState());
+      }
+      initiateStopTransaction(transactionId);
+    } else {
+      initiateStopTransaction(transactionId);
+    }
   }
 }

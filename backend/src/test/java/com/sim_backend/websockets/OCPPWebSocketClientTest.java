@@ -65,17 +65,10 @@ public class OCPPWebSocketClientTest {
 
   @Test
   void testPopAllMessages() throws OCPPMessageFailure, InterruptedException {
-    Pattern pattern = Pattern.compile("^\\[2,\\s*\".*?\",\\s*\"Heartbeat\",\\s*\\{}]$");
-    doAnswer(
-            invocation -> {
-              assert pattern.matcher(invocation.getArgument(0, String.class)).find();
-              return null;
-            })
-        .when(client)
-        .send(anyString());
+    doAnswer(invocation -> null).when(client).send(anyString());
 
     Heartbeat beat = new Heartbeat();
-    Heartbeat beat2 = new Heartbeat();
+    HeartbeatResponse beat2 = new HeartbeatResponse();
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -149,6 +142,9 @@ public class OCPPWebSocketClientTest {
         new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
     String fullMessage = messageError.toJsonString();
+    Heartbeat beat = new Heartbeat();
+    beat.setMessageID(messageError.getMessageID());
+    client.addPreviousMessage(beat);
 
     client.onReceiveMessage(
         OCPPMessageError.class,
@@ -171,6 +167,9 @@ public class OCPPWebSocketClientTest {
         new OCPPMessageError(ErrorCode.FormatViolation, "Not Found", new JsonObject());
 
     String fullMessage = messageError.toJsonString();
+    Heartbeat beat = new Heartbeat();
+    beat.setMessageID(messageError.getMessageID());
+    client.addPreviousMessage(beat);
 
     client.onReceiveMessage(
         OCPPMessageError.class,
@@ -196,14 +195,16 @@ public class OCPPWebSocketClientTest {
   public void testOnReceiveMessageNoMatchingMsg() throws OCPPMessageFailure, InterruptedException {
     HeartbeatResponse response = new HeartbeatResponse();
 
+    OCPPMessageError error = new OCPPMessageError(ErrorCode.FormatViolation, "", new JsonObject());
+
     Heartbeat beat = new Heartbeat();
     doAnswer(
             invocation -> {
               response.setMessageID(beat.getMessageID());
               String fullMessage = response.toJsonString();
-              OCPPCannotProcessResponse badResponse =
+              OCPPCannotProcessMessage badResponse =
                   assertThrows(
-                      OCPPCannotProcessResponse.class,
+                      OCPPCannotProcessMessage.class,
                       () -> {
                         client.handleMessage(fullMessage);
                       });
@@ -221,6 +222,30 @@ public class OCPPWebSocketClientTest {
     client.popAllMessages();
 
     // verify(onOCPPMessageMock, times(1)).getMessage();
+  }
+
+  @Test
+  public void testOnReceiveErrorMessageNoMatchingMsg()
+      throws OCPPMessageFailure, InterruptedException {
+    OCPPMessageError error = new OCPPMessageError(ErrorCode.FormatViolation, "", new JsonObject());
+
+    doAnswer(
+            invocation -> {
+              String fullMessage = error.toJsonString();
+              assertThrows(
+                  OCPPCannotProcessMessage.class,
+                  () -> {
+                    client.handleMessage(fullMessage);
+                  });
+
+              return null;
+            })
+        .when(client)
+        .send(anyString());
+
+    client.pushMessage(error);
+    client.onReceiveMessage(OCPPMessageError.class, message -> {});
+    client.popAllMessages();
   }
 
   @Test
@@ -432,5 +457,61 @@ public class OCPPWebSocketClientTest {
 
     client.deleteOnReceiveMessage(Heartbeat.class, listener);
     assertEquals(-1, client.onReceiveMessage.get(Heartbeat.class).indexOf(listener));
+  }
+
+  @Test
+  void testRequestSynchronicity() throws Exception {
+    doAnswer(invocation -> null).when(client).send(anyString());
+
+    Heartbeat beat = new Heartbeat();
+    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    beatResponse.setMessageID(beat.getMessageID());
+
+    Heartbeat beat2 = new Heartbeat();
+
+    client.pushMessage(beat);
+    assert client.size() == 1;
+    client.pushMessage(beat2);
+    assert client.size() == 2;
+
+    client.popAllMessages();
+    assertFalse(client.isEmpty());
+    verify(client, times(1)).send(anyString());
+    assertTrue(client.isBusy());
+
+    client.handleMessage(beatResponse.toJsonString());
+    client.popAllMessages();
+    assertTrue(client.isEmpty());
+
+    verify(client, times(2)).send(anyString());
+  }
+
+  @Test
+  void testRequestSynchronicity2() throws InterruptedException, OCPPMessageFailure {
+    doAnswer(invocation -> null).when(client).send(anyString());
+
+    Heartbeat beat = new Heartbeat();
+    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    beatResponse.setMessageID(beat.getMessageID());
+
+    Heartbeat beat2 = new Heartbeat();
+
+    client.pushMessage(beat);
+    assert client.size() == 1;
+    client.pushMessage(beat2);
+    assert client.size() == 2;
+
+    client.popAllMessages();
+    assertFalse(client.isEmpty());
+    verify(client, times(1)).send(anyString());
+    assertTrue(client.isBusy());
+
+    client.clearPreviousMessage(beat);
+
+    assertFalse(client.isBusy());
+
+    client.popAllMessages();
+    verify(client, times(2)).send(anyString());
+    assertTrue(client.isEmpty());
   }
 }

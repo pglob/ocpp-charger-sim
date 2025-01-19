@@ -1,0 +1,31 @@
+name: Spotless Check
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  spotless:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build project dependencies
+        working-directory: ./backend
+        run: mvn clean package -DskipTests
+
+      - name: Run Spotless Check
+        working-directory: ./backend
+        run: mvn spotless:check
