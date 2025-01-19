@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /** Thrown when we receive a message ID we did not send. */
 @Getter
-public class OCPPCannotProcessResponse extends Exception {
+public class OCPPCannotProcessMessage extends Exception {
 
   /** The Received message we could not process due to us not having a matching message ID. */
   private final String receivedMessage;
@@ -18,7 +18,7 @@ public class OCPPCannotProcessResponse extends Exception {
    * @param receivedMsg The received message.
    * @param badMsgId The message ID we cannot match.
    */
-  public OCPPCannotProcessResponse(final String receivedMsg, final String badMsgId) {
+  public OCPPCannotProcessMessage(final String receivedMsg, final String badMsgId) {
     this.receivedMessage = receivedMsg;
     this.badMessageId = badMsgId;
   }

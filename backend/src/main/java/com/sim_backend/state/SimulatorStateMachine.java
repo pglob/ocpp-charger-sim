@@ -4,24 +4,20 @@ import java.util.*;
 import lombok.Getter;
 
 /**
- * State machine for managing a simulated charger.
- * The states here include OCPP protocol defined states, in addition
- * to other states that are relevant for charger operation.
+ * State machine for managing a simulated charger. The states here include OCPP protocol defined
+ * states, in addition to other states that are relevant for charger operation.
  */
 public class SimulatorStateMachine {
   @Getter private SimulatorState currentState;
 
   private List<StateObserver> observers = new ArrayList<>();
   private Map<SimulatorState, Set<SimulatorState>> validTransitions =
-    Map.of(
-      SimulatorState.PoweredOff, Set.of(SimulatorState.BootingUp),
-      SimulatorState.BootingUp, Set.of(SimulatorState.Available),
-      SimulatorState.Available, Set.of(SimulatorState.PoweredOff)
-    );
+      Map.of(
+          SimulatorState.PoweredOff, Set.of(SimulatorState.BootingUp),
+          SimulatorState.BootingUp, Set.of(SimulatorState.Available),
+          SimulatorState.Available, Set.of(SimulatorState.PoweredOff));
 
-  /**
-   * Initializes the state machine in the PoweredOff state.
-   */
+  /** Initializes the state machine in the PoweredOff state. */
   public SimulatorStateMachine() {
     currentState = SimulatorState.PoweredOff;
     notifyObservers();
@@ -29,7 +25,7 @@ public class SimulatorStateMachine {
 
   /**
    * Initializes the state machine in the desired state.
-   * 
+   *
    * @param initialState the state to start in
    */
   public SimulatorStateMachine(SimulatorState initalState) {
@@ -62,9 +58,7 @@ public class SimulatorStateMachine {
     observers.add(newObserver);
   }
 
-  /**
-   * Notifies all registered state observers about a state transition.
-   */
+  /** Notifies all registered state observers about a state transition. */
   private void notifyObservers() {
     for (StateObserver observer : observers) {
       observer.onStateChanged(currentState);

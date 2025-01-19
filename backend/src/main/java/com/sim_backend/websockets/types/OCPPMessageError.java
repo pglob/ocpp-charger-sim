@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ErrorCode;
 import lombok.Getter;
+import lombok.Setter;
 
 /** A CallError message for OCPP. */
 @Getter
@@ -30,6 +31,9 @@ public class OCPPMessageError extends OCPPMessage {
 
   /** Any error details. */
   private final transient JsonObject errorDetails;
+
+  /** The message we received our error from */
+  @Setter private transient OCPPMessage erroredMessage = null;
 
   /**
    * Creates an OCPP error messages.

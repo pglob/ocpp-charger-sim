@@ -19,10 +19,7 @@ public class ObserverTest {
 
   @Test
   void testInit() {
-    assertEquals(
-        null,
-        testObserver.getLastState(),
-        "Last State in Observer is not null");
+    assertEquals(null, testObserver.getLastState(), "Last State in Observer is not null");
   }
 
   @Test
@@ -44,10 +41,7 @@ public class ObserverTest {
         "Observer Failed to Log Available to PoweredOff");
 
     List<SimulatorState> expectedResult =
-        List.of(
-            SimulatorState.BootingUp,
-            SimulatorState.Available,
-            SimulatorState.PoweredOff);
+        List.of(SimulatorState.BootingUp, SimulatorState.Available, SimulatorState.PoweredOff);
 
     assertEquals(
         testObserver.getHistory(),

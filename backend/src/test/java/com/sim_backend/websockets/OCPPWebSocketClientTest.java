@@ -201,9 +201,9 @@ public class OCPPWebSocketClientTest {
             invocation -> {
               response.setMessageID(beat.getMessageID());
               String fullMessage = response.toJsonString();
-              OCPPCannotProcessResponse badResponse =
+              OCPPCannotProcessMessage badResponse =
                   assertThrows(
-                      OCPPCannotProcessResponse.class,
+                      OCPPCannotProcessMessage.class,
                       () -> {
                         client.handleMessage(fullMessage);
                       });
