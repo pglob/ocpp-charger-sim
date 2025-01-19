@@ -46,7 +46,6 @@ public final class Main {
 
     // Run the main simulator loop
     SimulatorLoop.runSimulatorLoop(wsClient);
-
   }
 
   /**

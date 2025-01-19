@@ -19,10 +19,7 @@ public class ObserverTest {
 
   @Test
   void testInit() {
-    assertEquals(
-        null,
-        testObserver.getLastState(),
-        "Last State in Observer is not null");
+    assertEquals(null, testObserver.getLastState(), "Last State in Observer is not null");
   }
 
   @Test
@@ -32,12 +29,44 @@ public class ObserverTest {
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log PoweredOff to Bootingup");
+
     testStateMachine.transition(SimulatorState.Available);
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log BootingUp to Available");
+
+    testStateMachine.transition(SimulatorState.Preparing);
+    assertEquals(
+        testStateMachine.getCurrentState(),
+        testObserver.getLastState(),
+        "Observer Failed to Log Available to Prepraring");
+
+    testStateMachine.transition(SimulatorState.Charging);
+    assertEquals(
+        testStateMachine.getCurrentState(),
+        testObserver.getLastState(),
+        "Observer Failed to Log Preparing to Charging");
+
+    testStateMachine.transition(SimulatorState.Available);
+    assertEquals(
+        testStateMachine.getCurrentState(),
+        testObserver.getLastState(),
+        "Observer Failed to Log Charging to Available");
+
+    testStateMachine.transition(SimulatorState.Preparing);
+    assertEquals(
+        testStateMachine.getCurrentState(),
+        testObserver.getLastState(),
+        "Observer Failed to Log Available to Prepraring");
+    testStateMachine.transition(SimulatorState.Available);
+
+    assertEquals(
+        testStateMachine.getCurrentState(),
+        testObserver.getLastState(),
+        "Observer Failed to Log Charging to Available");
     testStateMachine.transition(SimulatorState.PoweredOff);
+
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
@@ -46,6 +75,11 @@ public class ObserverTest {
     List<SimulatorState> expectedResult =
         List.of(
             SimulatorState.BootingUp,
+            SimulatorState.Available,
+            SimulatorState.Preparing,
+            SimulatorState.Charging,
+            SimulatorState.Available,
+            SimulatorState.Preparing,
             SimulatorState.Available,
             SimulatorState.PoweredOff);
 

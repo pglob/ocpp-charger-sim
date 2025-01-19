@@ -4,18 +4,16 @@ import com.sim_backend.websockets.events.*;
 import com.sim_backend.websockets.messages.*;
 
 /**
- * The Authorize Observer is responsible for handling AuthorizeResponse message
- * received from the Central System.
- * 
+ * The Authorize Observer is responsible for handling AuthorizeResponse message received from the
+ * Central System.
  */
 public class AuthorizeObserver implements OnOCPPMessageListener {
-  
-    /**
+
+  /**
    * Process AuthorizeResponse based on status that is provided by Central System
-   * 
-   * If the message is not an instance of AuthorizeResponse,
-   * ClassCastException is thrown.
-   * 
+   *
+   * <p>If the message is not an instance of AuthorizeResponse, ClassCastException is thrown.
+   *
    * @param message OCPP AuthorizeResponse Message
    * @throws ClassCastException if message is not an AuthorizeResponse
    */

@@ -4,4 +4,6 @@ public enum SimulatorState {
   PoweredOff,
   BootingUp,
   Available,
+  Preparing,
+  Charging
 }
