@@ -37,12 +37,11 @@ public class StopTransactionHandlerTest {
   }
 
   @Test
-  void preAuthorizetest() {
+  void preAuthorizeAcceptedtest() {
     when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
 
     AuthorizeResponse authorizeResponse =
         new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
-    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
 
     doAnswer(
             invocation -> {
@@ -55,6 +54,37 @@ public class StopTransactionHandlerTest {
         .when(client)
         .onReceiveMessage(eq(AuthorizeResponse.class), any());
 
+    handler.preAuthorize("Accepted");
+    verify(client).pushMessage(any(Authorize.class));
+  }
+
+  @Test
+  void preAuthorizeDeniedtest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
+
+    AuthorizeResponse authorizeResponse =
+        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.BLOCKED));
+
+    doAnswer(
+            invocation -> {
+              OnOCPPMessageListener listener = invocation.getArgument(1);
+              OnOCPPMessage message = mock(OnOCPPMessage.class);
+              when(message.getMessage()).thenReturn(authorizeResponse);
+              listener.onMessageReceived(message);
+              return null;
+            })
+        .when(client)
+        .onReceiveMessage(eq(AuthorizeResponse.class), any());
+
+    handler.preAuthorize("Blocked");
+    verify(client).pushMessage(any(Authorize.class));
+  }
+
+  @Test
+  void initiateStopTransactiontest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
+    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
+
     doAnswer(
             invocation -> {
               OnOCPPMessageListener listener = invocation.getArgument(1);
@@ -66,8 +96,8 @@ public class StopTransactionHandlerTest {
         .when(client)
         .onReceiveMessage(eq(StopTransactionResponse.class), any());
 
-    handler.preAuthorize(1, "Accepted", 10);
-    verify(client).pushMessage(any(Authorize.class));
+    handler.initiateStopTransaction();
+
     verify(client).pushMessage(any(StopTransaction.class));
     verify(stateMachine).transition(SimulatorState.Available);
   }

@@ -26,10 +26,13 @@ public class StopTransactionHandler {
     this.client = client;
   }
 
-  /*
-   *  Stop Transaction
+  /**
+   *  Authorization Process before initiating Stop Transaction
+   *  
+   * @param idTag ID of an user
+   * @throws IllegalStateException If stateMachine status is not a Charging state throw error
    */
-  public void preAuthorize(int transactionId, String idTag, int meterStop) {
+  public void preAuthorize(String idTag) {
     // transition to Available, check if StateMachine is Charging
     if (stateMachine.getCurrentState() != SimulatorState.Charging) {
       throw new IllegalStateException(
@@ -38,10 +41,6 @@ public class StopTransactionHandler {
 
     Authorize authorizeMessage = new Authorize(idTag);
     client.pushMessage(authorizeMessage);
-
-    OCPPTime ocppTime = client.getScheduler().getTime();
-    ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
-    String timestamp = zonetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
 
     client.onReceiveMessage(
         AuthorizeResponse.class,
@@ -52,31 +51,33 @@ public class StopTransactionHandler {
           if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
             System.out.println("Authorization Accepted...");
             System.out.println("Proceeding Transaction...");
-            initiateStopTransaction(transactionId, meterStop, timestamp);
           } else {
             System.err.println(
                 "Authorize Denied... Status : " + response.getIdTagInfo().getStatus());
-            stateMachine.transition(SimulatorState.Charging);
           }
         });
   }
 
-  /*
-   * Initiate Stop Transaction after authorization is completed.
-   * Handling StartTransaction Request, Response and simulator status
+  /**
+   * Initiate Stop Transaction
+   * Handling StopTransaction Request, Response and simulator status
+   * If authorization is accepted, change a stateMachine status from Charging to Available
+   * Stays Charging otherwise
    */
-  private void initiateStopTransaction(int transactionId, int meterStart, String timestamp) {
+  public void initiateStopTransaction() {
 
     /*
-     * TODO : Swap meterStart value, Time info
+     * TODO : Swap meterStop, transactionId Value
      */
-    int tempMeterStop = 10;
+    int meterStop = 10;
+    int transactionId = 1;
+
+    OCPPTime ocppTime = client.getScheduler().getTime();
+    ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
+    String timestamp = zonetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
 
     StopTransaction stopTransactionMessage =
-        /*
-         * TODO : Change temp arguments to meterStop
-         */
-        new StopTransaction(transactionId, tempMeterStop, timestamp);
+        new StopTransaction(transactionId, meterStop, timestamp);
     client.pushMessage(stopTransactionMessage);
 
     client.onReceiveMessage(
