@@ -9,7 +9,7 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-public class StopTransactionResponsetest {
+public class StopTransactionResponseTest {
   private static @NotNull StopTransactionResponse getStopTransactionResponse() {
     // Create an StopTransaction response
     StopTransactionResponse response = new StopTransactionResponse("Accepted");
@@ -24,9 +24,8 @@ public class StopTransactionResponsetest {
     StopTransactionResponse response = getStopTransactionResponse();
 
     // Ensure message generation works
-    System.out.println(response.generateMessage().size());
-    assert response.generateMessage().size() == 2;
-    String message = GsonUtilities.toString(response.generateMessage().get(1));
+    assert response.generateMessage().size() == 3;
+    String message = GsonUtilities.toString(response.generateMessage().get(2));
 
     // Validate against schema
     JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/StopTransactionResponse.json");
@@ -37,10 +36,8 @@ public class StopTransactionResponsetest {
         System.out.println(error);
       }
     }
-
-    System.out.println(message);
-
     // Check expected message structure
+    assert message.equals("{\"idTagInfo\":{\"status\":\"Accepted\"}}");
     assert errors.isEmpty();
   }
 }
