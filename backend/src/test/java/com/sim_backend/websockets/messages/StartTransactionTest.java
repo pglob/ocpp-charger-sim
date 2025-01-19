@@ -8,7 +8,6 @@ import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
-import com.sim_backend.websockets.enums.AuthorizationStatus;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
@@ -32,7 +31,7 @@ public class StartTransactionTest {
 
   @Test
   public void testStartTransaction() {
-    StartTransaction request = new StartTransaction(1, AuthorizationStatus.ACCEPTED, 0, time);
+    StartTransaction request = new StartTransaction(1, "Accepted", 0, time);
     String tempTime = time;
 
     // Ensure message generation works

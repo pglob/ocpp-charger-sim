@@ -1,5 +1,6 @@
 package com.sim_backend.transactions;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -37,12 +38,11 @@ public class StartTransactionHandlerTest {
   }
 
   @Test
-  void preAuthorizetest() {
+  void preAuthorizeAcceptedtest() {
     when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Available);
 
     AuthorizeResponse authorizeResponse =
         new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
-    StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
 
     doAnswer(
             invocation -> {
@@ -55,6 +55,41 @@ public class StartTransactionHandlerTest {
         .when(client)
         .onReceiveMessage(eq(AuthorizeResponse.class), any());
 
+    handler.preAuthorize(1, "Accepted");
+    verify(client).pushMessage(any(Authorize.class));
+    verify(stateMachine).transition(SimulatorState.Preparing);
+  }
+
+  @Test
+  void preAuthorizeDeniedtest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Available);
+
+    AuthorizeResponse authorizeResponse =
+        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.BLOCKED));
+
+    doAnswer(
+            invocation -> {
+              OnOCPPMessageListener listener = invocation.getArgument(1);
+              OnOCPPMessage message = mock(OnOCPPMessage.class);
+              when(message.getMessage()).thenReturn(authorizeResponse);
+              listener.onMessageReceived(message);
+              return null;
+            })
+        .when(client)
+        .onReceiveMessage(eq(AuthorizeResponse.class), any());
+
+    handler.preAuthorize(1, "Blocked");
+    verify(client).pushMessage(any(Authorize.class));
+    assertEquals(
+        stateMachine.getCurrentState(), SimulatorState.Available, "State should be Available");
+  }
+
+  @Test
+  void initiateStartTransactiontest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Preparing);
+
+    StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
+
     doAnswer(
             invocation -> {
               OnOCPPMessageListener listener = invocation.getArgument(1);
@@ -66,10 +101,9 @@ public class StartTransactionHandlerTest {
         .when(client)
         .onReceiveMessage(eq(StartTransactionResponse.class), any());
 
-    handler.preAuthorize(1, "Accepted", 0);
-    verify(client).pushMessage(any(Authorize.class));
+    handler.initiateStartTransaction(1, "Accepted", 0);
+
     verify(client).pushMessage(any(StartTransaction.class));
-    verify(stateMachine).transition(SimulatorState.Preparing);
     verify(stateMachine).transition(SimulatorState.Charging);
   }
 }

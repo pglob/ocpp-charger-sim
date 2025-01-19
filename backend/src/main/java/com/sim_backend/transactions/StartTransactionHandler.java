@@ -13,7 +13,7 @@ import lombok.Getter;
 
 /*
  * This class handles sending an authorize request, followed by a StartTransaction message.
- *
+ * 
  */
 @Getter
 public class StartTransactionHandler {
@@ -26,11 +26,16 @@ public class StartTransactionHandler {
     this.client = client;
   }
 
-  /*
-   *  Start Transaction
+  /**
+   *  Authorization Process before Start Transaction
+   *  When Authorize is accepted, change a stateMachine status to Preparing
+   *  Stays Available otherwise 
+   * 
+   *  @param connectorId ID of the connector
+   *  @param idTag ID of the user
+   *  @throws IllegalStateException if stateMachine status is not available 
    */
-  public void preAuthorize(int connectorId, String idTag, int meterStart) {
-    // transition to Preparing, check if StateMachine is Available
+  public void preAuthorize(int connectorId, String idTag) {
     if (stateMachine.getCurrentState() != SimulatorState.Available) {
       throw new IllegalStateException(
           "Cannot start with the current state. current state: " + stateMachine.getCurrentState());
@@ -38,10 +43,6 @@ public class StartTransactionHandler {
 
     Authorize authorizeMessage = new Authorize(idTag);
     client.pushMessage(authorizeMessage);
-
-    OCPPTime ocppTime = client.getScheduler().getTime();
-    ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
-    String timestamp = zonetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
 
     client.onReceiveMessage(
         AuthorizeResponse.class,
@@ -53,33 +54,40 @@ public class StartTransactionHandler {
             System.out.println("Authorization Accepted...");
             System.out.println("Proceeding Transaction...");
             stateMachine.transition(SimulatorState.Preparing);
-            initiateStartTransaction(
-                connectorId, response.getIdTagInfo().getStatus(), meterStart, timestamp);
           } else {
             System.err.println(
                 "Authorize Denied... Status : " + response.getIdTagInfo().getStatus());
-            stateMachine.transition(SimulatorState.Available);
           }
         });
   }
 
-  /*
-   * Initiate Start Transaction after authorization is completed.
+  /**
+   * Initiate Start Transaction
    * Handling StartTransaction Request, Response and simulator status
+   * If authorization is accepted, change a stateMachine status to Charging
+   * Switch to Available otherwise
+   * 
+   * @param connectorId ID of connector
+   * @param connectorId ID of user
+   * @param meterStart initial value of meter
+   * 
    */
-  private void initiateStartTransaction(
-      int connectorId, AuthorizationStatus idTag, int meterStart, String timestamp) {
+  public void initiateStartTransaction(int connectorId, String idTag, int meterStart) {
 
     /*
      * TODO : Swap meterStart value, Time info
      */
-    int tempMeterStart = 0;
+    int mterStart = 0;
+
+    OCPPTime ocppTime = client.getScheduler().getTime();
+    ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
+    String timestamp = zonetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
 
     StartTransaction startTransactionMessage =
         /*
          * TODO : Change temp arguments to meterStart
          */
-        new StartTransaction(connectorId, idTag, tempMeterStart, timestamp);
+        new StartTransaction(connectorId, idTag, meterStart, timestamp);
     client.pushMessage(startTransactionMessage);
 
     client.onReceiveMessage(
