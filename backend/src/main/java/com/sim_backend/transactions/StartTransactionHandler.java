@@ -3,9 +3,12 @@ package com.sim_backend.transactions;
 import com.sim_backend.state.IllegalStateException;
 import com.sim_backend.state.SimulatorState;
 import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.*;
 import com.sim_backend.websockets.messages.*;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.Getter;
 
 /*
@@ -26,7 +29,7 @@ public class StartTransactionHandler {
   /*
    *  Start Transaction
    */
-  public void preAuthorize(int connectorId, String idTag, int meterStart, String timestamp) {
+  public void preAuthorize(int connectorId, String idTag, int meterStart) {
     // transition to Preparing, check if StateMachine is Available
     if (stateMachine.getCurrentState() != SimulatorState.Available) {
       throw new IllegalStateException(
@@ -35,6 +38,10 @@ public class StartTransactionHandler {
 
     Authorize authorizeMessage = new Authorize(idTag);
     client.pushMessage(authorizeMessage);
+
+    OCPPTime ocppTime = client.getScheduler().getTime();
+    ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
+    String timestamp = zonetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
 
     client.onReceiveMessage(
         AuthorizeResponse.class,
@@ -67,13 +74,12 @@ public class StartTransactionHandler {
      * TODO : Swap meterStart value, Time info
      */
     int tempMeterStart = 0;
-    String tempTimestamp = "2025-01-19T00:00:00Z";
 
     StartTransaction startTransactionMessage =
         /*
-         * TODO : Change temp arguments to meterStart, timestamp
+         * TODO : Change temp arguments to meterStart
          */
-        new StartTransaction(connectorId, idTag, tempMeterStart, tempTimestamp);
+        new StartTransaction(connectorId, idTag, tempMeterStart, timestamp);
     client.pushMessage(startTransactionMessage);
 
     client.onReceiveMessage(
