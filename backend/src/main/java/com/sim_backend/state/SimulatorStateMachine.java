@@ -15,7 +15,9 @@ public class SimulatorStateMachine {
       Map.of(
           SimulatorState.PoweredOff, Set.of(SimulatorState.BootingUp),
           SimulatorState.BootingUp, Set.of(SimulatorState.Available),
-          SimulatorState.Available, Set.of(SimulatorState.PoweredOff));
+          SimulatorState.Available, Set.of(SimulatorState.Preparing, SimulatorState.PoweredOff),
+          SimulatorState.Preparing, Set.of(SimulatorState.Charging, SimulatorState.Available),
+          SimulatorState.Charging, Set.of(SimulatorState.Available));
 
   /** Initializes the state machine in the PoweredOff state. */
   public SimulatorStateMachine() {
