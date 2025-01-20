@@ -94,16 +94,26 @@ class MessageControllerTest {
   }
 
   @Test
-  void testStatus() {
+void testStatus() {
     // Arrange
     doNothing().when(mockWebSocketClient).pushMessage(any(StatusNotification.class));
+    String jsonRequest = "{"
+        + "\"connectorId\": \"1\","
+        + "\"errorCode\": \"HighTemperature\","
+        + "\"info\": \"\","
+        + "\"status\": \"Faulted\","
+        + "\"timestamp\": \"\","
+        + "\"vendorId\": \"\","
+        + "\"vendorErrorCode\": \"\""
+        + "}";
+    when(mockContext.body()).thenReturn(jsonRequest);
 
     // Act
     messageController.status(mockContext);
 
     // Assert
     verify(mockContext).result("OK");
-  }
+}
 
   @Test
   void testRegisterRoutes() {
