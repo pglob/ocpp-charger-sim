@@ -13,6 +13,11 @@ import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.StatusNotification;
+import com.sim_backend.websockets.enums.ChargePointErrorCode;
+import com.sim_backend.websockets.enums.ChargePointStatus;
+import java.time.OffsetDateTime;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URI;
@@ -71,10 +76,21 @@ public class MessageController extends ControllerBase {
   }
 
   public void status(Context ctx) {
-    StatusNotification msg = new StatusNotification();
+    String requestBody = ctx.body();
+    JsonObject json = JsonParser.parseString(requestBody).getAsJsonObject();
+    int connectorId = json.has("connectorId") ? json.get("connectorId").getAsInt() : 0; 
+    ChargePointErrorCode errorCode = json.has("errorCode") ? ChargePointErrorCode.valueOf(json.get("errorCode").getAsString()) : ChargePointErrorCode.NO_ERROR;
+    String info = json.has("info") ? json.get("info").getAsString() : "";
+    ChargePointStatus status = json.has("status") ? ChargePointStatus.valueOf(json.get("status").getAsString()) : ChargePointStatus.AVAILABLE;
+    OffsetDateTime timestamp = json.has("timestamp") && !json.get("timestamp").getAsString().isEmpty()
+        ? OffsetDateTime.parse(json.get("timestamp").getAsString())
+        : OffsetDateTime.now();
+    String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString() : "";
+    String vendorErrorCode = json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString() : "";
+    StatusNotification msg = new StatusNotification(connectorId, errorCode, info, status, timestamp, vendorId, vendorErrorCode);
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
-  }
+}
 
   @Override
   public void registerRoutes(Javalin app) {

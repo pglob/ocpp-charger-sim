@@ -42,14 +42,13 @@ public final class StatusNotification extends OCPPMessageRequest {
   @SerializedName("vendorErrorCode")
   private String vendorErrorCode;
 
-  /*Not sure how to structure it yet,use default values now*/
-  public StatusNotification() {
-    this.connectorId = 0; 
-    this.errorCode = ChargePointErrorCode.NO_ERROR; 
-    this.info = ""; 
-    this.status = ChargePointStatus.AVAILABLE; 
-    this.timestamp = OffsetDateTime.now(); 
-    this.vendorId = StatusNotificationConstants.CHARGE_POINT_VENDOR;
-    this.vendorErrorCode = ""; 
-}
+  public StatusNotification(int connectorId, ChargePointErrorCode errorCode, String info, ChargePointStatus status, OffsetDateTime timestamp, String vendorId, String vendorErrorCode) {
+    this.connectorId = connectorId;
+    this.errorCode = errorCode;
+    this.info = info != null ? info : "";
+    this.status = status;
+    this.timestamp = timestamp != null ? timestamp : OffsetDateTime.now();
+    this.vendorId = vendorId != null ? vendorId : "";
+    this.vendorErrorCode = vendorErrorCode != null ? vendorErrorCode : "";
+  }
 }
