@@ -31,6 +31,9 @@ public final class Main {
 
     // Create Simulator State
     SimulatorStateMachine stateMachine = new SimulatorStateMachine();
+
+    // Temporary comment
+
     // Create Observers
     // TODO: Add other observers
     BootNotificationObserver bootObserver = new BootNotificationObserver(wsClient, stateMachine);
