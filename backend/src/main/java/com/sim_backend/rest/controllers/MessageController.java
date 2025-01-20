@@ -79,9 +79,9 @@ public class MessageController extends ControllerBase {
     String requestBody = ctx.body();
     JsonObject json = JsonParser.parseString(requestBody).getAsJsonObject();
     int connectorId = json.has("connectorId") ? json.get("connectorId").getAsInt() : 0; 
-    ChargePointErrorCode errorCode = json.has("errorCode") ? ChargePointErrorCode.valueOf(json.get("errorCode").getAsString()) : ChargePointErrorCode.NO_ERROR;
+    ChargePointErrorCode errorCode = json.has("errorCode") ? ChargePointErrorCode.valueOf(json.get("errorCode").getAsString()) : ChargePointErrorCode.NoError;
     String info = json.has("info") ? json.get("info").getAsString() : "";
-    ChargePointStatus status = json.has("status") ? ChargePointStatus.valueOf(json.get("status").getAsString()) : ChargePointStatus.AVAILABLE;
+    ChargePointStatus status = json.has("status") ? ChargePointStatus.valueOf(json.get("status").getAsString()) : ChargePointStatus.Available;
     OffsetDateTime timestamp = json.has("timestamp") && !json.get("timestamp").getAsString().isEmpty()
         ? OffsetDateTime.parse(json.get("timestamp").getAsString())
         : OffsetDateTime.now();

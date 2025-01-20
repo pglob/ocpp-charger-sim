@@ -7,6 +7,7 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.Heartbeat;
+import com.sim_backend.websockets.messages.StatusNotification;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URISyntaxException;
