@@ -8,7 +8,7 @@
     "react-scripts": "5.0.0"
   },
   "scripts": {
-    "format": "prettier --write src/**/*.js",
+    "format": "prettier --write \"src/**/*.js\"",
     "lint": "eslint . --ext .js,.jsx",
     "start": "PORT=3030 react-scripts start",
     "build": "react-scripts build",
