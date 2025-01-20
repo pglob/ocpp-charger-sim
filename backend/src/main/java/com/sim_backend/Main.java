@@ -30,7 +30,7 @@ public final class Main {
     registerRoutes(app, wsClient);
 
     // Create Simulator State
-     SimulatorStateMachine stateMachine = new SimulatorStateMachine();
+    SimulatorStateMachine stateMachine = new SimulatorStateMachine();
     // Create Observers
     // TODO: Add other observers
     BootNotificationObserver bootObserver = new BootNotificationObserver(wsClient, stateMachine);
