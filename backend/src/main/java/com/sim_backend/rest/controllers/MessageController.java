@@ -78,6 +78,12 @@ public class MessageController extends ControllerBase {
   public void status(Context ctx) {
     String requestBody = ctx.body();
     JsonObject json = JsonParser.parseString(requestBody).getAsJsonObject();
+    
+    if (!json.has("connectorId") || !json.has("errorCode") || !json.has("status")) {
+        ctx.status(400).result("Missing required fields: connectorId, errorCode, status");
+        return;
+    }
+
     int connectorId = json.has("connectorId") ? json.get("connectorId").getAsInt() : 0; 
     ChargePointErrorCode errorCode = json.has("errorCode") ? ChargePointErrorCode.valueOf(json.get("errorCode").getAsString()) : ChargePointErrorCode.NoError;
     String info = json.has("info") ? json.get("info").getAsString() : "";
@@ -87,6 +93,7 @@ public class MessageController extends ControllerBase {
         : OffsetDateTime.now();
     String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString() : "";
     String vendorErrorCode = json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString() : "";
+    
     StatusNotification msg = new StatusNotification(connectorId, errorCode, info, status, timestamp, vendorId, vendorErrorCode);
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
