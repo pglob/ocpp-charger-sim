@@ -305,4 +305,13 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void addPreviousMessage(final OCPPMessage msg) {
     queue.addPreviousMessage(msg);
   }
+
+  /**
+   * Deletes an OCPPMessage from the previous messages.
+   *
+   * @param msg The message we wish to delete.
+   */
+  public void clearPreviousMessage(final OCPPMessage msg) {
+    queue.clearPreviousMessage(msg);
+  }
 }
