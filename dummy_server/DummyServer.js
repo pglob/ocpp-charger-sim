@@ -7,7 +7,18 @@ app.use(express.json());
 const receivedMessages = [];
 
 // WebSocket server
-const wss = new WebSocketServer({ port: 9000 });
+const wss = new WebSocket.Server({
+  port: 9000,
+  handleProtocols: (protocols, request) => {
+    if (protocols.includes("ocpp1.6")) {
+      return "ocpp1.6";
+    }
+
+    console.error("No supported subprotocol found");
+    return false;
+  },
+});
+
 wss.on("connection", (ws) => {
   console.log("WebSocket connection established");
 

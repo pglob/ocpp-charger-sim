@@ -80,7 +80,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void onOpen(ServerHandshake serverHandshake) {
     String protocol = serverHandshake.getFieldValue("Sec-WebSocket-Protocol");
     if (protocol == null || !protocol.contains("ocpp1.6")) {
-      log.error("Websocket Handshake failed ocpp1.6 is not supported: {}", protocol);
+      log.error("Handshake failed no supported protocols provided: {}", protocol);
       throw new OCPPUnsupportedProtocol(protocol);
     }
   }
