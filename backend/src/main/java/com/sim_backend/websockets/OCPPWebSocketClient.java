@@ -11,7 +11,7 @@ import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPBadCallID;
 import com.sim_backend.websockets.exceptions.OCPPBadClass;
-import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
+import com.sim_backend.websockets.exceptions.OCPPCannotProcessMessage;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedProtocol;
@@ -60,9 +60,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
   @VisibleForTesting
   public final Map<Class<?>, CopyOnWriteArrayList<OnOCPPMessageListener>> onReceiveMessage =
       new ConcurrentHashMap<>();
-
-  /** The previous messages we have sent. * */
-  private final Map<String, OCPPMessage> previousMessages = new ConcurrentHashMap<>();
 
   /** Our message scheduler. */
   @Getter private final MessageScheduler scheduler = new MessageScheduler(this);
@@ -132,19 +129,27 @@ public class OCPPWebSocketClient extends WebSocketClient {
       }
       case OCPPMessage.CALL_ID_RESPONSE -> {
         // handling a CallResult
-        if (this.previousMessages.get(msgId) == null) {
-          log.warn("Received OCPP message with message unknown ID {}: {}", msgId, s);
-          throw new OCPPCannotProcessResponse(s, msgId);
+        OCPPMessage prevMessage = this.queue.getPreviousMessage(msgId);
+        if (prevMessage == null) {
+          log.warn("Received OCPP response message with an unknown ID {}: {}", msgId, s);
+          throw new OCPPCannotProcessMessage(s, msgId);
         }
 
-        OCPPMessageInfo info =
-            this.previousMessages.remove(msgId).getClass().getAnnotation(OCPPMessageInfo.class);
+        this.queue.clearPreviousMessage(prevMessage);
+        OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
         messageName = info.messageName() + "Response";
         data = array.get(PAYLOAD_INDEX - 1).getAsJsonObject();
       }
       case OCPPMessage.CALL_ID_ERROR -> {
-        // handling a CallError.
+        OCPPMessage prevMessage = this.queue.getPreviousMessage(msgId);
+        if (prevMessage == null) {
+          log.warn("Received OCPP error message with an unknown ID {}: {}", msgId, s);
+          throw new OCPPCannotProcessMessage(s, msgId);
+        }
+
+        this.queue.clearPreviousMessage(prevMessage);
         OCPPMessageError error = new OCPPMessageError(array);
+        error.setErroredMessage(prevMessage);
         this.handleReceivedMessage(OCPPMessageError.class, error);
         log.warn("Received OCPPError {}", error.toString());
         return;
@@ -280,6 +285,15 @@ public class OCPPWebSocketClient extends WebSocketClient {
   }
 
   /**
+   * Return if the send queue is busy.
+   *
+   * @return True if it's busy
+   */
+  public boolean isBusy() {
+    return queue.isBusy();
+  }
+
+  /**
    * Pop and send the message on top of the send queue.
    *
    * @return The Send OCPP Message.
@@ -299,6 +313,15 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param msg The message we wish to add.
    */
   public void addPreviousMessage(final OCPPMessage msg) {
-    this.previousMessages.put(msg.getMessageID(), msg);
+    queue.addPreviousMessage(msg);
+  }
+
+  /**
+   * Deletes an OCPPMessage from the previous messages.
+   *
+   * @param msg The message we wish to delete.
+   */
+  public void clearPreviousMessage(final OCPPMessage msg) {
+    queue.clearPreviousMessage(msg);
   }
 }
