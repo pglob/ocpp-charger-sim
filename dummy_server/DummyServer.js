@@ -7,7 +7,7 @@ app.use(express.json());
 const receivedMessages = [];
 
 // WebSocket server
-const wss = new WebSocket.Server({
+const wss = new WebSocketServer({
   port: 9000,
   handleProtocols: (protocols, request) => {
     if (protocols.includes("ocpp1.6")) {
