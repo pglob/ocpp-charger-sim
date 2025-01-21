@@ -1,7 +1,7 @@
 package com.sim_backend;
 
-import com.sim_backend.state.SimulatorState;
 import com.sim_backend.websockets.constants.BootNotificationConstants;
+import com.sim_backend.websockets.enums.MeterValuesSampledData;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,9 +26,6 @@ public class ConfigurationRegistry {
 
   /** The ChargeBox's Serial Number */
   private String centralSystemUrl;
-
-  /** Current state of the simulator */
-  private SimulatorState simulatorState;
 
   /** The Charge Point's Vendor. */
   private final String chargePointVendor = BootNotificationConstants.CHARGE_POINT_VENDOR;
@@ -57,4 +54,14 @@ public class ConfigurationRegistry {
 
   /** Meter Serial Number. */
   private final String meterSerialNumber = BootNotificationConstants.METER_SERIAL_NUMBER;
+
+  /** A sample meter value interval. */
+  private int MeterValueSampleInterval = 30;
+
+  /** Authorization Enable check. */
+  boolean AuthEnabled = true;
+
+  /** Sample meter value data. */
+  private MeterValuesSampledData meterValuesSampledData =
+      MeterValuesSampledData.ENERGY_ACTIVE_IMPORT_REGISTER;
 }
