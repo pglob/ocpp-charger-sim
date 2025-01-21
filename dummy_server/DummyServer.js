@@ -10,7 +10,7 @@ const receivedMessages = [];
 const wss = new WebSocketServer({
   port: 9000,
   handleProtocols: (protocols, request) => {
-    if (protocols.includes("ocpp1.6")) {
+    if (protocols.has("ocpp1.6")) {
       return "ocpp1.6";
     }
 
