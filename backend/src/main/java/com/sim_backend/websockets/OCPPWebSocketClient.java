@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
+import java.util.List;
 
 /** A WebSocket client for handling OCPP Messages. */
 @Slf4j
@@ -67,6 +68,48 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** The headers we send with our Websocket connection */
   public static final Map<String, String> headers = Map.of("Sec-WebSocket-Protocol", "ocpp1.6");
 
+  /** List to store transmitted messages. */
+  private final List<String> txMessages = new CopyOnWriteArrayList<>();
+
+  /** List to store received messages. */
+  private final List<String> rxMessages = new CopyOnWriteArrayList<>();
+
+  /**
+   * Record a transmitted message.
+   *
+   * @param message The transmitted message.
+   */
+  public void recordTxMessage(String message) {
+    txMessages.add(message);
+  }
+
+  /**
+   * Record a received message.
+   *
+   * @param message The received message.
+   */
+  public void recordRxMessage(String message) {
+    rxMessages.add(message);
+  }
+
+  /**
+   * Get the list of transmitted messages.
+   *
+   * @return List of transmitted messages.
+   */
+  public List<String> getSentMessages() {
+    return txMessages;
+  }
+
+  /**
+   * Get the list of received messages.
+   *
+   * @return List of received messages.
+   */
+  public List<String> getReceivedMessages() {
+    return rxMessages;
+  }
+
   /**
    * Create an OCPP WebSocket Client.
    *
@@ -96,6 +139,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void onMessage(String s) {
     try {
       this.handleMessage(s);
+      this.recordRxMessage(s); // Record received message
     } catch (Exception exception) {
       log.error("Received Bad OCPP Message: ", exception);
     }
@@ -165,6 +209,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
 
     OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
+    rxMessages.add(s);  // Store the received message
     message.setMessageID(msgId);
     this.handleReceivedMessage(messageClass, message);
   }
@@ -262,8 +307,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @param message the message to be sent.
    */
-  public boolean pushMessage(final OCPPMessage message) {
-    return queue.pushMessage(message);
+  public void pushMessage(final OCPPMessage message) {
+    queue.pushMessage(message);
+    recordTxMessage(message.toJsonString()); // Record transmitted message
   }
 
   /**
