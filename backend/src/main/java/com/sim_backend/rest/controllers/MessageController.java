@@ -117,6 +117,14 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
+public void getSentMessages(Context ctx) {
+    ctx.json(webSocketClient.getSentMessages());  // Return sent messages as JSON
+}
+
+public void getReceivedMessages(Context ctx) {
+    ctx.json(webSocketClient.getReceivedMessages());  // Return received messages as JSON
+}
+
   @Override
   public void registerRoutes(Javalin app) {
     app.post("/api/message/authorize", this::authorize);
@@ -125,5 +133,7 @@ public class MessageController extends ControllerBase {
     app.post("/api/state/online", this::online);
     app.post("/api/state/offline", this::offline);
     app.post("/api/state/status", this::status);
+    app.get("/api/messages/sentmessage", this::getSentMessages);
+    app.get("/api/messages/receivedmessage", this::getReceivedMessages);
   }
 }
