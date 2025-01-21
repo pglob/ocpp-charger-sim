@@ -24,7 +24,7 @@ public class ConfigurationRegistry {
   /** Authorize response id tag */
   private String idTag;
 
-  /** The ChargeBox's Serial Number */
+  /** The Central System's url */
   private String centralSystemUrl;
 
   /** The Charge Point's Vendor. */
