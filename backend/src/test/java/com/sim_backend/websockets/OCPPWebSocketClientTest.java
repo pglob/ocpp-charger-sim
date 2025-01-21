@@ -485,33 +485,33 @@ public class OCPPWebSocketClientTest {
 
     verify(client, times(2)).send(anyString());
   }
-    @Test
-    void testRequestSynchronicity2() throws InterruptedException, OCPPMessageFailure {
-        doAnswer(invocation -> null).when(client).send(anyString());
 
-        Heartbeat beat = new Heartbeat();
-        HeartbeatResponse beatResponse = new HeartbeatResponse();
-        beatResponse.setMessageID(beat.getMessageID());
+  @Test
+  void testRequestSynchronicity2() throws InterruptedException, OCPPMessageFailure {
+    doAnswer(invocation -> null).when(client).send(anyString());
 
-        Heartbeat beat2 = new Heartbeat();
+    Heartbeat beat = new Heartbeat();
+    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    beatResponse.setMessageID(beat.getMessageID());
 
-        client.pushMessage(beat);
-        assert client.size() == 1;
-        client.pushMessage(beat2);
-        assert client.size() == 2;
+    Heartbeat beat2 = new Heartbeat();
 
-        client.popAllMessages();
-        assertFalse(client.isEmpty());
-        verify(client, times(1)).send(anyString());
-        assertTrue(client.isBusy());
+    client.pushMessage(beat);
+    assert client.size() == 1;
+    client.pushMessage(beat2);
+    assert client.size() == 2;
 
-        client.clearPreviousMessage(beat);
+    client.popAllMessages();
+    assertFalse(client.isEmpty());
+    verify(client, times(1)).send(anyString());
+    assertTrue(client.isBusy());
 
-        assertFalse(client.isBusy());
+    client.clearPreviousMessage(beat);
 
-        client.popAllMessages();
-        verify(client, times(2)).send(anyString());
-        assertTrue(client.isEmpty());
+    assertFalse(client.isBusy());
 
-    }
+    client.popAllMessages();
+    verify(client, times(2)).send(anyString());
+    assertTrue(client.isEmpty());
+  }
 }
