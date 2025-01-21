@@ -9,11 +9,7 @@ import com.google.gson.JsonParseException;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
-import com.sim_backend.websockets.exceptions.OCPPBadCallID;
-import com.sim_backend.websockets.exceptions.OCPPBadClass;
-import com.sim_backend.websockets.exceptions.OCPPCannotProcessResponse;
-import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
-import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
+import com.sim_backend.websockets.exceptions.*;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
@@ -66,19 +62,28 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** Our message scheduler. */
   @Getter private final MessageScheduler scheduler = new MessageScheduler(this);
 
+  /** The headers we send with our Websocket connection */
+  public static final Map<String, String> headers = Map.of("Sec-WebSocket-Protocol", "ocpp1.6");
+
   /**
    * Create an OCPP WebSocket Client.
    *
    * @param serverUri The Websocket Address.
    */
   public OCPPWebSocketClient(final URI serverUri) {
-    super(serverUri, new Draft_6455(), null, CONNECT_TIMEOUT);
+    super(serverUri, new Draft_6455(), headers, CONNECT_TIMEOUT);
     this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
   }
 
   @Override
-  public void onOpen(ServerHandshake serverHandshake) {}
+  public void onOpen(ServerHandshake serverHandshake) {
+    String protocol = serverHandshake.getFieldValue("Sec-WebSocket-Protocol");
+    if (protocol == null || !protocol.contains("ocpp1.6")) {
+      log.error("Websocket Handshake failed ocpp1.6 is not supported: {}", protocol);
+      throw new OCPPUnsupportedProtocol(protocol);
+    }
+  }
 
   /**
    * When we receive an OCPP message.
