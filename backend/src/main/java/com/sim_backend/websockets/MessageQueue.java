@@ -31,7 +31,7 @@ public class MessageQueue {
   public static final int MAX_REATTEMPTS = 5;
 
   /** The time we consider a Request Message not valid anymore */
-  public static final int RESPONSE_TIME_OUT = 15;
+  public static final int RESPONSE_TIME_OUT = 30;
 
   /** The previous messages we have sent. */
   private final Map<String, TimedMessage> previousMessages = new ConcurrentHashMap<>();
