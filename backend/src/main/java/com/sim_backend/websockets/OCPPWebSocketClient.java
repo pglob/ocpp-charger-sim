@@ -18,6 +18,9 @@ import com.sim_backend.websockets.exceptions.OCPPUnsupportedProtocol;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
-import java.util.List;
 
 /** A WebSocket client for handling OCPP Messages. */
 @Slf4j
@@ -80,7 +82,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message The transmitted message.
    */
   public void recordTxMessage(String message) {
-    txMessages.add(message);
+    String timestamp = OffsetDateTime.now(ZoneOffset.UTC).toString();
+    String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
+    txMessages.add(messageWithTimestamp);
   }
 
   /**
@@ -209,7 +213,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
 
     OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
-    rxMessages.add(s);  // Store the received message
+    rxMessages.add(s); // Store the received message
     message.setMessageID(msgId);
     this.handleReceivedMessage(messageClass, message);
   }
