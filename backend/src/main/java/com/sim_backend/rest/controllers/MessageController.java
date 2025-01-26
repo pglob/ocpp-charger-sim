@@ -117,13 +117,13 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
-public void getSentMessages(Context ctx) {
-    ctx.json(webSocketClient.getSentMessages());  // Return sent messages as JSON
-}
+  public void getSentMessages(Context ctx) {
+    ctx.json(webSocketClient.getSentMessages()); // Return sent messages as JSON
+  }
 
-public void getReceivedMessages(Context ctx) {
-    ctx.json(webSocketClient.getReceivedMessages());  // Return received messages as JSON
-}
+  public void getReceivedMessages(Context ctx) {
+    ctx.json(webSocketClient.getReceivedMessages()); // Return received messages as JSON
+  }
 
   @Override
   public void registerRoutes(Javalin app) {
