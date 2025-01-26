@@ -4,6 +4,7 @@ import AuthorizeButton from '../components/buttons/AuthorizeButton';
 import BootButton from '../components/buttons/BootButton';
 import HeartbeatButton from '../components/buttons/HeartbeatButton';
 import ButtonBase from './buttons/ButtonBase';
+import '../styles/styles.css';
 
 // Implementation of the button component, which includes a drop-down menu and an online/offline button
 function Button({ isOnline, setIsOnline }) {
@@ -33,34 +34,23 @@ function Button({ isOnline, setIsOnline }) {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="button-container">
       {isOnline && (
         <>
           {/* Dropdown toggle button */}
-          <button onClick={handleDropdown} style={{ marginRight: '10px' }}>
+          <button onClick={handleDropdown} className="dropdown-toggle">
             {openDropdown ? 'Close Menu' : 'Send Messages'}
           </button>
 
           {/* Dropdown menu */}
           {openDropdown && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '100%',
-                border: '1px solid #ddd',
-                padding: '10px',
-                marginTop: '10px',
-                boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.2)',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
+            <div className="dropdown-menu">
               {/* Render buttons dynamically */}
               {buttons.map((button) => (
                 <button
                   key={button.name}
                   onClick={() => button.postRequest()} // Trigger specific button's postRequest
-                  style={{ marginBottom: '8px' }}
+                  className="dropdown-button"
                 >
                   {button.name}
                 </button>
@@ -71,7 +61,7 @@ function Button({ isOnline, setIsOnline }) {
       )}
 
       {/* Bring Online/Take Offline button */}
-      <button onClick={handleOnlineOffline} style={{ marginTop: '10px' }}>
+      <button onClick={handleOnlineOffline} className="dropdown-button">
         {isOnline ? 'Take Offline' : 'Bring Online'}
       </button>
     </div>
