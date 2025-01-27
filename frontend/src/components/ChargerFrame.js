@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './Button';
+import '../styles/styles.css';
 
 function ChargerFrame() {
   const [isOnline, setIsOnline] = useState(true); // Track online/offline state
@@ -12,26 +13,8 @@ function ChargerFrame() {
   ];
 
   return (
-    <div
-      style={{
-        width: '300px',
-        border: '2px solid #000',
-        borderRadius: '8px',
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        backgroundColor: '#f9f9f9',
-      }}
-    >
-      <div
-        style={{
-          marginBottom: '20px', // Larger gap for Charger Name
-          fontSize: '18px', // Larger font for Charger Name
-          fontWeight: 'bold', // Bold Charger Name
-        }}
-      >
+    <div className="charger-frame">
+      <div className="charger-name">
         <p style={{ margin: '0', textAlign: 'left' }}>
           <strong>Charger Name:</strong> Sample A
         </p>
@@ -40,9 +23,9 @@ function ChargerFrame() {
       {/*the data displayed below for State, Meter value etc are temporary, will replace
     with real data later*/}
       {textContent.map((item, index) => (
-        <div key={index} style={{ marginBottom: '5px' }}>
+        <div key={index} className="text-item">
           {/* Smaller margin */}
-          <p style={{ margin: '0', textAlign: 'left' }}>
+          <p className="text-item">
             {/* Left-aligned text */}
             <strong>{item.label}:</strong> {item.value}
           </p>
@@ -50,32 +33,8 @@ function ChargerFrame() {
       ))}
       {isOnline && (
         <>
-          <button
-            style={{
-              width: '200px',
-              padding: '10px',
-              margin: '10px 0',
-              border: '2px solid #000',
-              borderRadius: '8px',
-              backgroundColor: '#fff',
-              cursor: 'pointer',
-            }}
-          >
-            Plug in Vehicle
-          </button>
-          <button
-            style={{
-              width: '200px',
-              padding: '10px',
-              margin: '10px 0',
-              border: '2px solid #000',
-              borderRadius: '8px',
-              backgroundColor: '#fff',
-              cursor: 'pointer',
-            }}
-          >
-            Send custom message
-          </button>
+          <button className="button">Plug in Vehicle</button>
+          <button className="button">Send custom message</button>
         </>
       )}
       <Button isOnline={isOnline} setIsOnline={setIsOnline} />
