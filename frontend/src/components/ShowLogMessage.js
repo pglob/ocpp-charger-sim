@@ -12,9 +12,9 @@ const ShowLogMessages = () => {
   const parseMessage = (message) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
-      const [TimeStamp, NumId, userId, messageType, payload] = parsedMessage;
+      const [TimeStamp, NumId, userId, RequestType, payload] = parsedMessage;
 
-      const formattedTime = new Date(TimeStamp).toLocaleString(); // format timestamp to a readable string
+      const formattedTime = new Date(TimeStamp).toLocaleString(); // Format timestamp to a readable string
 
       const handleToggleDetails = () => {
         setExpandedMessages((prevExpanded) => {
@@ -29,25 +29,80 @@ const ShowLogMessages = () => {
       };
 
       return (
-        <div key={userId} style={{ marginBottom: '20px' }}>
-          <p>
-            <strong>Time:</strong> {formattedTime}
-          </p>
-          <p>
-            <strong>Message Type:</strong> {messageType}
-          </p>
-          <p>
-            <strong>Number ID:</strong> {NumId}
-          </p>
+        <div
+          key={userId}
+          style={{
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            padding: '10px',
+            marginBottom: '20px',
+            backgroundColor: '#fff',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          {/* Grouped Content */}
+          <div
+            style={{
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <div style={{ flexGrow: 1 }}>
+              <p>{formattedTime}</p>
+            </div>
+            <div
+              style={{
+                backgroundColor: '#E8F0FE',
+                border: '1px solid #007BFF',
+                borderRadius: '4px',
+                padding: '5px 10px',
+                fontWeight: 'bold',
+                color: '#007BFF',
+                textAlign: 'center',
+              }}
+            >
+              {RequestType}
+            </div>
+          </div>
 
-          {/* Show "Show Details" button to expand the rest */}
-          <button onClick={handleToggleDetails}>
-            {expandedMessages.has(userId) ? 'Hide Details' : 'Show Details'}
-          </button>
+          {/* Message Number ID and Show Details Button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ flexGrow: 1 }}>
+              <p>
+                <strong>Message Number ID:</strong> {NumId}
+              </p>
+            </div>
+            <button
+              onClick={handleToggleDetails}
+              style={{
+                backgroundColor: '#007BFF',
+                color: '#fff',
+                padding: '5px 10px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              {expandedMessages.has(userId) ? 'Hide Details' : 'Show Details'}
+            </button>
+          </div>
 
-          {/* Show extra details when expanded */}
+          {/* Expanded Details */}
           {expandedMessages.has(userId) && (
-            <div style={{ marginTop: '10px', paddingLeft: '20px' }}>
+            <div
+            // style={{
+            //   marginTop: '10px',
+            //   padding: '10px',
+            //   border: '1px solid #ddd',
+            //   borderRadius: '8px',
+            //   backgroundColor: '#f9f9f9',
+            // }}
+            >
+              <p>
+                <strong>User ID:</strong> {userId}
+              </p>
               {Object.entries(payload).map(([key, value]) => (
                 <p key={key}>
                   <strong>{key}:</strong> {value}
