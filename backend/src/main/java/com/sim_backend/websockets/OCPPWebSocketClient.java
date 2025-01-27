@@ -93,7 +93,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message The received message.
    */
   public void recordRxMessage(String message) {
-    rxMessages.add(message);
+    String timestamp = OffsetDateTime.now(ZoneOffset.UTC).toString();
+    String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
+    rxMessages.add(messageWithTimestamp);
   }
 
   /**
@@ -213,7 +215,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
 
     OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
-    rxMessages.add(s); // Store the received message
     message.setMessageID(msgId);
     this.handleReceivedMessage(messageClass, message);
   }
