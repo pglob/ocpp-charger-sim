@@ -133,7 +133,7 @@ public class MessageController extends ControllerBase {
     app.post("/api/state/online", this::online);
     app.post("/api/state/offline", this::offline);
     app.post("/api/state/status", this::status);
-    app.get("/api/messages/sentmessage", this::getSentMessages);
-    app.get("/api/messages/receivedmessage", this::getReceivedMessages);
+    app.get("/api/log/sentmessage", this::getSentMessages);
+    app.get("/api/log/receivedmessage", this::getReceivedMessages);
   }
 }

@@ -16,6 +16,17 @@ const ShowLogMessages = () => {
 
       const formattedTime = new Date(TimeStamp).toLocaleString(); // Format timestamp to a readable string
 
+      // Map NumId to representive labels
+      const numIdLabel =
+        {
+          2: 'Call',
+          3: 'Result',
+          4: 'Error',
+        }[NumId] || `Unknown`;
+
+      // Format the timestamp and request type
+      const formattedMessageLine = `${formattedTime} - ${RequestType}`;
+
       const handleToggleDetails = () => {
         setExpandedMessages((prevExpanded) => {
           const updated = new Set(prevExpanded);
@@ -31,7 +42,9 @@ const ShowLogMessages = () => {
       return (
         <div
           key={userId}
+          onClick={handleToggleDetails}
           style={{
+            cursor: 'pointer',
             border: '1px solid #ccc',
             borderRadius: '8px',
             padding: '10px',
@@ -46,12 +59,14 @@ const ShowLogMessages = () => {
               marginBottom: '10px',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
+              gap: '10px', // Space between timestamp, request type, and numIdLabel
             }}
           >
-            <div style={{ flexGrow: 1 }}>
-              <p>{formattedTime}</p>
-            </div>
+            <p style={{ margin: 0, fontWeight: 'bold' }}>
+              {formattedMessageLine}
+            </p>
+
+            {/* Message Number ID (numIdLabel) with a rectangular box */}
             <div
               style={{
                 backgroundColor: '#E8F0FE',
@@ -63,32 +78,9 @@ const ShowLogMessages = () => {
                 textAlign: 'center',
               }}
             >
-              {RequestType}
+              {numIdLabel}
             </div>
           </div>
-
-          {/* Message Number ID and Show Details Button */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ flexGrow: 1 }}>
-              <p>
-                <strong>Message Number ID:</strong> {NumId}
-              </p>
-            </div>
-            <button
-              onClick={handleToggleDetails}
-              style={{
-                backgroundColor: '#007BFF',
-                color: '#fff',
-                padding: '5px 10px',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              {expandedMessages.has(userId) ? 'Hide Details' : 'Show Details'}
-            </button>
-          </div>
-
           {/* Expanded Details */}
           {expandedMessages.has(userId) && (
             <div
@@ -159,8 +151,6 @@ const ShowLogMessages = () => {
 
   return (
     <div>
-      <h1>OCPP Messages</h1>
-
       {/* Sent Messages Section */}
       <div>
         <h2>Sent Messages</h2>

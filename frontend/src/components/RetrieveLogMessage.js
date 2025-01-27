@@ -2,7 +2,7 @@
 export const fetchSentMessages = async () => {
   try {
     const response = await fetch(
-      `${process.env.REACT_APP_BACKEND_URL}/api/messages/sentmessage`,
+      `${process.env.REACT_APP_BACKEND_URL}/api/log/sentmessage`,
       {
         method: 'GET',
         headers: {
@@ -27,7 +27,7 @@ export const fetchSentMessages = async () => {
 export const fetchReceivedMessages = async () => {
   try {
     const response = await fetch(
-      `${process.env.REACT_APP_BACKEND_URL}/api/messages/receivedmessage`,
+      `${process.env.REACT_APP_BACKEND_URL}/api/log/receivedmessage`,
       {
         method: 'GET',
         headers: {
