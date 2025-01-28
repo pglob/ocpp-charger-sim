@@ -11,10 +11,13 @@ import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import java.time.OffsetDateTime;
+
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /** A OCPP Status Notification Request Message. */
 @Getter
+@EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StatusNotification")
 public final class StatusNotification extends OCPPMessageRequest {
 

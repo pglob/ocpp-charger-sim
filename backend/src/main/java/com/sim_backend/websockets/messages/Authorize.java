@@ -5,6 +5,8 @@ import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import java.util.UUID;
+
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +14,7 @@ import lombok.Setter;
  * Represents an OCPP 1.6 Authorize Request sent by a Charge Point to request authorization for a
  * given idTag.
  */
+@EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "Authorize")

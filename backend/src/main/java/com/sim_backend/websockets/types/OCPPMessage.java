@@ -10,10 +10,12 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 /** An OCPP message. */
+@EqualsAndHashCode(exclude = "messageID", callSuper = false)
 public abstract class OCPPMessage {
   /** The call ID for a request. */
   public static final int CALL_ID_REQUEST = 2;
@@ -123,4 +125,5 @@ public abstract class OCPPMessage {
   public String toString() {
     return String.format("%s = %s", this.getClass(), this.toJsonString());
   }
+
 }
