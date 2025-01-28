@@ -1,44 +1,77 @@
 package com.sim_backend;
 
-import lombok.Getter;
+import com.sim_backend.state.IllegalStateException;
+import com.sim_backend.state.SimulatorState;
+import com.sim_backend.state.SimulatorStateMachine;
+import lombok.NoArgsConstructor;
 
-@Getter
+@NoArgsConstructor
 public class ElectricalTransition {
 
-  /** Charger's voltage. Default value of a level 2 charger, 240V. */
-  private int voltage = 240;
+  /** Charger's voltage.*/
+  private int voltage;
 
-  /** Charger's maximum current in amps. Defaults to 40A. */
-  private final int currentOffered = 40;
+  /** Charger's maximum current in amps.*/
+  private  int currentOffered;
 
   /** The actual current drawn from the charger by the EV. */
-  private final int currentImport = 40;
+  private int currentImport;
 
-  /** The maximum power the charger is capable of providing in kilowatts (kW).*/
+  /** The maximum power the charger is capable of providing in kilowatts (kW). */
   private float powerOffered;
 
-  /** The actual power consumed by the charger in kilowatts (kW). Value is not calculated using load balancing. */
+  /**
+   * The actual power consumed by the charger in kilowatts (kW). Value is not calculated using load
+   * balancing.
+   */
   private float powerActiveImport;
 
-  /** The lifetime energy used by the charger in kilowatt-hours (kWh). */
-  private int lifetimeEnergyUse = 0;
+  /**
+   * A timestamp of when charging first occurs
+   */
+  private long initialChargeTimestamp;
 
-  public ElectricalTransition() {
-    this.powerOffered = (float) (currentOffered * voltage) / 1000;
-    this.powerActiveImport = (float) (currentImport * voltage) / 1000;
+  /**
+   * Amount of seconds per hour. Used for calculations.
+   */
+  private static final float SECONDS_PER_HOUR = 3600.0f;
+
+  /**
+   * Amount of milliseconds per hour. Used for calculations.
+   */
+  private static final long MILLISECONDS_PER_HOUR = 3600000;
+
+  /**
+   * Retrieves the amount of energy consumed since the specified interval in kilowatt-hours (kWh).
+   *
+   * @param interval the interval in seconds for which the energy usage is being queried
+   * @return the energy consumed since the given interval in kilowatt-hours (kWh).
+   */
+  public float getEnergyActiveImportInterval(int interval) {
+    return this.powerOffered * ((float) interval / SECONDS_PER_HOUR);
   }
 
-    /**
-     * Retrieves the amount of energy consumed since the specified interval in kilowatt-hours (kWh).
-     *
-     * @param interval the interval in seconds for which the energy usage is being queried
-     * @return the energy consumed since the given interval in kilowatt-hours (kWh).
-     */
-    public float getEnergyActiveImportInterval(int interval) {
-        return this.powerOffered * (interval/3600);
+  /**
+   * Returns the lifetime energy used by the charger in kilowatt-hours (kWh).
+   *
+   * @return the lifetime energy consumed in kilowatt-hours (kWh).
+   */
+  public float getEnergyActiveImportRegister(){
+    long timeCharging = System.currentTimeMillis() - this.initialChargeTimestamp;
+    return this.powerOffered * ((float) timeCharging /MILLISECONDS_PER_HOUR);
+  }
+
+  public void ChargingTransition(SimulatorStateMachine stateMachine) {
+
+    if(stateMachine.getCurrentState() != SimulatorState.Charging){
+      throw new IllegalStateException("Charging transition triggered during incorrect state: " + stateMachine.getCurrentState());
     }
 
-    public int ChargingTransition() {
-    return 0;
+    this.voltage = 240;
+    this.currentOffered = 40;
+    this.currentImport = 40;
+    this.powerOffered = (float) (currentOffered * voltage) /1000;
+    this.powerActiveImport = (float) (currentImport * voltage) /1000;
+    initialChargeTimestamp = System.currentTimeMillis();
   }
 }
