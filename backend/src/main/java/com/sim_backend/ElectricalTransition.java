@@ -59,10 +59,11 @@ public class ElectricalTransition {
    * @return the energy consumed since the given interval in kilowatt-hours (kWh).
    */
   public float getEnergyActiveImportInterval(int interval) {
-    long timeChargingSeconds = (System.currentTimeMillis() - this.initialChargeTimestamp) / MILLISECONDS_PER_SECOND;
+    long timeChargingSeconds =
+        (System.currentTimeMillis() - this.initialChargeTimestamp) / MILLISECONDS_PER_SECOND;
 
     // If the requested interval exceeds the actual charging time, adjust accordingly
-    if(timeChargingSeconds < interval) {
+    if (timeChargingSeconds < interval) {
       interval = (int) timeChargingSeconds;
     }
     return getPowerActiveImport() * ((float) interval / SECONDS_PER_HOUR);
