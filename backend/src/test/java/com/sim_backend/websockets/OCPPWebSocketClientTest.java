@@ -513,4 +513,15 @@ public class OCPPWebSocketClientTest {
     verify(client, times(2)).send(anyString());
     assertTrue(client.isEmpty());
   }
+
+  @Test
+  void testDuplicateAdd() {
+    doAnswer(invocation -> null).when(client).send(anyString());
+    Heartbeat beat = new Heartbeat();
+    assertTrue(client.pushMessage(beat));
+    assertFalse(client.isEmpty());
+
+    Heartbeat beat2 = new Heartbeat();
+    assertFalse(client.pushMessage(beat2));
+  }
 }

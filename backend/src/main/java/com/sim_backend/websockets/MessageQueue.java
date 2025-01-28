@@ -52,13 +52,14 @@ public class MessageQueue {
    *
    * @param message the message to be sent.
    */
-  public void pushMessage(final OCPPMessage message) {
+  public boolean pushMessage(final OCPPMessage message) {
     if (queueSet.contains(message)) {
-      return;
+      return false;
     }
 
     queue.add(message);
     queueSet.add(message);
+    return true;
   }
 
   /**
