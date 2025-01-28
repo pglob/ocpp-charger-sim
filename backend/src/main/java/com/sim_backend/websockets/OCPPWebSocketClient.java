@@ -18,6 +18,8 @@ import com.sim_backend.websockets.exceptions.OCPPUnsupportedProtocol;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,6 +57,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
   /** The OCPP Message Queue. */
   private final MessageQueue queue = new MessageQueue();
+
+  /** Our received messages while offline */
+  private final Deque<String> offlineQueue = new LinkedList<>();
 
   /** Our online status */
   @Getter private boolean Online = true;
@@ -97,7 +102,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   @Override
   public void onMessage(String s) {
-    // If we are offline should we hold them in a queue here?
+    if (!isOnline()) {
+      offlineQueue.add(s);
+      return;
+    }
+
     try {
       this.handleMessage(s);
     } catch (Exception exception) {
@@ -345,5 +354,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void goOnline() {
     this.startConnectionLostTimer();
     this.Online = true;
+
+    while (!offlineQueue.isEmpty()) {
+      this.onMessage(offlineQueue.poll());
+    }
   }
 }
