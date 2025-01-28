@@ -26,10 +26,13 @@ public class ElectricalTransition {
   private long initialChargeTimestamp;
 
   /** Constant representing the number of seconds in an hour. Used for energy calculations. */
-  private static final float SECONDS_PER_HOUR = 3600.0f;
+  private static final long SECONDS_PER_HOUR = 3600;
 
   /** Constant representing the number of milliseconds in an hour. Used for energy calculations. */
   private static final long MILLISECONDS_PER_HOUR = 3600000;
+
+  /** Constant representing the number of milliseconds in a second. Used for energy calculations. */
+  private static final long MILLISECONDS_PER_SECOND = 1000;
 
   /**
    * Calculates and returns the maximum power the charger is capable of providing in kilowatts (kW).
@@ -56,6 +59,12 @@ public class ElectricalTransition {
    * @return the energy consumed since the given interval in kilowatt-hours (kWh).
    */
   public float getEnergyActiveImportInterval(int interval) {
+    long timeChargingSeconds = (System.currentTimeMillis() - this.initialChargeTimestamp) / MILLISECONDS_PER_SECOND;
+
+    // If the requested interval exceeds the actual charging time, adjust accordingly
+    if(timeChargingSeconds < interval) {
+      interval = (int) timeChargingSeconds;
+    }
     return getPowerActiveImport() * ((float) interval / SECONDS_PER_HOUR);
   }
 
