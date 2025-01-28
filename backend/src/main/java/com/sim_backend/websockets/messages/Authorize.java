@@ -5,7 +5,6 @@ import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import java.util.UUID;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

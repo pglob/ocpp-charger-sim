@@ -8,9 +8,9 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import java.util.Set;
 import java.util.UUID;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
@@ -125,5 +125,4 @@ public abstract class OCPPMessage {
   public String toString() {
     return String.format("%s = %s", this.getClass(), this.toJsonString());
   }
-
 }

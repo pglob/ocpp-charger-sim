@@ -6,10 +6,10 @@ import com.sim_backend.websockets.types.OCPPMessageRequest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -53,7 +53,7 @@ public class MessageQueue {
    * @param message the message to be sent.
    */
   public void pushMessage(final OCPPMessage message) {
-    if(queueSet.contains(message)) {
+    if (queueSet.contains(message)) {
       return;
     }
 

@@ -11,7 +11,6 @@ import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import java.time.OffsetDateTime;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
