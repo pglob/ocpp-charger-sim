@@ -68,10 +68,12 @@ public class MessageController extends ControllerBase {
   }
 
   public void online(Context ctx) {
+    webSocketClient.goOnline();
     ctx.result("OK");
   }
 
   public void offline(Context ctx) {
+    webSocketClient.goOffline();
     ctx.result("OK");
   }
 
