@@ -1,6 +1,7 @@
 package com.sim_backend;
 
 import com.sim_backend.state.SimulatorState;
+import com.sim_backend.state.StateObserver;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
-public class ElectricalTransition {
+public class ElectricalTransition implements StateObserver {
 
   /** The charger's voltage in volts. */
   private int voltage;
@@ -85,12 +86,13 @@ public class ElectricalTransition {
    * set to 240V, and the current offered and imported are both set to 40A. The initial charge
    * timestamp is also updated to the current system time.
    *
-   * @param state the current state of the charger
+   * @param simulatorState is the current simulator state
    */
-  public void transition(SimulatorState state) {
+  @Override
+  public void onStateChanged(SimulatorState simulatorState) {
 
     // Whenever we aren't charging, zero all the electrical values.
-    if (state != SimulatorState.Charging) {
+    if (simulatorState != SimulatorState.Charging) {
       this.voltage = 0;
       this.currentOffered = 0;
       this.currentImport = 0;
