@@ -13,13 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ElectricalTransition {
 
-  /** The charger's voltage in volts. Defaults to 240 volts */
+  /** The charger's voltage in volts. */
   private int voltage;
 
-  /** The maximum current offered by the charger in amps. Defaults to 40 amps */
+  /** The maximum current offered by the charger in amps. */
   private int currentOffered;
 
-  /** The actual current drawn from the charger by the EV. Defaults to 40 amps */
+  /** The actual current drawn from the charger by the EV. */
   private int currentImport;
 
   /** A timestamp of when charging first started. */
