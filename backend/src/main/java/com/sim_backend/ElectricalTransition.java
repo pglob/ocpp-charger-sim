@@ -5,14 +5,19 @@ import com.sim_backend.state.SimulatorState;
 import com.sim_backend.state.SimulatorStateMachine;
 import lombok.NoArgsConstructor;
 
+/**
+ * This class represents the electrical transition of a charging process, including the charging
+ * power, voltage, current, and energy consumed. It tracks the charging state and calculates the
+ * power usage and energy consumption in kilowatt-hours (kWh).
+ */
 @NoArgsConstructor
 public class ElectricalTransition {
 
-  /** Charger's voltage.*/
+  /** The charger's voltage in volts. */
   private int voltage;
 
-  /** Charger's maximum current in amps.*/
-  private  int currentOffered;
+  /** The maximum current offered by the charger in amps. */
+  private int currentOffered;
 
   /** The actual current drawn from the charger by the EV. */
   private int currentImport;
@@ -26,19 +31,13 @@ public class ElectricalTransition {
    */
   private float powerActiveImport;
 
-  /**
-   * A timestamp of when charging first occurs
-   */
+  /** A timestamp of when charging first started. */
   private long initialChargeTimestamp;
 
-  /**
-   * Amount of seconds per hour. Used for calculations.
-   */
+  /** Constant representing the number of seconds in an hour. Used for energy calculations. */
   private static final float SECONDS_PER_HOUR = 3600.0f;
 
-  /**
-   * Amount of milliseconds per hour. Used for calculations.
-   */
+  /** Constant representing the number of milliseconds in an hour. Used for energy calculations. */
   private static final long MILLISECONDS_PER_HOUR = 3600000;
 
   /**
@@ -56,22 +55,37 @@ public class ElectricalTransition {
    *
    * @return the lifetime energy consumed in kilowatt-hours (kWh).
    */
-  public float getEnergyActiveImportRegister(){
+  public float getEnergyActiveImportRegister() {
     long timeCharging = System.currentTimeMillis() - this.initialChargeTimestamp;
-    return this.powerOffered * ((float) timeCharging /MILLISECONDS_PER_HOUR);
+    return this.powerOffered * ((float) timeCharging / MILLISECONDS_PER_HOUR);
   }
 
+  /**
+   * Initiates the charging transition, setting the initial charging parameters such as voltage,
+   * current, and power. The function also checks if the state machine is in the correct state
+   * (Charging) before applying the transition.
+   *
+   * @param stateMachine The state machine controlling the charging process.
+   * @throws IllegalStateException If the current state is not 'Charging', an exception is thrown.
+   */
   public void ChargingTransition(SimulatorStateMachine stateMachine) {
 
-    if(stateMachine.getCurrentState() != SimulatorState.Charging){
-      throw new IllegalStateException("Charging transition triggered during incorrect state: " + stateMachine.getCurrentState());
+    if (stateMachine.getCurrentState() != SimulatorState.Charging) {
+      throw new IllegalStateException(
+          "Charging transition triggered during incorrect state: "
+              + stateMachine.getCurrentState());
     }
 
+    // Set the charger's voltage and current parameters for the transition.
     this.voltage = 240;
     this.currentOffered = 40;
     this.currentImport = 40;
-    this.powerOffered = (float) (currentOffered * voltage) /1000;
-    this.powerActiveImport = (float) (currentImport * voltage) /1000;
+
+    // Calculate the power offered and the active power import in kilowatts.
+    this.powerOffered = (float) (currentOffered * voltage) / 1000;
+    this.powerActiveImport = (float) (currentImport * voltage) / 1000;
+
+    // Record the timestamp when the charging starts.
     initialChargeTimestamp = System.currentTimeMillis();
   }
 }
