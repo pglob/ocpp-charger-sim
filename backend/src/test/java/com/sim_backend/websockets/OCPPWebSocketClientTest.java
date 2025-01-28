@@ -495,7 +495,6 @@ public class OCPPWebSocketClientTest {
 
     StartTransaction beat2 = new StartTransaction(2, "", 1, "");
 
-
     client.pushMessage(beat);
     assert client.size() == 1;
     client.pushMessage(beat2);
