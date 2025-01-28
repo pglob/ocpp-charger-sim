@@ -89,7 +89,6 @@ public class MessageQueue {
       throws OCPPMessageFailure, InterruptedException {
     OCPPMessage message = queue.poll();
     if (message != null) {
-      queueSet.remove(message);
       if (message instanceof OCPPMessageRequest && isBusy()) {
         queue.addLast(message);
         return null;
@@ -97,6 +96,7 @@ public class MessageQueue {
 
       try {
         message.sendMessage(client);
+        queueSet.remove(message);
       } catch (WebsocketNotConnectedException ex) {
         if (message.incrementTries() >= MAX_REATTEMPTS) {
           throw new OCPPMessageFailure(message, ex);
