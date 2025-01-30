@@ -11,10 +11,12 @@ import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import java.time.OffsetDateTime;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /** A OCPP Status Notification Request Message. */
 @Getter
+@EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StatusNotification")
 public final class StatusNotification extends OCPPMessageRequest {
 
@@ -51,7 +53,7 @@ public final class StatusNotification extends OCPPMessageRequest {
     this.errorCode = errorCode;
     this.info = info != null ? info : "";
     this.status = status;
-    this.timestamp = timestamp != null ? timestamp : null;
+    this.timestamp = timestamp;
     this.vendorId = vendorId != null ? vendorId : "";
     this.vendorErrorCode = vendorErrorCode != null ? vendorErrorCode : "";
   }

@@ -4,10 +4,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ErrorCode;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 /** A CallError message for OCPP. */
+@EqualsAndHashCode(callSuper = true)
 @Getter
 public class OCPPMessageError extends OCPPMessage {
 

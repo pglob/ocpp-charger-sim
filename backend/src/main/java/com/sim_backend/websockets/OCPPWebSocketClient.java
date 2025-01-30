@@ -275,8 +275,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @param message the message to be sent.
    */
-  public void pushMessage(final OCPPMessage message) {
-    queue.pushMessage(message);
+  public boolean pushMessage(final OCPPMessage message) {
+    return queue.pushMessage(message);
   }
 
   /**

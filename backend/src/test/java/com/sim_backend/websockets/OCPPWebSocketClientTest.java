@@ -10,8 +10,7 @@ import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.*;
-import com.sim_backend.websockets.messages.Heartbeat;
-import com.sim_backend.websockets.messages.HeartbeatResponse;
+import com.sim_backend.websockets.messages.*;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -467,7 +466,7 @@ public class OCPPWebSocketClientTest {
     HeartbeatResponse beatResponse = new HeartbeatResponse();
     beatResponse.setMessageID(beat.getMessageID());
 
-    Heartbeat beat2 = new Heartbeat();
+    StartTransaction beat2 = new StartTransaction(2, "", 1, "");
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -494,7 +493,7 @@ public class OCPPWebSocketClientTest {
     HeartbeatResponse beatResponse = new HeartbeatResponse();
     beatResponse.setMessageID(beat.getMessageID());
 
-    Heartbeat beat2 = new Heartbeat();
+    StartTransaction beat2 = new StartTransaction(2, "", 1, "");
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -513,6 +512,17 @@ public class OCPPWebSocketClientTest {
     client.popAllMessages();
     verify(client, times(2)).send(anyString());
     assertTrue(client.isEmpty());
+  }
+
+  @Test
+  void testDuplicateAdd() {
+    doAnswer(invocation -> null).when(client).send(anyString());
+    Heartbeat beat = new Heartbeat();
+    assertTrue(client.pushMessage(beat));
+    assertFalse(client.isEmpty());
+
+    Heartbeat beat2 = new Heartbeat();
+    assertFalse(client.pushMessage(beat2));
   }
 
   @Test

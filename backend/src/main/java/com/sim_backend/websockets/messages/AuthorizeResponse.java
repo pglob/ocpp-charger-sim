@@ -6,6 +6,7 @@ import com.sim_backend.websockets.enums.AuthorizationStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ import lombok.Setter;
  * Represents an OCPP 1.6 Authorize Response sent by the Central System to confirm the authorization
  * status of a Charge Point's idTag.
  */
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @Getter
 @Setter

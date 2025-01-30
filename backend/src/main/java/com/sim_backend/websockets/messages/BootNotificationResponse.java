@@ -7,6 +7,7 @@ import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,6 +21,7 @@ import lombok.Setter;
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "BootNotificationResponse")
+@EqualsAndHashCode(callSuper = true)
 public class BootNotificationResponse extends OCPPMessageResponse {
 
   @SerializedName("status")

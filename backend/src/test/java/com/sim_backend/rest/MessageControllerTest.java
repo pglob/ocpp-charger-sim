@@ -42,7 +42,7 @@ class MessageControllerTest {
   @Test
   void testAuthorize() {
     // Arrange
-    doNothing().when(mockWebSocketClient).pushMessage(any(Authorize.class));
+    doReturn(true).when(mockWebSocketClient).pushMessage(any(Authorize.class));
 
     // Act
     messageController.authorize(mockContext);
@@ -54,7 +54,7 @@ class MessageControllerTest {
   @Test
   void testBoot() {
     // Arrange
-    doNothing().when(mockWebSocketClient).pushMessage(any(BootNotification.class));
+    doReturn(true).when(mockWebSocketClient).pushMessage(any(BootNotification.class));
 
     // Act
     messageController.boot(mockContext);
@@ -66,7 +66,7 @@ class MessageControllerTest {
   @Test
   void testHeartbeat() {
     // Arrange
-    doNothing().when(mockWebSocketClient).pushMessage(any(Heartbeat.class));
+    doReturn(true).when(mockWebSocketClient).pushMessage(any(Heartbeat.class));
 
     // Act
     messageController.heartbeat(mockContext);
@@ -96,7 +96,7 @@ class MessageControllerTest {
   @Test
   void testStatus() {
     // Arrange
-    doNothing().when(mockWebSocketClient).pushMessage(any(StatusNotification.class));
+    doReturn(true).when(mockWebSocketClient).pushMessage(any(StatusNotification.class));
     String jsonRequest =
         "{"
             + "\"connectorId\": \"1\","

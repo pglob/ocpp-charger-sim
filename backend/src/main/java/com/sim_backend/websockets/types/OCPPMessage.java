@@ -8,12 +8,14 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import java.util.Set;
 import java.util.UUID;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 /** An OCPP message. */
+@EqualsAndHashCode(exclude = "messageID", callSuper = false)
 public abstract class OCPPMessage {
   /** The call ID for a request. */
   public static final int CALL_ID_REQUEST = 2;
