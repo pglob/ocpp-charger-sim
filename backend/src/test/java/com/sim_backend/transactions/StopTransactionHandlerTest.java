@@ -96,7 +96,59 @@ public class StopTransactionHandlerTest {
         .when(client)
         .onReceiveMessage(eq(StopTransactionResponse.class), any());
 
-    handler.initiateStopTransaction();
+    handler.initiateStopTransaction(1);
+
+    verify(client).pushMessage(any(StopTransaction.class));
+    verify(stateMachine).transition(SimulatorState.Available);
+  }
+
+  @Test
+  void StopChargingSameIdtest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
+    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
+
+    doAnswer(
+            invocation -> {
+              OnOCPPMessageListener listener = invocation.getArgument(1);
+              OnOCPPMessage message = mock(OnOCPPMessage.class);
+              when(message.getMessage()).thenReturn(stopTransactionResponse);
+              listener.onMessageReceived(message);
+              return null;
+            })
+        .when(client)
+        .onReceiveMessage(eq(StopTransactionResponse.class), any());
+
+    handler.StopCharging("idTag1", "idTag1", 1);
+
+    verify(client).pushMessage(any(StopTransaction.class));
+    verify(stateMachine).transition(SimulatorState.Available);
+  }
+
+  @Test
+  void StopChargingDiffIdtest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
+    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
+
+    doAnswer(
+            invocation -> {
+              stateMachine.transition(SimulatorState.Preparing);
+              return null;
+            })
+        .when(stateMachine)
+        .transition(SimulatorState.Preparing);
+
+    doAnswer(
+            invocation -> {
+              OnOCPPMessageListener listener = invocation.getArgument(1);
+              OnOCPPMessage message = mock(OnOCPPMessage.class);
+              when(message.getMessage()).thenReturn(stopTransactionResponse);
+              listener.onMessageReceived(message);
+              return null;
+            })
+        .when(client)
+        .onReceiveMessage(eq(StopTransactionResponse.class), any());
+
+    handler.StopCharging("idTag1", "idTag2", 1);
 
     verify(client).pushMessage(any(StopTransaction.class));
     verify(stateMachine).transition(SimulatorState.Available);

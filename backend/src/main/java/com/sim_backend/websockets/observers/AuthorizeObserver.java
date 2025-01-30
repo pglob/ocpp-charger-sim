@@ -1,13 +1,27 @@
 package com.sim_backend.websockets.observers;
 
+import com.sim_backend.websockets.enums.*;
 import com.sim_backend.websockets.events.*;
 import com.sim_backend.websockets.messages.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Authorize Observer is responsible for handling AuthorizeResponse message received from the
  * Central System.
  */
 public class AuthorizeObserver implements OnOCPPMessageListener {
+
+  private List<AuthorizationStatus> status = new ArrayList<>();
+
+  // Return last authorization status
+  public AuthorizationStatus getLastStatus() {
+    if (status.isEmpty()) {
+      System.err.println("There is no Authorization History...");
+      return null;
+    }
+    return status.get(status.size() - 1);
+  }
 
   /**
    * Process AuthorizeResponse based on status that is provided by Central System
@@ -40,5 +54,6 @@ public class AuthorizeObserver implements OnOCPPMessageListener {
       default:
         System.err.println("Unknown Status Received.");
     }
+    status.add(response.getIdTagInfo().getStatus());
   }
 }

@@ -106,4 +106,47 @@ public class StartTransactionHandlerTest {
     verify(client).pushMessage(any(StartTransaction.class));
     verify(stateMachine).transition(SimulatorState.Charging);
   }
+
+  @Test
+  void preAuthStartChargingtest() {
+    when(stateMachine.getCurrentState())
+        .thenReturn(SimulatorState.Available)
+        .thenReturn(SimulatorState.Preparing)
+        .thenReturn(SimulatorState.Charging);
+
+    AuthorizeResponse authorizeResponse =
+        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
+
+    doAnswer(
+            invocation -> {
+              OnOCPPMessageListener listener = invocation.getArgument(1);
+              OnOCPPMessage message = mock(OnOCPPMessage.class);
+              when(message.getMessage()).thenReturn(authorizeResponse);
+              listener.onMessageReceived(message);
+              return null;
+            })
+        .when(client)
+        .onReceiveMessage(eq(AuthorizeResponse.class), any());
+
+    StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
+
+    doAnswer(
+            invocation -> {
+              OnOCPPMessageListener listener = invocation.getArgument(1);
+              OnOCPPMessage message = mock(OnOCPPMessage.class);
+              when(message.getMessage()).thenReturn(startTransactionResponse);
+              listener.onMessageReceived(message);
+              return null;
+            })
+        .when(client)
+        .onReceiveMessage(eq(StartTransactionResponse.class), any());
+
+    handler.preAuthStartCharging(1, "Accepted");
+
+    verify(client).pushMessage(any(Authorize.class));
+    verify(stateMachine).transition(SimulatorState.Preparing);
+
+    verify(client).pushMessage(any(StartTransaction.class));
+    verify(stateMachine).transition(SimulatorState.Charging);
+  }
 }
