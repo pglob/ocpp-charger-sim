@@ -1,6 +1,5 @@
 package com.sim_backend.transactions;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -20,13 +19,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class StartTransactionHandlerTest {
+public class StopTransactionHandlerTest {
   @Mock private SimulatorStateMachine stateMachine;
   @Mock private OCPPWebSocketClient client;
   @Mock private OCPPTime ocppTime;
   @Mock private MessageScheduler scheduler;
 
-  private StartTransactionHandler handler;
+  private StopTransactionHandler handler;
 
   @BeforeEach
   void setUp() {
@@ -34,12 +33,12 @@ public class StartTransactionHandlerTest {
     when(client.getScheduler()).thenReturn(scheduler);
     when(scheduler.getTime()).thenReturn(ocppTime);
     when(ocppTime.getSynchronizedTime()).thenReturn(ZonedDateTime.parse("2025-01-19T00:00:00Z"));
-    handler = new StartTransactionHandler(stateMachine, client);
+    handler = new StopTransactionHandler(stateMachine, client);
   }
 
   @Test
   void preAuthorizeAcceptedtest() {
-    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Available);
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
 
     AuthorizeResponse authorizeResponse =
         new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
@@ -55,14 +54,13 @@ public class StartTransactionHandlerTest {
         .when(client)
         .onReceiveMessage(eq(AuthorizeResponse.class), any());
 
-    handler.preAuthorize(1, "Accepted");
+    handler.preAuthorize("Accepted");
     verify(client).pushMessage(any(Authorize.class));
-    verify(stateMachine).transition(SimulatorState.Preparing);
   }
 
   @Test
   void preAuthorizeDeniedtest() {
-    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Available);
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
 
     AuthorizeResponse authorizeResponse =
         new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.BLOCKED));
@@ -78,75 +76,81 @@ public class StartTransactionHandlerTest {
         .when(client)
         .onReceiveMessage(eq(AuthorizeResponse.class), any());
 
-    handler.preAuthorize(1, "Blocked");
+    handler.preAuthorize("Blocked");
     verify(client).pushMessage(any(Authorize.class));
-    assertEquals(
-        stateMachine.getCurrentState(), SimulatorState.Available, "State should be Available");
   }
 
   @Test
-  void initiateStartTransactiontest() {
-    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Preparing);
-
-    StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
+  void initiateStopTransactiontest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
+    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
 
     doAnswer(
             invocation -> {
               OnOCPPMessageListener listener = invocation.getArgument(1);
               OnOCPPMessage message = mock(OnOCPPMessage.class);
-              when(message.getMessage()).thenReturn(startTransactionResponse);
+              when(message.getMessage()).thenReturn(stopTransactionResponse);
               listener.onMessageReceived(message);
               return null;
             })
         .when(client)
-        .onReceiveMessage(eq(StartTransactionResponse.class), any());
+        .onReceiveMessage(eq(StopTransactionResponse.class), any());
 
-    handler.initiateStartTransaction(1, "Accepted");
+    handler.initiateStopTransaction(1);
 
-    verify(client).pushMessage(any(StartTransaction.class));
-    verify(stateMachine).transition(SimulatorState.Charging);
+    verify(client).pushMessage(any(StopTransaction.class));
+    verify(stateMachine).transition(SimulatorState.Available);
   }
 
   @Test
-  void preAuthStartChargingtest() {
-    when(stateMachine.getCurrentState())
-        .thenReturn(SimulatorState.Available)
-        .thenReturn(SimulatorState.Preparing)
-        .thenReturn(SimulatorState.Charging);
-
-    AuthorizeResponse authorizeResponse =
-        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
+  void StopChargingSameIdtest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
+    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
 
     doAnswer(
             invocation -> {
               OnOCPPMessageListener listener = invocation.getArgument(1);
               OnOCPPMessage message = mock(OnOCPPMessage.class);
-              when(message.getMessage()).thenReturn(authorizeResponse);
+              when(message.getMessage()).thenReturn(stopTransactionResponse);
               listener.onMessageReceived(message);
               return null;
             })
         .when(client)
-        .onReceiveMessage(eq(AuthorizeResponse.class), any());
+        .onReceiveMessage(eq(StopTransactionResponse.class), any());
 
-    StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
+    handler.StopCharging("idTag1", "idTag1", 1);
+
+    verify(client).pushMessage(any(StopTransaction.class));
+    verify(stateMachine).transition(SimulatorState.Available);
+  }
+
+  @Test
+  void StopChargingDiffIdtest() {
+    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
+    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
+
+    doAnswer(
+            invocation -> {
+              stateMachine.transition(SimulatorState.Preparing);
+              return null;
+            })
+        .when(stateMachine)
+        .transition(SimulatorState.Preparing);
 
     doAnswer(
             invocation -> {
               OnOCPPMessageListener listener = invocation.getArgument(1);
               OnOCPPMessage message = mock(OnOCPPMessage.class);
-              when(message.getMessage()).thenReturn(startTransactionResponse);
+              when(message.getMessage()).thenReturn(stopTransactionResponse);
               listener.onMessageReceived(message);
               return null;
             })
         .when(client)
-        .onReceiveMessage(eq(StartTransactionResponse.class), any());
+        .onReceiveMessage(eq(StopTransactionResponse.class), any());
 
-    handler.preAuthStartCharging(1, "Accepted");
+    handler.StopCharging("idTag1", "idTag2", 1);
 
-    verify(client).pushMessage(any(Authorize.class));
-    verify(stateMachine).transition(SimulatorState.Preparing);
-
-    verify(client).pushMessage(any(StartTransaction.class));
-    verify(stateMachine).transition(SimulatorState.Charging);
+    verify(client).pushMessage(any(StopTransaction.class));
+    verify(stateMachine).transition(SimulatorState.Available);
   }
 }

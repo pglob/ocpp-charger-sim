@@ -39,7 +39,6 @@ public class StartTransactionHandler {
       throw new IllegalStateException(
           "Cannot start with the current state. current state: " + stateMachine.getCurrentState());
     }
-
     Authorize authorizeMessage = new Authorize(idTag);
     client.pushMessage(authorizeMessage);
 
@@ -49,13 +48,14 @@ public class StartTransactionHandler {
           if (!(message.getMessage() instanceof AuthorizeResponse response)) {
             throw new ClassCastException("Message is not an AuthorizeResponse");
           }
+          stateMachine.transition(SimulatorState.Preparing);
           if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
             System.out.println("Authorization Accepted...");
             System.out.println("Proceeding Transaction...");
-            stateMachine.transition(SimulatorState.Preparing);
           } else {
             System.err.println(
                 "Authorize Denied... Status : " + response.getIdTagInfo().getStatus());
+            stateMachine.transition(SimulatorState.Available);
           }
         });
   }
@@ -66,7 +66,7 @@ public class StartTransactionHandler {
    * otherwise
    *
    * @param connectorId ID of connector
-   * @param connectorId ID of user
+   * @param idTag ID of user
    * @param meterStart initial value of meter
    */
   public void initiateStartTransaction(int connectorId, String idTag) {
@@ -102,5 +102,17 @@ public class StartTransactionHandler {
             stateMachine.transition(SimulatorState.Available);
           }
         });
+
+    client.clearOnReceiveMessage(StartTransactionResponse.class);
+  }
+
+  /** Authorize user and initiate charging */
+  public void preAuthStartCharging(int connectorId, String idTag) {
+    preAuthorize(connectorId, idTag);
+    if (stateMachine.getCurrentState() == SimulatorState.Preparing) {
+      initiateStartTransaction(connectorId, idTag);
+    } else {
+      System.err.println("Failed to start charging...");
+    }
   }
 }
