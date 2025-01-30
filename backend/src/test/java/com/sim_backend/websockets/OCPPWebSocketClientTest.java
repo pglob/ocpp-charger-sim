@@ -514,4 +514,25 @@ public class OCPPWebSocketClientTest {
     verify(client, times(2)).send(anyString());
     assertTrue(client.isEmpty());
   }
+
+  @Test
+  void testOfflineFunctionality() throws InterruptedException, OCPPMessageFailure {
+    client.goOffline();
+
+    Heartbeat beat = new Heartbeat();
+    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    beatResponse.setMessageID(beat.getMessageID());
+    client.pushMessage(new Heartbeat());
+    client.addPreviousMessage(beat);
+    client.onMessage(beatResponse.toJsonString());
+    client.popAllMessages();
+
+    verify(client, times(0)).send(anyString());
+
+    OnOCPPMessageListener a = mock(OnOCPPMessageListener.class);
+    client.onReceiveMessage(HeartbeatResponse.class, a);
+
+    client.goOnline();
+    verify(a, times(1)).onMessageReceived(any());
+  }
 }
