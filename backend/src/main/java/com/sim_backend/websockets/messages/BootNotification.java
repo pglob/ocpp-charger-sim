@@ -10,11 +10,13 @@ import com.sim_backend.websockets.constants.BootNotificationConstants;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /** A OCPP Boot Notification Request Message. */
 @AllArgsConstructor
 @Getter
+@EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "BootNotification")
 public final class BootNotification extends OCPPMessageRequest {
 

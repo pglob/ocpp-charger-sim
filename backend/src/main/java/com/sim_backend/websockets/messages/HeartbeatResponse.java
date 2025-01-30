@@ -7,6 +7,7 @@ import com.sim_backend.websockets.types.OCPPMessageResponse;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
@@ -15,6 +16,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
+@EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "HeartbeatResponse")
 public final class HeartbeatResponse extends OCPPMessageResponse {
 

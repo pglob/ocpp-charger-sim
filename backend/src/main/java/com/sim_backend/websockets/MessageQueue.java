@@ -6,8 +6,10 @@ import com.sim_backend.websockets.types.OCPPMessageRequest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,6 +41,9 @@ public class MessageQueue {
   /** The OCPP Message Queue. */
   private final Deque<OCPPMessage> queue = new LinkedList<>();
 
+  /** Unique hashes to check for uniqueness */
+  private final Set<OCPPMessage> queueSet = new HashSet<>();
+
   /** Create an OCPPMessage Queue. */
   public MessageQueue() {}
 
@@ -47,8 +52,14 @@ public class MessageQueue {
    *
    * @param message the message to be sent.
    */
-  public void pushMessage(final OCPPMessage message) {
+  public boolean pushMessage(final OCPPMessage message) {
+    if (queueSet.contains(message)) {
+      return false;
+    }
+
     queue.add(message);
+    queueSet.add(message);
+    return true;
   }
 
   /**
@@ -86,6 +97,7 @@ public class MessageQueue {
 
       try {
         message.sendMessage(client);
+        queueSet.remove(message);
       } catch (WebsocketNotConnectedException ex) {
         if (message.incrementTries() >= MAX_REATTEMPTS) {
           throw new OCPPMessageFailure(message, ex);

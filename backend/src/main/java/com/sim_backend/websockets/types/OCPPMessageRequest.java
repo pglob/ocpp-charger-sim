@@ -3,8 +3,10 @@ package com.sim_backend.websockets.types;
 import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import lombok.EqualsAndHashCode;
 
 /** An OCPP Call message. */
+@EqualsAndHashCode(callSuper = true)
 public class OCPPMessageRequest extends OCPPMessage {
 
   /**
