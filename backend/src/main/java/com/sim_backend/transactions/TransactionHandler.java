@@ -4,11 +4,7 @@ import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import lombok.Getter;
 
-/**
- * 
- * This TransactionHandler manages Start and Stop opreation
- * 
- */
+/** This TransactionHandler manages Start and Stop opreation */
 @Getter
 public class TransactionHandler {
   private StartTransactionHandler startHandler;
@@ -27,6 +23,7 @@ public class TransactionHandler {
 
   /**
    * Resume Charging when authorized before
+   *
    * @param connectorId
    * @param configIdTag from Configuration registry data
    */
@@ -36,7 +33,6 @@ public class TransactionHandler {
 
   // Stop Charging
   /**
-   * 
    * @param transactionId
    * @param configIdTag from Configuration Registry data
    * @param idTag idTag of user
