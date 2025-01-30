@@ -7,6 +7,7 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.Heartbeat;
+import com.sim_backend.websockets.messages.StatusNotification;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URISyntaxException;
@@ -87,6 +88,29 @@ class MessageControllerTest {
   void testOffline() {
     // Act
     messageController.offline(mockContext);
+
+    // Assert
+    verify(mockContext).result("OK");
+  }
+
+  @Test
+  void testStatus() {
+    // Arrange
+    doNothing().when(mockWebSocketClient).pushMessage(any(StatusNotification.class));
+    String jsonRequest =
+        "{"
+            + "\"connectorId\": \"1\","
+            + "\"errorCode\": \"HighTemperature\","
+            + "\"info\": \"\","
+            + "\"status\": \"Faulted\","
+            + "\"timestamp\": \"\","
+            + "\"vendorId\": \"\","
+            + "\"vendorErrorCode\": \"\""
+            + "}";
+    when(mockContext.body()).thenReturn(jsonRequest);
+
+    // Act
+    messageController.status(mockContext);
 
     // Assert
     verify(mockContext).result("OK");
