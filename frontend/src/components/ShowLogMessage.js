@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchSentMessages, fetchReceivedMessages } from './RetrieveLogMessage';
+import '../styles/styles.css';
 
 const ShowLogMessages = () => {
   const [sentMessages, setSentMessages] = useState([]);
@@ -7,6 +8,10 @@ const ShowLogMessages = () => {
 
   // State to manage expanded details
   const [expandedMessages, setExpandedMessages] = useState(new Set());
+
+  // State for dropdown menu selection (log message type)
+  const [logMessageType, setLogMessageType] = useState('default');
+
   // Helper function for mapping NumId to labels
   const getNumIdLabel = (NumId) => {
     return (
@@ -16,6 +21,20 @@ const ShowLogMessages = () => {
         4: 'Error',
       }[NumId] || 'Unknown'
     );
+  };
+
+  // Function to determine styling based on NumId
+  const getNumIdStyle = (NumId) => {
+    switch (NumId) {
+      case 2:
+        return 'num-id-call';
+      case 3:
+        return 'num-id-result';
+      case 4:
+        return 'num-id-error';
+      default:
+        return 'num-id-unknown';
+    }
   };
 
   // Helper function to toggle message details
@@ -39,60 +58,27 @@ const ShowLogMessages = () => {
 
       const formattedTime = new Date(TimeStamp).toLocaleString(); // Format timestamp to a readable string
       const numIdLabel = getNumIdLabel(NumId);
+      const numIdStyle = getNumIdStyle(NumId); // Apply dynamic styling
+
       return (
         <div
           key={userId}
           onClick={() => handleToggleDetails(userId)}
-          style={{
-            cursor: 'pointer',
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            padding: '10px',
-            marginBottom: '20px',
-            backgroundColor: '#fff',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-          }}
+          className="log-message-container"
         >
           {/* Grouped Content */}
-          <div
-            style={{
-              marginBottom: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px', // Space between timestamp, request type, and numIdLabel
-            }}
-          >
-            <p style={{ margin: 0 }}>
+          <div className="log-message-header">
+            <p>
               <span>{formattedTime} - </span>
               <strong>{RequestType}</strong>
             </p>
 
             {/* Message Number ID (numIdLabel) with a rectangular box */}
-            <div
-              style={{
-                backgroundColor: '#E8F0FE',
-                border: '1px solid #007BFF',
-                borderRadius: '4px',
-                padding: '5px 10px',
-                fontWeight: 'bold',
-                color: '#007BFF',
-                textAlign: 'center',
-              }}
-            >
-              {numIdLabel}
-            </div>
+            <div className={`num-id-label ${numIdStyle}`}>{numIdLabel}</div>
           </div>
           {/* Expanded Details */}
           {expandedMessages.has(userId) && (
-            <div
-            // style={{
-            //   marginTop: '10px',
-            //   padding: '10px',
-            //   border: '1px solid #ddd',
-            //   borderRadius: '8px',
-            //   backgroundColor: '#f9f9f9',
-            // }}
-            >
+            <div>
               <p>
                 <strong>User ID:</strong> {userId}
               </p>
@@ -115,67 +101,33 @@ const ShowLogMessages = () => {
     try {
       const parseReceivedMessage = JSON.parse(message); // Parse the string into an array
 
-      const [NumId, userId, payload] = parseReceivedMessage; // Extract relevant parts from array
+      const [NumId, userId, payload] = parseReceivedMessage;
 
-      const { status, currentTime, interval } = payload; // Extract values
+      const { status, currentTime, interval } = payload;
 
       const formattedTime = new Date(currentTime).toLocaleString();
       const numIdLabel = getNumIdLabel(NumId);
+      const numIdStyle = getNumIdStyle(NumId); // Apply dynamic styling
 
       return (
         <div
           key={userId}
           onClick={() => handleToggleDetails(userId)}
-          style={{
-            cursor: 'pointer',
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            padding: '10px',
-            marginBottom: '10px',
-            backgroundColor: '#fff',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-          }}
+          className="log-message-container"
         >
-          <div
-            style={{
-              marginBottom: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px', // Space between the message details and numIdLabel
-            }}
-          >
+          <div className="log-message-header">
             {/* Main message display */}
-            <p style={{ margin: 0 }}>
+            <p>
               <span>{formattedTime} - </span>
               <strong>{status}</strong>
             </p>
 
             {/* Message Number ID (numIdLabel) with a rectangular box */}
-            <div
-              style={{
-                backgroundColor: '#E8F0FE',
-                border: '1px solid #007BFF',
-                borderRadius: '4px',
-                padding: '5px 10px',
-                fontWeight: 'bold',
-                color: '#007BFF',
-                textAlign: 'center',
-              }}
-            >
-              {numIdLabel}
-            </div>
+            <div className={`num-id-label ${numIdStyle}`}>{numIdLabel}</div>
           </div>
           {/* Expanded Details: Message ID & Interval (Hidden until clicked) */}
           {expandedMessages.has(userId) && (
-            <div
-            // style={{
-            //   marginTop: '10px',
-            //   padding: '10px',
-            //   border: '1px solid #ddd',
-            //   borderRadius: '8px',
-            //   backgroundColor: '#f9f9f9',
-            // }}
-            >
+            <div>
               <p>
                 <strong>User ID:</strong> {userId}
               </p>
@@ -234,51 +186,42 @@ const ShowLogMessages = () => {
 
   return (
     <div>
-      {/* Sent Messages Section */}
-      <div>
-        <h2>Sent Messages</h2>
-        <div
-          style={{
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            padding: '10px',
-            maxHeight: '150px',
-            width: '400px',
-            overflowY: 'auto', // Enable scrolling
-            backgroundColor: '#f9f9f9',
-          }}
+      {/* Dropdown Menu for Selecting Log Messages */}
+      <div className="dropdown-container">
+        <label htmlFor="logMessageType"> </label>
+        <select
+          id="logMessageType"
+          value={logMessageType}
+          onChange={(e) => setLogMessageType(e.target.value)}
         >
+          <option value="default">Log Message</option>
+          <option value="sent">Sent Messages</option>
+          <option value="received">Received Messages</option>
+        </select>
+      </div>
+
+      {/* Conditionally Render Based on Dropdown Selection */}
+      {logMessageType === 'sent' && (
+        <div className="message-list-container">
           {sortedSentMessages.length > 0 ? (
             sortedSentMessages.map((message) => parseMessage(message))
           ) : (
-            <p style={{ textAlign: 'center' }}>No sent messages found</p>
+            <p className="no-messages">No sent messages found</p>
           )}
         </div>
-      </div>
+      )}
 
-      {/* Received Messages Section */}
-      <div style={{ marginTop: '20px' }}>
-        <h2>Received Messages</h2>
-        <div
-          style={{
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            padding: '10px',
-            maxHeight: '150px',
-            width: '400px',
-            overflowY: 'auto', // Enable scrolling
-            backgroundColor: '#f9f9f9',
-          }}
-        >
+      {logMessageType === 'received' && (
+        <div className="message-list-container">
           {sortedReceivedMessages.length > 0 ? (
             sortedReceivedMessages.map((message) =>
               parseReceivedMessage(message)
             )
           ) : (
-            <p style={{ textAlign: 'center' }}>No received messages found</p>
+            <p className="no-messages">No received messages found</p>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 };
