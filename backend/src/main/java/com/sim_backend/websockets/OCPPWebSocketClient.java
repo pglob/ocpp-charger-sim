@@ -94,8 +94,10 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   public void recordRxMessage(String message) {
     String timestamp = OffsetDateTime.now(ZoneOffset.UTC).toString();
-    String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
-    rxMessages.add(messageWithTimestamp);
+    // Replace the currentTime value using regex
+    String modifiedMessage =
+        message.replaceAll("\"currentTime\":\"[^\"]+\"", "\"currentTime\":\"" + timestamp + "\"");
+    rxMessages.add(modifiedMessage);
   }
 
   /**
