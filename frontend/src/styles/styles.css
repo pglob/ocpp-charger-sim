@@ -66,9 +66,7 @@
   font-size: 16px; /* Optional: Set a consistent font size */
 }
 
-/* ShowLogMessages.css */
-
-/* Main container */
+/* Main containerfor log message */
 .log-message-container {
   cursor: pointer;
   border: 1px solid #ccc;
@@ -132,7 +130,7 @@
   border-radius: 8px;
   padding: 10px;
   max-height: 150px;
-  width: 400px;
+  width: 320px;
   overflow-y: auto;
   background-color: #f9f9f9;
 }

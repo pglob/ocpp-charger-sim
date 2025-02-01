@@ -17,7 +17,7 @@ const ShowLogMessages = () => {
     return (
       {
         2: 'Call',
-        3: 'Result',
+        3: 'Respone',
         4: 'Error',
       }[NumId] || 'Unknown'
     );
@@ -55,8 +55,13 @@ const ShowLogMessages = () => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
       const [TimeStamp, NumId, userId, RequestType, payload] = parsedMessage;
+      const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
 
-      const formattedTime = new Date(TimeStamp).toLocaleString(); // Format timestamp to a readable string
       const numIdLabel = getNumIdLabel(NumId);
       const numIdStyle = getNumIdStyle(NumId); // Apply dynamic styling
 
@@ -100,12 +105,15 @@ const ShowLogMessages = () => {
   const parseReceivedMessage = (message) => {
     try {
       const parseReceivedMessage = JSON.parse(message); // Parse the string into an array
-
       const [NumId, userId, payload] = parseReceivedMessage;
-
       const { status, currentTime, interval } = payload;
+      const formattedTime = new Date(currentTime).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
 
-      const formattedTime = new Date(currentTime).toLocaleString();
       const numIdLabel = getNumIdLabel(NumId);
       const numIdStyle = getNumIdStyle(NumId); // Apply dynamic styling
 
