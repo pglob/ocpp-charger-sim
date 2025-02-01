@@ -318,6 +318,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     recordTxMessage(message.toJsonString()); // Record transmitted message
     return queue.pushMessage(message);
   }
+
   /**
    * Return the size of the send queue.
    *
