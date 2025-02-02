@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 import lombok.Getter;
 
 /*
- * This class handles sending an authorize request, followed by a StopTransaction message.
+ * This class handles simulator status followed by a StopTransaction message.
  *
  */
 @Getter
@@ -25,7 +25,11 @@ public class StopTransactionHandler {
     this.client = client;
   }
 
-  /** Initiate Stop Transaction Handling StopTransaction Request, Response and simulator status */
+  /** Initiate StopTransaction, handles StopTransaction requests, responses and simulator status 
+   * 
+   * @param transactionId id of transaction from StartTransaction
+   * @param idTag id of user
+  */
   public void initiateStopTransaction(int transactionId, String idTag) {
 
     /*

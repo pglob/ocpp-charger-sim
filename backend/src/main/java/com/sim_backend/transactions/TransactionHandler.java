@@ -8,7 +8,7 @@ import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.AuthorizeResponse;
 import lombok.Getter;
 
-/** This TransactionHandler manages Start and Stop opreation */
+/** This TransactionHandler manages Start and Stop operation */
 @Getter
 public class TransactionHandler {
   private StartTransactionHandler startHandler;
@@ -29,8 +29,8 @@ public class TransactionHandler {
   }
 
   /**
-   * Authorization Process before Start Transaction When Authorize is accepted, change a
-   * stateMachine status to Preparing Stays Available otherwise
+   * Authorization process before StartTransaction or StopTransaction. When Authorize is accepted
+   * handles Start or Stop initiation
    *
    * @param connectorId ID of the connector
    * @param idTag ID of the user
@@ -48,14 +48,20 @@ public class TransactionHandler {
 
           if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
             System.out.println("Authorization Accepted...");
-            System.out.println("Proceeding Transaction...");
+            System.out.println("Proceeding with Transaction...");
             if (stateMachine.getCurrentState() == SimulatorState.Preparing) {
               startHandler.initiateStartTransaction(connectorId, idTag);
               this.transactionId = startHandler.getTransactionId();
               this.idTag = idTag;
+              /*
+               * TODO : Delete line 59 if it's not required.
+               */
               stateMachine.transition(startHandler.getStateMachine().getCurrentState());
             } else if (stateMachine.getCurrentState() == SimulatorState.Charging) {
               stopHandler.initiateStopTransaction(this.transactionId, idTag);
+              /*
+               * TODO : Delete line 65 if it's not required.
+               */
               stateMachine.transition(stopHandler.getStateMachine().getCurrentState());
             } else {
               System.err.println(
@@ -98,7 +104,7 @@ public class TransactionHandler {
       stopHandler.initiateStopTransaction(this.transactionId, idTag);
       stateMachine.transition(stopHandler.getStateMachine().getCurrentState());
     } else {
-      preAuthorize(this.transactionId, idTag);
+      preAuthorize(0, idTag);
     }
   }
 }
