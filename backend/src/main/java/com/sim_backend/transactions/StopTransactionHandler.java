@@ -25,11 +25,12 @@ public class StopTransactionHandler {
     this.client = client;
   }
 
-  /** Initiate StopTransaction, handles StopTransaction requests, responses and simulator status 
-   * 
+  /**
+   * Initiate StopTransaction, handles StopTransaction requests, responses and simulator status
+   *
    * @param transactionId id of transaction from StartTransaction
    * @param idTag id of user
-  */
+   */
   public void initiateStopTransaction(int transactionId, String idTag) {
 
     /*
