@@ -1,6 +1,5 @@
 package com.sim_backend.transactions;
 
-import com.sim_backend.state.IllegalStateException;
 import com.sim_backend.state.SimulatorState;
 import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.websockets.OCPPTime;
@@ -19,45 +18,13 @@ import lombok.Getter;
 public class StartTransactionHandler {
   private SimulatorStateMachine stateMachine;
   private OCPPWebSocketClient client;
+  private int transactionId;
 
   // Constructor
   public StartTransactionHandler(SimulatorStateMachine stateMachine, OCPPWebSocketClient client) {
     this.stateMachine = stateMachine;
     this.client = client;
-  }
-
-  /**
-   * Authorization Process before Start Transaction When Authorize is accepted, change a
-   * stateMachine status to Preparing Stays Available otherwise
-   *
-   * @param connectorId ID of the connector
-   * @param idTag ID of the user
-   * @throws IllegalStateException if stateMachine status is not available
-   */
-  public void preAuthorize(int connectorId, String idTag) {
-    if (stateMachine.getCurrentState() != SimulatorState.Available) {
-      throw new IllegalStateException(
-          "Cannot start with the current state. current state: " + stateMachine.getCurrentState());
-    }
-
-    Authorize authorizeMessage = new Authorize(idTag);
-    client.pushMessage(authorizeMessage);
-
-    client.onReceiveMessage(
-        AuthorizeResponse.class,
-        message -> {
-          if (!(message.getMessage() instanceof AuthorizeResponse response)) {
-            throw new ClassCastException("Message is not an AuthorizeResponse");
-          }
-          if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
-            System.out.println("Authorization Accepted...");
-            System.out.println("Proceeding Transaction...");
-            stateMachine.transition(SimulatorState.Preparing);
-          } else {
-            System.err.println(
-                "Authorize Denied... Status : " + response.getIdTagInfo().getStatus());
-          }
-        });
+    this.transactionId = -1;
   }
 
   /**
@@ -66,7 +33,7 @@ public class StartTransactionHandler {
    * otherwise
    *
    * @param connectorId ID of connector
-   * @param connectorId ID of user
+   * @param idTag ID of user
    * @param meterStart initial value of meter
    */
   public void initiateStartTransaction(int connectorId, String idTag) {
@@ -94,13 +61,16 @@ public class StartTransactionHandler {
             throw new ClassCastException("Message is not an StartTransactionResponse");
           }
           if (response.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED) {
+            transactionId = response.getTransactionId();
             System.out.println(
-                "Transaction Completed... Transaction Id : " + response.getTransactionId());
+                "Start Transaction Completed... Transaction Id : " + response.getTransactionId());
             stateMachine.transition(SimulatorState.Charging);
           } else {
-            System.err.println("Transaction Failed...");
+            System.err.println("Transaction Failed to Start...");
             stateMachine.transition(SimulatorState.Available);
           }
         });
+
+    client.clearOnReceiveMessage(StartTransactionResponse.class);
   }
 }

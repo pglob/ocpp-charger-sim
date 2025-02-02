@@ -10,18 +10,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Represents an OCPP 1.6 StartTransactionResponse sent by the Central System for transaction
+ * Represents an OCPP 1.6 StopTransactionResponse sent by the Central System for transaction
  * details.
  */
 @Getter
 @Setter
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
-    messageName = "StartTransactionResponse")
-public class StartTransactionResponse extends OCPPMessageResponse {
-  @SerializedName("transactionId")
-  private int transactionId;
-
+    messageName = "StopTransactionResponse")
+public class StopTransactionResponse extends OCPPMessageResponse {
   @SerializedName("idTagInfo")
   private IdTagInfo idTaginfo;
 
@@ -35,8 +32,7 @@ public class StartTransactionResponse extends OCPPMessageResponse {
   }
 
   // Constructor
-  public StartTransactionResponse(int transactionId, String idTaginfo) {
-    this.transactionId = transactionId;
+  public StopTransactionResponse(String idTaginfo) {
     this.idTaginfo = new IdTagInfo(AuthorizationStatus.fromString(idTaginfo));
   }
 }
