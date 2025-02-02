@@ -1,6 +1,5 @@
 package com.sim_backend.transactions;
 
-import com.sim_backend.state.IllegalStateException;
 import com.sim_backend.state.SimulatorState;
 import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.websockets.OCPPTime;
@@ -26,46 +25,8 @@ public class StopTransactionHandler {
     this.client = client;
   }
 
-  /**
-   * Authorization Process before initiating Stop Transaction
-   *
-   * @param idTag ID of an user
-   * @throws IllegalStateException If stateMachine status is not a Charging state throw error
-   */
-  public void preAuthorize(String idTag) {
-    // transition to Available, check if StateMachine is Charging
-    if (stateMachine.getCurrentState() != SimulatorState.Charging) {
-      throw new IllegalStateException(
-          "Cannot stop with the current state. current state: " + stateMachine.getCurrentState());
-    }
-
-    Authorize authorizeMessage = new Authorize(idTag);
-    client.pushMessage(authorizeMessage);
-
-    client.onReceiveMessage(
-        AuthorizeResponse.class,
-        message -> {
-          if (!(message.getMessage() instanceof AuthorizeResponse response)) {
-            throw new ClassCastException("Message is not an AuthorizeResponse");
-          }
-          stateMachine.transition(SimulatorState.Preparing);
-          if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
-            System.out.println("Authorization Accepted...");
-            System.out.println("Proceeding Transaction...");
-          } else {
-            System.err.println(
-                "Authorize Denied... Status : " + response.getIdTagInfo().getStatus());
-            stateMachine.transition(SimulatorState.Charging);
-          }
-        });
-  }
-
-  /**
-   * Initiate Stop Transaction Handling StopTransaction Request, Response and simulator status If
-   * authorization is accepted, change a stateMachine status from Charging to Available Stays
-   * Charging otherwise
-   */
-  public void initiateStopTransaction(int transactionId) {
+  /** Initiate Stop Transaction Handling StopTransaction Request, Response and simulator status */
+  public void initiateStopTransaction(int transactionId, String idTag) {
 
     /*
      * TODO : Swap meterStop
@@ -82,32 +43,19 @@ public class StopTransactionHandler {
 
     client.onReceiveMessage(
         StopTransactionResponse.class,
-        message2 -> {
-          if (!(message2.getMessage() instanceof StopTransactionResponse response2)) {
+        message -> {
+          if (!(message.getMessage() instanceof StopTransactionResponse response)) {
             throw new ClassCastException("Message is not a StopTransactionResponse");
           }
-          if (response2.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED) {
-            System.out.println("Transaction Completed...");
+          if (response.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED) {
+            System.out.println("Stop Transaction Completed...");
             stateMachine.transition(SimulatorState.Available);
           } else {
-            System.err.println("Transaction Failed...");
+            System.err.println("Transaction Failed to Stop...");
             stateMachine.transition(SimulatorState.Charging);
           }
         });
 
     client.clearOnReceiveMessage(StopTransactionResponse.class);
-  }
-
-  public void StopCharging(String preAuthidTag, String postAuthidTag, int transactionId) {
-    if (preAuthidTag != postAuthidTag) {
-      preAuthorize(postAuthidTag);
-      if (stateMachine.getCurrentState() != SimulatorState.Charging) {
-        throw new IllegalStateException(
-            "Cannot stop with the current state. current state: " + stateMachine.getCurrentState());
-      }
-      initiateStopTransaction(transactionId);
-    } else {
-      initiateStopTransaction(transactionId);
-    }
   }
 }

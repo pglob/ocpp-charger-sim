@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StopTransaction")
 public class StopTransaction extends OCPPMessageRequest {
   /*

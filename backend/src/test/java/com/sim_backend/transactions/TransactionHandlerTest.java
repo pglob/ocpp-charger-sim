@@ -38,11 +38,9 @@ public class TransactionHandlerTest {
   }
 
   @Test
-  void PreAuthStartChargingtest() {
+  void PreAuthorizeStarttest() {
     when(transactionHandler.getStartHandler().getStateMachine().getCurrentState())
-        .thenReturn(SimulatorState.Available)
-        .thenReturn(SimulatorState.Preparing)
-        .thenReturn(SimulatorState.Charging);
+        .thenReturn(SimulatorState.Preparing);
 
     AuthorizeResponse authorizeResponse =
         new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
@@ -71,12 +69,9 @@ public class TransactionHandlerTest {
         .when(transactionHandler.getStartHandler().getClient())
         .onReceiveMessage(eq(StartTransactionResponse.class), any());
 
-    transactionHandler.PreAuthlStartCharging(1, "Accepted");
+    transactionHandler.preAuthorize(1, "Accepted");
 
-    verify(transactionHandler.getStartHandler().getStateMachine())
-        .transition(SimulatorState.Preparing);
     verify(transactionHandler.getStartHandler().getClient()).pushMessage(any(Authorize.class));
-
     verify(transactionHandler.getStartHandler().getStateMachine())
         .transition(SimulatorState.Charging);
     verify(transactionHandler.getStartHandler().getClient())
@@ -84,49 +79,22 @@ public class TransactionHandlerTest {
   }
 
   @Test
-  void PostAuthStartChargingtest() {
-    when(transactionHandler.getStartHandler().getStateMachine().getCurrentState())
-        .thenReturn(SimulatorState.Preparing)
+  void PreAuthorizeStoptest() {
+    when(transactionHandler.getStopHandler().getStateMachine().getCurrentState())
         .thenReturn(SimulatorState.Charging);
 
-    StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
+    AuthorizeResponse authorizeResponse =
+        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
 
     doAnswer(
             invocation -> {
               OnOCPPMessageListener listener = invocation.getArgument(1);
               OnOCPPMessage message = mock(OnOCPPMessage.class);
-              when(message.getMessage()).thenReturn(startTransactionResponse);
+              when(message.getMessage()).thenReturn(authorizeResponse);
               listener.onMessageReceived(message);
               return null;
             })
         .when(transactionHandler.getStartHandler().getClient())
-        .onReceiveMessage(eq(StartTransactionResponse.class), any());
-
-    transactionHandler.PostAuthStartCharging(1, "Accepted");
-
-    verify(transactionHandler.getStartHandler().getStateMachine())
-        .transition(SimulatorState.Charging);
-    verify(transactionHandler.getStartHandler().getClient())
-        .pushMessage(any(StartTransaction.class));
-  }
-
-  @Test
-  void StopChargingSameIdtest() {
-    when(transactionHandler.getStopHandler().getStateMachine().getCurrentState())
-        .thenReturn(SimulatorState.Charging);
-
-    AuthorizeResponse authorizeResponse =
-        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
-
-    doAnswer(
-            invocation -> {
-              OnOCPPMessageListener listener = invocation.getArgument(1);
-              OnOCPPMessage message = mock(OnOCPPMessage.class);
-              when(message.getMessage()).thenReturn(authorizeResponse);
-              listener.onMessageReceived(message);
-              return null;
-            })
-        .when(transactionHandler.getStopHandler().getClient())
         .onReceiveMessage(eq(AuthorizeResponse.class), any());
 
     StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
@@ -142,20 +110,19 @@ public class TransactionHandlerTest {
         .when(transactionHandler.getStopHandler().getClient())
         .onReceiveMessage(eq(StopTransactionResponse.class), any());
 
-    transactionHandler.StopCharging(1, "idTag1", "idTag1");
+    transactionHandler.preAuthorize(1, "Accepted");
 
-    verify(transactionHandler.getStopHandler().getClient()).pushMessage(any(StopTransaction.class));
+    verify(transactionHandler.getStopHandler().getClient()).pushMessage(any(Authorize.class));
     verify(transactionHandler.getStopHandler().getStateMachine())
         .transition(SimulatorState.Available);
+    verify(transactionHandler.getStopHandler().getClient()).pushMessage(any(StopTransaction.class));
   }
 
   @Test
-  void StopChargingDiffIdtest() {
-    when(transactionHandler.getStopHandler().getStateMachine().getCurrentState())
-        .thenReturn(SimulatorState.Charging);
+  void PreAuthorizeDeniedtest() {
 
     AuthorizeResponse authorizeResponse =
-        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
+        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.BLOCKED));
 
     doAnswer(
             invocation -> {
@@ -165,26 +132,11 @@ public class TransactionHandlerTest {
               listener.onMessageReceived(message);
               return null;
             })
-        .when(transactionHandler.getStopHandler().getClient())
+        .when(client)
         .onReceiveMessage(eq(AuthorizeResponse.class), any());
 
-    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
+    transactionHandler.preAuthorize(1, "idTag");
 
-    doAnswer(
-            invocation -> {
-              OnOCPPMessageListener listener = invocation.getArgument(1);
-              OnOCPPMessage message = mock(OnOCPPMessage.class);
-              when(message.getMessage()).thenReturn(stopTransactionResponse);
-              listener.onMessageReceived(message);
-              return null;
-            })
-        .when(transactionHandler.getStopHandler().getClient())
-        .onReceiveMessage(eq(StopTransactionResponse.class), any());
-
-    transactionHandler.StopCharging(1, "idTag1", "idTag2");
-
-    verify(transactionHandler.getStopHandler().getClient()).pushMessage(any(StopTransaction.class));
-    verify(transactionHandler.getStopHandler().getStateMachine())
-        .transition(SimulatorState.Available);
+    verify(stateMachine, times(1)).transition(SimulatorState.Available);
   }
 }
