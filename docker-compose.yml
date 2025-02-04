@@ -64,6 +64,7 @@ services:
       - integration-test
     environment:
       - NODE_ENV=production
+      - NORMAL_MODE=${NORMAL_MODE}
     networks:
       - core-network
 

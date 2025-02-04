@@ -7,13 +7,13 @@ docker_debug:
 	DEBUG_STAGE=suspend-debug docker-compose --profile core up --build
 
 integration_test:
-	DEBUG_STAGE=run-debug docker-compose --env-file .env.internal --profile integration-test up --build
+	docker-compose --env-file .env.internal --profile integration-test up --build
 
 dummy_server:
-	docker compose --profile core --profile dummy-server up --build
+	NORMAL_MODE=enabled docker compose --profile core --profile dummy-server up --build
 
 dummy_server_debug:
-	DEBUG_STAGE=suspend-debug docker compose --profile core --profile dummy-server up --build
+	NORMAL_MODE=enabled DEBUG_STAGE=suspend-debug docker compose --profile core --profile dummy-server up --build
 
 build_backend:
 	cd ./backend && mvn spotless:apply && mvn clean && mvn package
