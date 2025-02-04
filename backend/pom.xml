@@ -92,12 +92,18 @@
             <version>1.18.36</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.0.2</version>
+        </dependency>
         <!-- ADD NEW DEPENDENCIES HERE -->
         <!-- <dependency>
             <groupId>group.id.here</groupId>
             <artifactId>artifact-id-here</artifactId>
             <version>version-here</version>
         </dependency> -->
+
     </dependencies>
 
     <build>

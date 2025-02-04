@@ -5,6 +5,7 @@ import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.RegistrationStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
+import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -24,14 +25,20 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 public class BootNotificationResponse extends OCPPMessageResponse {
 
+  /** Status of the BootNotification (Accepted, Pending, Rejected). Required. */
+  @NotNull(message = "Registration status is required")
   @SerializedName("status")
-  private RegistrationStatus status; // Status of the BootNotification (Accepted, Rejected)
+  private RegistrationStatus status;
 
+  /** Current time in ISO 8601 format. Required. */
+  @NotNull(message = "Current time is required")
   @SerializedName("currentTime")
-  private ZonedDateTime currentTime; // Current time in ISO 8601 format
+  private ZonedDateTime currentTime;
 
+  /** Interval (time in seconds) for next BootNotification. Must be positive. */
+  @NotNull(message = "Interval is required")
   @SerializedName("interval")
-  private int interval; // Interval (time in seconds) for next BootNotification
+  private int interval;
 
   public BootNotificationResponse(String status, ZonedDateTime currentTime, int interval) {
     this.status = RegistrationStatus.fromString(status);
