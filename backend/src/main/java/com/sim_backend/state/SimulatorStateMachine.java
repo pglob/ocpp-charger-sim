@@ -15,7 +15,7 @@ public class SimulatorStateMachine {
       Map.of(
           SimulatorState.PoweredOff, Set.of(SimulatorState.BootingUp),
           SimulatorState.BootingUp, Set.of(SimulatorState.Available),
-          SimulatorState.Available, Set.of(SimulatorState.Preparing, SimulatorState.PoweredOff),
+          SimulatorState.Available, Set.of(SimulatorState.Preparing),
           SimulatorState.Preparing, Set.of(SimulatorState.Charging, SimulatorState.Available),
           SimulatorState.Charging, Set.of(SimulatorState.Available));
 
@@ -42,7 +42,9 @@ public class SimulatorStateMachine {
    * @throws IllegalStateException if the transition is invalid.
    */
   public void transition(SimulatorState newState) {
-    if (validTransitions.getOrDefault(currentState, null).contains(newState)) {
+    // Transitioning to PoweredOff is always allowed
+    if (newState == SimulatorState.PoweredOff
+        || validTransitions.getOrDefault(currentState, null).contains(newState)) {
       currentState = newState;
       notifyObservers();
     } else {

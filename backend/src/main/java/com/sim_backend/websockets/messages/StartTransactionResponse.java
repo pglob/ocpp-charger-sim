@@ -24,7 +24,7 @@ public class StartTransactionResponse extends OCPPMessageResponse {
   private int transactionId;
 
   @SerializedName("idTagInfo")
-  private IdTagInfo idTaginfo;
+  private IdTagInfo idTagInfo;
 
   @Getter
   @Setter
@@ -39,6 +39,6 @@ public class StartTransactionResponse extends OCPPMessageResponse {
   // Constructor
   public StartTransactionResponse(int transactionId, String idTaginfo) {
     this.transactionId = transactionId;
-    this.idTaginfo = new IdTagInfo(AuthorizationStatus.fromString(idTaginfo));
+    this.idTagInfo = new IdTagInfo(AuthorizationStatus.fromString(idTagInfo));
   }
 }

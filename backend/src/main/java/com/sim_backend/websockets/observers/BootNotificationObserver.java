@@ -12,16 +12,24 @@ import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.BootNotificationResponse;
 import com.sim_backend.websockets.messages.MessageValidator;
 import java.util.concurrent.TimeUnit;
-import lombok.AllArgsConstructor;
 
 /**
  * Observer that handles BootNotification requests and responses as part of the OCPP protocol
  * communication with the Central System.
  */
-@AllArgsConstructor
 public class BootNotificationObserver implements OnOCPPMessageListener, StateObserver {
   private OCPPWebSocketClient webSocketClient;
-  private SimulatorStateMachine currState;
+  private SimulatorStateMachine stateMachine;
+
+  public BootNotificationObserver(
+      OCPPWebSocketClient webSocketClient, SimulatorStateMachine stateMachine) {
+    this.webSocketClient = webSocketClient;
+    this.stateMachine = stateMachine;
+
+    // Self register observer
+    stateMachine.addObserver(this);
+    webSocketClient.onReceiveMessage(BootNotificationResponse.class, this);
+  }
 
   /**
    * Handles sending a BootNotification request to the Central System if the simulator is in the
@@ -30,7 +38,7 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
   public void handleBootNotificationRequest() {
 
     // Ensure current state is booting
-    if (currState.getCurrentState() == SimulatorState.BootingUp) {
+    if (stateMachine.getCurrentState() == SimulatorState.BootingUp) {
       BootNotification bootNotification = new BootNotification();
 
       // Ensure no constraint violations
@@ -39,10 +47,9 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
       } else {
         webSocketClient.pushMessage(new BootNotification());
       }
-
     } else
       throw new IllegalStateException(
-          "Invalid machine state to send a boot notification: " + currState.getCurrentState());
+          "Invalid machine state to send a boot notification: " + stateMachine.getCurrentState());
   }
 
   /**
@@ -70,7 +77,7 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
         // Registration successful, set heartbeat from interval, update state
         // and synchronize time to match the Central System.
         scheduler.setHeartbeatInterval(interval, TimeUnit.SECONDS);
-        currState.transition(SimulatorState.Available);
+        stateMachine.transition(SimulatorState.Available);
         scheduler.synchronizeTime(response.getCurrentTime());
         break;
 
