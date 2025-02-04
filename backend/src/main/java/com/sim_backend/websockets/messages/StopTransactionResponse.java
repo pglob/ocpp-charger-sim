@@ -21,7 +21,7 @@ import lombok.Setter;
     messageName = "StopTransactionResponse")
 public class StopTransactionResponse extends OCPPMessageResponse {
   @SerializedName("idTagInfo")
-  private IdTagInfo idTaginfo;
+  private IdTagInfo idTagInfo;
 
   @Getter
   @Setter
@@ -34,7 +34,7 @@ public class StopTransactionResponse extends OCPPMessageResponse {
   }
 
   // Constructor
-  public StopTransactionResponse(String idTaginfo) {
-    this.idTaginfo = new IdTagInfo(AuthorizationStatus.fromString(idTaginfo));
+  public StopTransactionResponse(String idTagInfo) {
+    this.idTagInfo = new IdTagInfo(AuthorizationStatus.fromString(idTagInfo));
   }
 }
