@@ -12,8 +12,9 @@ public class StopTransactionTest {
 
   private static @NotNull StopTransaction getStopTransaction() {
     // Create an StopTransaction request
-    StopTransaction stopTransaction = new StopTransaction(1, 10, "2025-01-01T00:00:00Z");
+    StopTransaction stopTransaction = new StopTransaction("tag", 1, 10, "2025-01-01T00:00:00Z");
 
+    assert stopTransaction.getIdTag() == "tag";
     assert stopTransaction.getTransactionId() == 1;
     assert stopTransaction.getMeterStop() == 10;
     assert stopTransaction.getTimestamp().equals("2025-01-01T00:00:00Z");
@@ -39,7 +40,7 @@ public class StopTransactionTest {
     }
     // Check expected message structure
     assert message.equals(
-        "{\"transactionId\":1,\"meterStop\":10,\"timestamp\":\"2025-01-01T00:00:00Z\"}");
+        "{\"idTag\":\"tag\",\"transactionId\":1,\"meterStop\":10,\"timestamp\":\"2025-01-01T00:00:00Z\"}");
     assert errors.isEmpty();
   }
 }

@@ -15,7 +15,7 @@ public class StopTransactionResponseTest {
     StopTransactionResponse response = new StopTransactionResponse("Accepted");
 
     // Verify the StopTransaction Request is created correctly
-    assert response.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED;
+    assert response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED;
     return response;
   }
 
