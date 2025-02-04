@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import com.sim_backend.electrical.ElectricalTransition;
+import com.sim_backend.simulator.Simulator;
 import com.sim_backend.state.SimulatorState;
 import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.websockets.MessageScheduler;
@@ -21,6 +23,8 @@ import org.mockito.MockitoAnnotations;
 
 public class TransactionHandlerTest {
   @Mock private SimulatorStateMachine stateMachine;
+  @Mock private Simulator simulator;
+  @Mock private ElectricalTransition elec;
   @Mock private OCPPWebSocketClient client;
   @Mock private OCPPTime ocppTime;
   @Mock private MessageScheduler scheduler;
@@ -31,10 +35,13 @@ public class TransactionHandlerTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
+    when(simulator.getWsClient()).thenReturn(client);
+    when(simulator.getStateMachine()).thenReturn(stateMachine);
+    when(simulator.getElec()).thenReturn(elec);
     when(client.getScheduler()).thenReturn(scheduler);
     when(scheduler.getTime()).thenReturn(ocppTime);
     when(ocppTime.getSynchronizedTime()).thenReturn(ZonedDateTime.parse("2025-01-19T00:00:00Z"));
-    transactionHandler = new TransactionHandler(stateMachine, client);
+    transactionHandler = new TransactionHandler(simulator);
   }
 
   @Test

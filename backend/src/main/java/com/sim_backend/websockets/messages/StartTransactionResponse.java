@@ -24,12 +24,12 @@ public class StartTransactionResponse extends OCPPMessageResponse {
   private int transactionId;
 
   @SerializedName("idTagInfo")
-  private IdTagInfo idTagInfo;
+  private idTagInfo idTagInfo;
 
   @Getter
   @Setter
   @AllArgsConstructor
-  public static class IdTagInfo {
+  public static class idTagInfo {
 
     @NotBlank(message = "StartTransactionResponse Status is required and cannot be blank")
     @SerializedName("status")
@@ -37,8 +37,8 @@ public class StartTransactionResponse extends OCPPMessageResponse {
   }
 
   // Constructor
-  public StartTransactionResponse(int transactionId, String idTaginfo) {
+  public StartTransactionResponse(int transactionId, String idTagInfo) {
     this.transactionId = transactionId;
-    this.idTagInfo = new IdTagInfo(AuthorizationStatus.fromString(idTagInfo));
+    this.idTagInfo = new idTagInfo(AuthorizationStatus.fromString(idTagInfo));
   }
 }

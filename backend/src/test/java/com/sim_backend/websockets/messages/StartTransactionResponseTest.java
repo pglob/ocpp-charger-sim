@@ -16,7 +16,7 @@ public class StartTransactionResponseTest {
 
     // Verify the StartTransaction Request is created correctly
     assert response.getTransactionId() == 1;
-    assert response.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED;
+    assert response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED;
     return response;
   }
 
