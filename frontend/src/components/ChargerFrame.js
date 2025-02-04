@@ -1,43 +1,60 @@
-import React, { useState } from 'react';
+// ChargerFrame.js
+import React, { useEffect, useState } from 'react';
 import { Button } from './Button';
+import ChargingButton from './buttons/ChargingButton';
 import '../styles/styles.css';
+import { pollChargerData } from './ChargerLabels';
+import RebootButton from './buttons/RebootButton';
 
 function ChargerFrame() {
-  const [isOnline, setIsOnline] = useState(true); // Track online/offline state
+  const [data, setData] = useState([]);
 
-  const textContent = [
-    { label: 'State', value: isOnline ? 'Available' : 'Offline' },
-    { label: 'Meter Value', value: '123456 Wh' },
-    { label: 'Max Current', value: '40A' },
-    { label: 'Current Flow', value: '0A' },
-  ];
+  useEffect(() => {
+    // Start polling charger data every 5 seconds and state every 1 second
+    const intervalId = pollChargerData(setData, 5000, 1000);
+
+    // Clean up the polling when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Extract the simulator state
+  const stateItem = data.find((item) => item.label === 'State');
+  const stateValue = stateItem && stateItem.value ? stateItem.value : '';
+
+  // Determine if the simulator is online
+  const isOnline = Boolean(stateItem && !stateValue.includes('Offline'));
+
+  // Determine if the simulator is ready
+  const isActive = Boolean(
+    stateItem &&
+      !stateValue.includes('PoweredOff') &&
+      !stateValue.includes('BootingUp') &&
+      !stateValue.includes('Unknown')
+  );
 
   return (
     <div className="charger-frame">
       <div className="charger-name">
         <p style={{ margin: '0', textAlign: 'left' }}>
-          <strong>Charger Name:</strong> Sample A
+          <strong>Charger A</strong>
         </p>
       </div>
 
-      {/*the data displayed below for State, Meter value etc are temporary, will replace
-    with real data later*/}
-      {textContent.map((item, index) => (
-        <div key={index} className="text-item">
-          {/* Smaller margin */}
-          <p className="text-item">
-            {/* Left-aligned text */}
-            <strong>{item.label}:</strong> {item.value}
-          </p>
+      {/* Display the charger details and conditionally render the charging button */}
+      <div className="content-and-button">
+        <div className="text-content-container">
+          {data.map((item, index) => (
+            <div key={index} className="text-content">
+              <p>
+                <strong>{item.label}:</strong> {item.value}
+              </p>
+            </div>
+          ))}
         </div>
-      ))}
-      {isOnline && (
-        <>
-          <button className="button">Plug in Vehicle</button>
-          <button className="button">Send custom message</button>
-        </>
-      )}
-      <Button isOnline={isOnline} setIsOnline={setIsOnline} />
+        {isActive && <ChargingButton stateValue={stateValue} />}
+      </div>
+      <RebootButton />
+      <Button isOnline={isOnline} isActive={isActive} />
     </div>
   );
 }

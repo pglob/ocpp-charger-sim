@@ -7,7 +7,7 @@ import ButtonBase from './buttons/ButtonBase';
 import '../styles/styles.css';
 
 // Implementation of the button component, which includes a drop-down menu and an online/offline button
-function Button({ isOnline, setIsOnline }) {
+function Button({ isOnline, isActive }) {
   const [openDropdown, setOpenDropdown] = useState(false); // Track dropdown open/close state
 
   // Create instances of each button class
@@ -18,14 +18,18 @@ function Button({ isOnline, setIsOnline }) {
   ];
 
   // Handle Bring Online/Take Offline button click behavior
-  const handleOnlineOffline = () => {
+  const handleOnlineOffline = async () => {
     const endpoint = isOnline ? '/api/state/offline' : '/api/state/online';
     const buttonName = isOnline ? 'Take Offline' : 'Bring Online';
 
     // Use the base class for online/offline behavior
     const onlineOfflineButton = new ButtonBase(buttonName, endpoint);
-    onlineOfflineButton.postRequest(); // Call the placeholder postRequest
-    setIsOnline(!isOnline);
+    try {
+      // Wait for the POST request to succeed (e.g., 200 OK) before changing the state
+      await onlineOfflineButton.postRequest();
+    } catch (error) {
+      console.error('Failed to update online/offline state:', error);
+    }
   };
 
   // Handle Dropdown menu open/close
@@ -35,7 +39,7 @@ function Button({ isOnline, setIsOnline }) {
 
   return (
     <div className="button-container">
-      {isOnline && (
+      {isOnline && isActive && (
         <>
           {/* Dropdown toggle button */}
           <button onClick={handleDropdown} className="dropdown-toggle">
@@ -70,7 +74,7 @@ function Button({ isOnline, setIsOnline }) {
 
 Button.propTypes = {
   isOnline: PropTypes.bool.isRequired, // 'isOnline' should be a boolean
-  setIsOnline: PropTypes.func.isRequired, // 'setIsOnline' should be a function
+  isActive: PropTypes.bool.isRequired, // 'isActive' should be a boolean
 };
 
 export { Button };

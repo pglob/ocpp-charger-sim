@@ -41,6 +41,7 @@ class ButtonBase {
       .catch((error) => {
         console.error(`Error with ${this.endpoint}:`, error);
         // Catch and log any exceptions
+        throw error; // Re-throw to be handled by caller
       });
   }
 }
