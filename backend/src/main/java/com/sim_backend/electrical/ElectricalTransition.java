@@ -1,6 +1,7 @@
-package com.sim_backend;
+package com.sim_backend.electrical;
 
 import com.sim_backend.state.SimulatorState;
+import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.state.StateObserver;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,16 +16,25 @@ import lombok.NoArgsConstructor;
 public class ElectricalTransition implements StateObserver {
 
   /** The charger's voltage in volts. */
-  private int voltage;
+  private int voltage = 0;
+
+  /** The voltage the charger is connected to. 240V assumes a split phase residential circuit. */
+  private final int nominalVoltage = 240;
 
   /** The maximum current offered by the charger in amps. */
-  private int currentOffered;
+  private int currentOffered = 0;
 
   /** The actual current drawn from the charger by the EV. */
-  private int currentImport;
+  private int currentImport = 0;
 
-  /** A timestamp of when charging first started. */
-  private long initialChargeTimestamp;
+  /** The maximum current the charger is rated for. */
+  private final int maxCurrent = 40;
+
+  /** A timestamp of when charging first started for the current session. */
+  private long initialChargeTimestamp = 0;
+
+  /** Accumulated lifetime energy consumption in kWh across all sessions. */
+  private float lifetimeEnergy = 0.0f;
 
   /** Constant representing the number of seconds in an hour. Used for energy calculations. */
   private static final long SECONDS_PER_HOUR = 3600;
@@ -34,6 +44,10 @@ public class ElectricalTransition implements StateObserver {
 
   /** Constant representing the number of milliseconds in a second. Used for energy calculations. */
   private static final long MILLISECONDS_PER_SECOND = 1000;
+
+  public ElectricalTransition(SimulatorStateMachine stateMachine) {
+    stateMachine.addObserver(this);
+  }
 
   /**
    * Calculates and returns the maximum power the charger is capable of providing in kilowatts (kW).
@@ -60,6 +74,8 @@ public class ElectricalTransition implements StateObserver {
    * @return the energy consumed since the given interval in kilowatt-hours (kWh).
    */
   public float getEnergyActiveImportInterval(int interval) {
+    if (interval < 0) throw new IllegalArgumentException("interval must be nonnegative");
+
     long timeChargingSeconds =
         (System.currentTimeMillis() - this.initialChargeTimestamp) / MILLISECONDS_PER_SECOND;
 
@@ -71,39 +87,50 @@ public class ElectricalTransition implements StateObserver {
   }
 
   /**
-   * Returns the lifetime energy used by the charger in kilowatt-hours (kWh).
+   * Returns the lifetime energy used by the charger in kilowatt-hours (kWh). This includes energy
+   * consumed in previous charging sessions as well as the current session if it is still active.
    *
    * @return the lifetime energy consumed in kilowatt-hours (kWh).
    */
   public float getEnergyActiveImportRegister() {
-    long timeCharging = System.currentTimeMillis() - this.initialChargeTimestamp;
-    return getPowerActiveImport() * ((float) timeCharging / MILLISECONDS_PER_HOUR);
+    float currentSessionEnergy = 0.0f;
+    if (initialChargeTimestamp > 0) {
+      long timeCharging = System.currentTimeMillis() - this.initialChargeTimestamp;
+      currentSessionEnergy =
+          getPowerActiveImport() * ((float) timeCharging / MILLISECONDS_PER_HOUR);
+    }
+    return lifetimeEnergy + currentSessionEnergy;
   }
 
   /**
-   * Updates the electrical values based on the given simulator state. If the state is not Charging,
-   * all electrical values are reset to zero. Otherwise, when in the Charging state, the voltage is
-   * set to 240V, and the current offered and imported are both set to 40A. The initial charge
-   * timestamp is also updated to the current system time.
+   * Updates the electrical values based on the given simulator state. When transitioning from
+   * Charging to a non-Charging state, the energy consumed in the current session is accumulated
+   * into lifetimeEnergy.
    *
    * @param simulatorState is the current simulator state
    */
   @Override
   public void onStateChanged(SimulatorState simulatorState) {
-
-    // Whenever we aren't charging, zero all the electrical values.
+    // If we're leaving the Charging state, accumulate the current session energy.
     if (simulatorState != SimulatorState.Charging) {
+      if (initialChargeTimestamp != 0) { // Only if there was an active charging session.
+        long timeCharging = System.currentTimeMillis() - this.initialChargeTimestamp;
+        float sessionEnergy =
+            getPowerActiveImport() * ((float) timeCharging / MILLISECONDS_PER_HOUR);
+        lifetimeEnergy += sessionEnergy;
+      }
+      // Reset the current session values.
       this.voltage = 0;
       this.currentOffered = 0;
       this.currentImport = 0;
       this.initialChargeTimestamp = 0;
     }
-
-    // State is charging, proceed to set electrical values
+    // State is Charging, proceed to set electrical values for a new session.
     else {
-      this.voltage = 240;
-      this.currentOffered = 40;
-      this.currentImport = 40;
+      this.voltage = this.nominalVoltage;
+      this.currentOffered = this.maxCurrent;
+      this.currentImport = this.currentOffered;
+      // Set a new start time for this charging session.
       this.initialChargeTimestamp = System.currentTimeMillis();
     }
   }
