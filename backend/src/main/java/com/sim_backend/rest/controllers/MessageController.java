@@ -18,7 +18,7 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import lombok.Getter;
 
 @Getter
@@ -102,10 +102,10 @@ public class MessageController extends ControllerBase {
         json.has("status")
             ? ChargePointStatus.valueOf(json.get("status").getAsString())
             : ChargePointStatus.Available;
-    OffsetDateTime timestamp =
+    ZonedDateTime timestamp =
         json.has("timestamp") && !json.get("timestamp").getAsString().isEmpty()
-            ? OffsetDateTime.parse(json.get("timestamp").getAsString())
-            : OffsetDateTime.now();
+            ? ZonedDateTime.parse(json.get("timestamp").getAsString())
+            : ZonedDateTime.now();
     String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString() : "";
     String vendorErrorCode =
         json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString() : "";

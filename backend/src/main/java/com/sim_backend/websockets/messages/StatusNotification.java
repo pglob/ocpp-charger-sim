@@ -9,7 +9,7 @@ import com.sim_backend.websockets.types.OCPPMessageRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -36,7 +36,7 @@ public final class StatusNotification extends OCPPMessageRequest {
   private ChargePointStatus status;
 
   @SerializedName("timestamp")
-  private OffsetDateTime timestamp;
+  private ZonedDateTime timestamp;
 
   @Size(max = 255, message = "StatusNotification Vendor ID must not exceed 255 characters")
   @SerializedName("vendorId")
@@ -51,7 +51,7 @@ public final class StatusNotification extends OCPPMessageRequest {
       ChargePointErrorCode errorCode,
       String info,
       ChargePointStatus status,
-      OffsetDateTime timestamp,
+      ZonedDateTime timestamp,
       String vendorId,
       String vendorErrorCode) {
     this.connectorId = connectorId;
