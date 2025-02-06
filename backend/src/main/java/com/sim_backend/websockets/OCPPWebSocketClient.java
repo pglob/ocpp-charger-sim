@@ -18,8 +18,8 @@ import com.sim_backend.websockets.exceptions.OCPPUnsupportedProtocol;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -82,7 +82,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message The transmitted message.
    */
   public void recordTxMessage(String message) {
-    String timestamp = OffsetDateTime.now(ZoneOffset.UTC).toString();
+    String timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
     String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
     txMessages.add(messageWithTimestamp);
   }
@@ -93,7 +93,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message The received message.
    */
   public void recordRxMessage(String message, String messageName) {
-    String timestamp = OffsetDateTime.now(ZoneOffset.UTC).toString();
+    String timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
     String modifiedMessage =
         message.replaceFirst("\\[", "[\"" + messageName + "\", \"" + timestamp + "\", ");
     rxMessages.add(modifiedMessage);
