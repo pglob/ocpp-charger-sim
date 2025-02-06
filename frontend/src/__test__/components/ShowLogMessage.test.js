@@ -19,7 +19,7 @@ describe('ShowLogMessages Component', () => {
   });
 
   test('displays parsed sent messages correctly', async () => {
-    // ✅ Ensure mock returns valid JSON
+    // Ensure mock returns valid JSON
     fetchSentMessages.mockResolvedValue([
       JSON.stringify([
         '2025-02-06T10:13:48.257996862Z',
@@ -44,7 +44,7 @@ describe('ShowLogMessages Component', () => {
 
     render(<ShowLogMessages />);
 
-    // ✅ Wait for mock data to be displayed
+    // Wait for mock data to be displayed
     await waitFor(() => {
       expect(screen.getByText(/BootNotification/)).toBeInTheDocument();
       expect(screen.getByText(/Call/)).toBeInTheDocument();

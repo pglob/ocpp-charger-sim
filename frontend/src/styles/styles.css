@@ -131,6 +131,10 @@
   background-color: #f9f9f9;
 }
 
+.message-list {
+  font-size: 14px;
+}
+
 /* Centered text for empty message list */
 .no-messages {
   text-align: center;

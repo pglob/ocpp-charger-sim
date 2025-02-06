@@ -69,7 +69,7 @@ const ShowLogMessages = () => {
   const parseMessage = (message) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
-      const [TimeStamp, NumId, userId, messageName, payload] = parsedMessage;
+      const [TimeStamp, NumId, messageId, messageName, payload] = parsedMessage;
       const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
@@ -82,8 +82,8 @@ const ShowLogMessages = () => {
 
       return (
         <div
-          key={userId}
-          onClick={() => handleToggleDetails(userId, 'sent')}
+          key={messageId}
+          onClick={() => handleToggleDetails(messageId, 'sent')}
           className="log-message-container"
         >
           {/* Grouped Content */}
@@ -97,10 +97,10 @@ const ShowLogMessages = () => {
             <div className={`num-id-label ${numIdStyle}`}>{numIdLabel}</div>
           </div>
           {/* Expanded Details */}
-          {expandedSentMessages.has(userId) && (
-            <div>
+          {expandedSentMessages.has(messageId) && (
+            <div className="message-list">
               <p>
-                <strong>User ID:</strong> {userId}
+                <strong>Message ID:</strong> {messageId}
               </p>
               {Object.entries(payload).map(([key, value]) => (
                 <p key={key}>
@@ -119,7 +119,7 @@ const ShowLogMessages = () => {
   const parseReceivedMessage = (message) => {
     try {
       const parseReceivedMessage = JSON.parse(message); // Parse the string into an array
-      const [messageName, TimeStamp, NumId, userId, payload] =
+      const [messageName, TimeStamp, NumId, messageId, payload] =
         parseReceivedMessage;
       // const { status, currentTime, interval } = payload;
       const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
@@ -134,8 +134,8 @@ const ShowLogMessages = () => {
 
       return (
         <div
-          key={userId}
-          onClick={() => handleToggleDetails(userId, 'received')}
+          key={messageId}
+          onClick={() => handleToggleDetails(messageId, 'received')}
           className="log-message-container"
         >
           <div className="log-message-header">
@@ -149,10 +149,10 @@ const ShowLogMessages = () => {
             <div className={`num-id-label ${numIdStyle}`}>{numIdLabel}</div>
           </div>
           {/* Expanded Details: Message ID & Interval (Hidden until clicked) */}
-          {expandedReceivedMessages.has(userId) && (
-            <div>
+          {expandedReceivedMessages.has(messageId) && (
+            <div className="message-list">
               <p>
-                <strong>User ID:</strong> {userId}
+                <strong>Message ID:</strong> {messageId}
               </p>
               {Object.entries(payload).map(([key, value]) =>
                 key !== 'interval' ? (
