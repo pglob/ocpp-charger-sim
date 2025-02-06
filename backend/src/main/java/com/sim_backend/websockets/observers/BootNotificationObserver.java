@@ -35,9 +35,7 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
 
       // Ensure no constraint violations
       if (!MessageValidator.isValid(bootNotification)) {
-        throw new IllegalArgumentException(
-            "BootNotification constraint violations: "
-                + MessageValidator.log_message(bootNotification));
+        throw new IllegalArgumentException(MessageValidator.log_message(bootNotification));
       } else {
         webSocketClient.pushMessage(new BootNotification());
       }
