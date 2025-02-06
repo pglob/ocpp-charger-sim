@@ -5,12 +5,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import com.sim_backend.charger.Charger;
 import com.sim_backend.config.ConfigurationRegistry;
 import com.sim_backend.electrical.ElectricalTransition;
 import com.sim_backend.rest.controllers.MessageController;
-import com.sim_backend.simulator.Simulator;
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.messages.Authorize;
@@ -27,9 +27,9 @@ import org.mockito.MockitoAnnotations;
 class MessageControllerTest {
 
   @Mock private Javalin mockApp;
-  @Mock private Simulator mockSimulator;
+  @Mock private Charger mockCharger;
   @Mock private OCPPWebSocketClient mockWsClient;
-  @Mock private SimulatorStateMachine mockStateMachine;
+  @Mock private ChargerStateMachine mockStateMachine;
   @Mock private ElectricalTransition mockElec;
   @Mock private TransactionHandler mockTHandler;
   @Mock private Context mockContext;
@@ -44,17 +44,17 @@ class MessageControllerTest {
     // Allow chaining on the context: ctx.status(…) returns ctx.
     when(mockContext.status(anyInt())).thenReturn(mockContext);
 
-    // Stub the Simulator to return mock components
-    when(mockSimulator.getWsClient()).thenReturn(mockWsClient);
-    when(mockSimulator.getStateMachine()).thenReturn(mockStateMachine);
-    when(mockSimulator.getElec()).thenReturn(mockElec);
-    when(mockSimulator.getTransactionHandler()).thenReturn(mockTHandler);
-    when(mockSimulator.getConfig()).thenReturn(mockConfig);
+    // Stub the Charger to return mock components
+    when(mockCharger.getWsClient()).thenReturn(mockWsClient);
+    when(mockCharger.getStateMachine()).thenReturn(mockStateMachine);
+    when(mockCharger.getElec()).thenReturn(mockElec);
+    when(mockCharger.getTransactionHandler()).thenReturn(mockTHandler);
+    when(mockCharger.getConfig()).thenReturn(mockConfig);
 
     // Stub isRebootInProgress() to be false by default
-    when(mockSimulator.isRebootInProgress()).thenReturn(false);
+    when(mockCharger.isRebootInProgress()).thenReturn(false);
 
-    messageController = new MessageController(mockApp, mockSimulator);
+    messageController = new MessageController(mockApp, mockCharger);
   }
 
   @Test
@@ -96,7 +96,7 @@ class MessageControllerTest {
   @Test
   void testState() {
     // Arrange
-    when(mockStateMachine.getCurrentState()).thenReturn(SimulatorState.PoweredOff);
+    when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.PoweredOff);
 
     // Act
     messageController.state(mockContext);
@@ -108,20 +108,20 @@ class MessageControllerTest {
   @Test
   void testRebootNormal() {
     // Arrange
-    doNothing().when(mockSimulator).Reboot();
+    doNothing().when(mockCharger).Reboot();
 
     // Act
     messageController.reboot(mockContext);
 
     // Assert
-    verify(mockSimulator).Reboot();
+    verify(mockCharger).Reboot();
     verify(mockContext).result("OK");
   }
 
   @Test
   void testRebootInProgress() {
     // Arrange
-    when(mockSimulator.isRebootInProgress()).thenReturn(true);
+    when(mockCharger.isRebootInProgress()).thenReturn(true);
 
     // Act
     messageController.reboot(mockContext);
@@ -129,7 +129,7 @@ class MessageControllerTest {
     // Assert
     verify(mockContext).status(503);
     verify(mockContext).result("Reboot already in progress");
-    verify(mockSimulator, never()).Reboot();
+    verify(mockCharger, never()).Reboot();
   }
 
   @Test
@@ -247,7 +247,7 @@ class MessageControllerTest {
     verify(mockApp).post(eq("/api/message/boot"), any());
     verify(mockApp).post(eq("/api/message/heartbeat"), any());
     verify(mockApp).get(eq("/api/state"), any());
-    verify(mockApp).post(eq("/api/simulator/reboot"), any());
+    verify(mockApp).post(eq("/api/charger/reboot"), any());
     verify(mockApp).post(eq("/api/state/online"), any());
     verify(mockApp).post(eq("/api/state/offline"), any());
     verify(mockApp).post(eq("/api/state/status"), any());

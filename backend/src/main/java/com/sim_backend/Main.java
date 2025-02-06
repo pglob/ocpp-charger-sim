@@ -1,9 +1,9 @@
 package com.sim_backend;
 
+import com.sim_backend.charger.Charger;
 import com.sim_backend.rest.TestMessageController;
 import com.sim_backend.rest.controllers.ControllerBase;
 import com.sim_backend.rest.controllers.MessageController;
-import com.sim_backend.simulator.Simulator;
 import io.javalin.Javalin;
 
 /** The entry into our program. */
@@ -17,14 +17,14 @@ public final class Main {
     // Start Javalin server
     Javalin app = initializeFrontendAPI(config);
 
-    // Create the simulator
-    Simulator sim = new Simulator();
+    // Create the charger
+    Charger charger = new Charger();
 
     // Register REST API controllers and routes
-    registerRoutes(app, sim);
+    registerRoutes(app, charger);
 
-    // Start the simulator
-    sim.Boot();
+    // Start the charger
+    charger.Boot();
   }
 
   /**
@@ -69,8 +69,8 @@ public final class Main {
    * @param app the Javalin app
    * @param wsClient the WebSocket client
    */
-  private static void registerRoutes(Javalin app, Simulator sim) {
-    ControllerBase messageController = new MessageController(app, sim);
+  private static void registerRoutes(Javalin app, Charger charger) {
+    ControllerBase messageController = new MessageController(app, charger);
     messageController.registerRoutes(app);
     TestMessageController.registerRoutes(app);
   }

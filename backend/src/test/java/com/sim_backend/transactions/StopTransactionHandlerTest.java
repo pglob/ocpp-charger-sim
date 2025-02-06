@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import com.sim_backend.electrical.ElectricalTransition;
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class StopTransactionHandlerTest {
-  @Mock private SimulatorStateMachine stateMachine;
+  @Mock private ChargerStateMachine stateMachine;
   @Mock private ElectricalTransition elec;
   @Mock private OCPPWebSocketClient client;
   @Mock private OCPPTime ocppTime;
@@ -41,7 +41,7 @@ public class StopTransactionHandlerTest {
 
   @Test
   void initiateStopTransactiontest() {
-    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Charging);
+    when(stateMachine.getCurrentState()).thenReturn(ChargerState.Charging);
     StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
 
     doAnswer(
@@ -58,6 +58,6 @@ public class StopTransactionHandlerTest {
     handler.initiateStopTransaction(1, "idTag", elec, new AtomicBoolean());
 
     verify(client).pushMessage(any(StopTransaction.class));
-    verify(stateMachine).transition(SimulatorState.Available);
+    verify(stateMachine).transition(ChargerState.Available);
   }
 }

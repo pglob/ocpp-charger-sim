@@ -7,21 +7,21 @@ import lombok.Getter;
  * State machine for managing a simulated charger. The states here include OCPP protocol defined
  * states, in addition to other states that are relevant for charger operation.
  */
-public class SimulatorStateMachine {
-  @Getter private SimulatorState currentState;
+public class ChargerStateMachine {
+  @Getter private ChargerState currentState;
 
   private List<StateObserver> observers = new ArrayList<>();
-  private Map<SimulatorState, Set<SimulatorState>> validTransitions =
+  private Map<ChargerState, Set<ChargerState>> validTransitions =
       Map.of(
-          SimulatorState.PoweredOff, Set.of(SimulatorState.BootingUp),
-          SimulatorState.BootingUp, Set.of(SimulatorState.Available),
-          SimulatorState.Available, Set.of(SimulatorState.Preparing),
-          SimulatorState.Preparing, Set.of(SimulatorState.Charging, SimulatorState.Available),
-          SimulatorState.Charging, Set.of(SimulatorState.Available));
+          ChargerState.PoweredOff, Set.of(ChargerState.BootingUp),
+          ChargerState.BootingUp, Set.of(ChargerState.Available),
+          ChargerState.Available, Set.of(ChargerState.Preparing),
+          ChargerState.Preparing, Set.of(ChargerState.Charging, ChargerState.Available),
+          ChargerState.Charging, Set.of(ChargerState.Available));
 
   /** Initializes the state machine in the PoweredOff state. */
-  public SimulatorStateMachine() {
-    currentState = SimulatorState.PoweredOff;
+  public ChargerStateMachine() {
+    currentState = ChargerState.PoweredOff;
     notifyObservers();
   }
 
@@ -30,7 +30,7 @@ public class SimulatorStateMachine {
    *
    * @param initialState the state to start in
    */
-  public SimulatorStateMachine(SimulatorState initalState) {
+  public ChargerStateMachine(ChargerState initalState) {
     currentState = initalState;
     notifyObservers();
   }
@@ -41,9 +41,9 @@ public class SimulatorStateMachine {
    * @param newState the target state to transition to.
    * @throws IllegalStateException if the transition is invalid.
    */
-  public void transition(SimulatorState newState) {
+  public void transition(ChargerState newState) {
     // Transitioning to PoweredOff is always allowed
-    if (newState == SimulatorState.PoweredOff
+    if (newState == ChargerState.PoweredOff
         || validTransitions.getOrDefault(currentState, null).contains(newState)) {
       currentState = newState;
       notifyObservers();

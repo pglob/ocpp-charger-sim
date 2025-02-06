@@ -7,17 +7,17 @@ import org.junit.jupiter.api.Test;
 
 public class StateTest {
 
-  private SimulatorStateMachine testStateMachine;
+  private ChargerStateMachine testStateMachine;
 
   @BeforeEach
   void setUp() {
-    testStateMachine = new SimulatorStateMachine();
+    testStateMachine = new ChargerStateMachine();
   }
 
   @Test
   void testInit() {
     assertEquals(
-        SimulatorState.PoweredOff,
+        ChargerState.PoweredOff,
         testStateMachine.getCurrentState(),
         "StateMachine should initialize to PoweredOff");
   }
@@ -25,22 +25,22 @@ public class StateTest {
   @Test
   void testTransition() {
     assertEquals(
-        SimulatorState.PoweredOff,
+        ChargerState.PoweredOff,
         testStateMachine.getCurrentState(),
         "StateMachine should initialize to PoweredOff");
-    testStateMachine.transition(SimulatorState.BootingUp);
+    testStateMachine.transition(ChargerState.BootingUp);
     assertEquals(
-        SimulatorState.BootingUp,
+        ChargerState.BootingUp,
         testStateMachine.getCurrentState(),
         "Transition from PoweredOff to BootingUp failed");
-    testStateMachine.transition(SimulatorState.Available);
+    testStateMachine.transition(ChargerState.Available);
     assertEquals(
-        SimulatorState.Available,
+        ChargerState.Available,
         testStateMachine.getCurrentState(),
         "Transition from BootingUp to Available failed");
-    testStateMachine.transition(SimulatorState.PoweredOff);
+    testStateMachine.transition(ChargerState.PoweredOff);
     assertEquals(
-        SimulatorState.PoweredOff,
+        ChargerState.PoweredOff,
         testStateMachine.getCurrentState(),
         "Transition from Available to PoweredOff failed");
   }
@@ -48,40 +48,40 @@ public class StateTest {
   @Test
   void testTransitionToPoweredOff() {
     // Transition from BootingUp to PoweredOff.
-    testStateMachine.transition(SimulatorState.BootingUp);
-    testStateMachine.transition(SimulatorState.PoweredOff);
+    testStateMachine.transition(ChargerState.BootingUp);
+    testStateMachine.transition(ChargerState.PoweredOff);
     assertEquals(
-        SimulatorState.PoweredOff,
+        ChargerState.PoweredOff,
         testStateMachine.getCurrentState(),
         "Transition from BootingUp to PoweredOff should be allowed");
 
     // Transition from Available to PoweredOff.
-    testStateMachine.transition(SimulatorState.BootingUp);
-    testStateMachine.transition(SimulatorState.Available);
-    testStateMachine.transition(SimulatorState.PoweredOff);
+    testStateMachine.transition(ChargerState.BootingUp);
+    testStateMachine.transition(ChargerState.Available);
+    testStateMachine.transition(ChargerState.PoweredOff);
     assertEquals(
-        SimulatorState.PoweredOff,
+        ChargerState.PoweredOff,
         testStateMachine.getCurrentState(),
         "Transition from Available to PoweredOff should be allowed");
 
     // Transition from Preparing to PoweredOff.
-    testStateMachine.transition(SimulatorState.BootingUp);
-    testStateMachine.transition(SimulatorState.Available);
-    testStateMachine.transition(SimulatorState.Preparing);
-    testStateMachine.transition(SimulatorState.PoweredOff);
+    testStateMachine.transition(ChargerState.BootingUp);
+    testStateMachine.transition(ChargerState.Available);
+    testStateMachine.transition(ChargerState.Preparing);
+    testStateMachine.transition(ChargerState.PoweredOff);
     assertEquals(
-        SimulatorState.PoweredOff,
+        ChargerState.PoweredOff,
         testStateMachine.getCurrentState(),
         "Transition from Preparing to PoweredOff should be allowed");
 
     // Transition from Charging to PoweredOff.
-    testStateMachine.transition(SimulatorState.BootingUp);
-    testStateMachine.transition(SimulatorState.Available);
-    testStateMachine.transition(SimulatorState.Preparing);
-    testStateMachine.transition(SimulatorState.Charging);
-    testStateMachine.transition(SimulatorState.PoweredOff);
+    testStateMachine.transition(ChargerState.BootingUp);
+    testStateMachine.transition(ChargerState.Available);
+    testStateMachine.transition(ChargerState.Preparing);
+    testStateMachine.transition(ChargerState.Charging);
+    testStateMachine.transition(ChargerState.PoweredOff);
     assertEquals(
-        SimulatorState.PoweredOff,
+        ChargerState.PoweredOff,
         testStateMachine.getCurrentState(),
         "Transition from Charging to PoweredOff should be allowed");
   }

@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import com.sim_backend.electrical.ElectricalTransition;
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
@@ -22,7 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class StartTransactionHandlerTest {
-  @Mock private SimulatorStateMachine stateMachine;
+  @Mock private ChargerStateMachine stateMachine;
   @Mock private ElectricalTransition elec;
   @Mock private OCPPWebSocketClient client;
   @Mock private OCPPTime ocppTime;
@@ -89,7 +89,7 @@ public class StartTransactionHandlerTest {
 
   @Test
   void initiateStartTransactiontest() {
-    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Preparing);
+    when(stateMachine.getCurrentState()).thenReturn(ChargerState.Preparing);
 
     StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
 
@@ -107,6 +107,6 @@ public class StartTransactionHandlerTest {
     handler.initiateStartTransaction(1, "Accepted", new AtomicInteger(), elec, new AtomicBoolean());
 
     verify(client).pushMessage(any(StartTransaction.class));
-    verify(stateMachine).transition(SimulatorState.Charging);
+    verify(stateMachine).transition(ChargerState.Charging);
   }
 }

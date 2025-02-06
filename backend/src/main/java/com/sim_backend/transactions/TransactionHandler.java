@@ -1,9 +1,9 @@
 package com.sim_backend.transactions;
 
+import com.sim_backend.charger.Charger;
 import com.sim_backend.electrical.ElectricalTransition;
-import com.sim_backend.simulator.Simulator;
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.AuthorizationStatus;
 import com.sim_backend.websockets.messages.Authorize;
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 
 /**
- * Manages transaction operations for the Simulator, including the initiation of start and stop
+ * Manages transaction operations for the Charger, including the initiation of start and stop
  * charging processes. This handler coordinates the authorization process before starting or
  * stopping a transaction
  */
@@ -25,8 +25,8 @@ public class TransactionHandler {
   /** Handler for initiating a StopTransaction operation */
   private StopTransactionHandler stopHandler;
 
-  /** The state machine managing the current state of the Simulator */
-  private SimulatorStateMachine stateMachine;
+  /** The state machine managing the current state of the charger */
+  private ChargerStateMachine stateMachine;
 
   /** The WebSocket client used for communication with the central system */
   private OCPPWebSocketClient client;
@@ -34,7 +34,7 @@ public class TransactionHandler {
   /** The ElectricalTransition instance tracking charging parameters */
   private ElectricalTransition elec;
 
-  /** The simulator's current idTa */
+  /** The charger's current idTa */
   private String idTag;
 
   /** The current transaction id */
@@ -47,14 +47,14 @@ public class TransactionHandler {
   private final AtomicBoolean stopInProgress = new AtomicBoolean(false);
 
   /**
-   * Creates a new TransactionHandler for the given Simulator instance
+   * Creates a new TransactionHandler for the given Charger instance
    *
-   * @param sim the Simulator this TransactionHandler belongs to
+   * @param charger the Charger this TransactionHandler belongs to
    */
-  public TransactionHandler(Simulator sim) {
-    stateMachine = sim.getStateMachine();
-    client = sim.getWsClient();
-    elec = sim.getElec();
+  public TransactionHandler(Charger charger) {
+    stateMachine = charger.getStateMachine();
+    client = charger.getWsClient();
+    elec = charger.getElec();
     startHandler = new StartTransactionHandler(stateMachine, client);
     stopHandler = new StopTransactionHandler(stateMachine, client);
     idTag = null;
@@ -65,7 +65,7 @@ public class TransactionHandler {
    * Performs pre-authorization before starting or stopping a transaction
    *
    * <p>If the authorization is accepted, this method initiates either the start or stop transaction
-   * process based on the current state of the simulator. If the authorization fails, it resets the
+   * process based on the current state of the charger. If the authorization fails, it resets the
    * transaction flags and transitions the state machine back to Available
    *
    * @param connectorId the identifier of the connector to be used
@@ -85,11 +85,11 @@ public class TransactionHandler {
           if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
             System.out.println("Authorization Accepted...");
             System.out.println("Proceeding with Transaction...");
-            if (stateMachine.getCurrentState() == SimulatorState.Preparing) {
+            if (stateMachine.getCurrentState() == ChargerState.Preparing) {
               startHandler.initiateStartTransaction(
                   connectorId, idTag, transactionId, elec, startInProgress);
               this.idTag = idTag;
-            } else if (stateMachine.getCurrentState() == SimulatorState.Charging) {
+            } else if (stateMachine.getCurrentState() == ChargerState.Charging) {
               stopHandler.initiateStopTransaction(transactionId.get(), idTag, elec, stopInProgress);
             } else {
               System.err.println(
@@ -100,7 +100,7 @@ public class TransactionHandler {
                 "Authorize Denied... Status: " + response.getIdTagInfo().getStatus());
             startInProgress.set(false);
             stopInProgress.set(false);
-            stateMachine.transition(SimulatorState.Available);
+            stateMachine.transition(ChargerState.Available);
           }
           client.clearOnReceiveMessage(AuthorizeResponse.class);
         });
@@ -109,16 +109,16 @@ public class TransactionHandler {
   /**
    * Starts a charging session
    *
-   * <p>If the simulator is in the Available state and no start transaction is already in progress,
+   * <p>If the charger is in the Available state and no start transaction is already in progress,
    * the state is first transitioned to Preparing, and then the pre-authorization process is
-   * initiated. If the simulator is not in the Available state or a start is already in progress,
-   * this method does nothing
+   * initiated. If the charger is not in the Available state or a start is already in progress, this
+   * method does nothing
    *
    * @param connectorId the identifier of the connector to be used
    * @param idTag the user identification tag
    */
   public void StartCharging(int connectorId, String idTag) {
-    if (stateMachine.getCurrentState() != SimulatorState.Available || startInProgress.get()) {
+    if (stateMachine.getCurrentState() != ChargerState.Available || startInProgress.get()) {
       return;
     }
 
@@ -127,21 +127,21 @@ public class TransactionHandler {
       return;
     }
 
-    stateMachine.transition(SimulatorState.Preparing);
+    stateMachine.transition(ChargerState.Preparing);
     preAuthorize(connectorId, idTag);
   }
 
   /**
    * Stops a charging session
    *
-   * <p>If the simulator is in the Charging state and no stop transaction is already in progress,
-   * this method will either directly stop the charging process if the provided idTag matches the
-   * current authorized idTag, or it will initiate pre-authorization if the idTags differ.
+   * <p>If the charger is in the Charging state and no stop transaction is already in progress, this
+   * method will either directly stop the charging process if the provided idTag matches the current
+   * authorized idTag, or it will initiate pre-authorization if the idTags differ.
    *
    * @param idTag the user identification tag
    */
   public void StopCharging(String idTag) {
-    if (stateMachine.getCurrentState() != SimulatorState.Charging || stopInProgress.get()) {
+    if (stateMachine.getCurrentState() != ChargerState.Charging || stopInProgress.get()) {
       return;
     }
 

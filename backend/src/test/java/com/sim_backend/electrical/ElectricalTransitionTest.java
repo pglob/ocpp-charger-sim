@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.sim_backend.state.SimulatorState;
+import com.sim_backend.state.ChargerState;
 import org.junit.jupiter.api.Test;
 
 public class ElectricalTransitionTest {
@@ -28,7 +28,7 @@ public class ElectricalTransitionTest {
   public void ChargingStateTest() {
     ElectricalTransition et = new ElectricalTransition();
     long beforeCreation = System.currentTimeMillis();
-    et.onStateChanged(SimulatorState.Charging);
+    et.onStateChanged(ChargerState.Charging);
     long afterCreation = System.currentTimeMillis();
 
     assert (et.getVoltage() == 240);
@@ -50,8 +50,8 @@ public class ElectricalTransitionTest {
   @Test
   public void ChargingStateIntoNonCharging() {
     ElectricalTransition et = new ElectricalTransition();
-    et.onStateChanged(SimulatorState.Charging);
-    et.onStateChanged(SimulatorState.PoweredOff);
+    et.onStateChanged(ChargerState.Charging);
+    et.onStateChanged(ChargerState.PoweredOff);
     assert (et.getPowerActiveImport() == 0);
     assert (et.getPowerOffered() == 0);
     assert (et.getCurrentImport() == 0);
@@ -78,7 +78,7 @@ public class ElectricalTransitionTest {
     assertEquals(et.getEnergyActiveImportRegister(), 0);
 
     // Start charging.
-    et.onStateChanged(SimulatorState.Charging);
+    et.onStateChanged(ChargerState.Charging);
 
     // Wait for 2 seconds to simulate a brief charging period.
     Thread.sleep(2000);
@@ -93,7 +93,7 @@ public class ElectricalTransitionTest {
 
     // End charging; this should accumulate the energy consumption into the lifetime energy
     // register.
-    et.onStateChanged(SimulatorState.PoweredOff);
+    et.onStateChanged(ChargerState.PoweredOff);
     float lifetimeEnergy = et.getEnergyActiveImportRegister();
     assertTrue(
         Math.abs(intervalEnergy - lifetimeEnergy) < tolerance,
@@ -111,14 +111,14 @@ public class ElectricalTransitionTest {
   public void testMultipleChargingSessions() throws InterruptedException {
     ElectricalTransition et = new ElectricalTransition();
 
-    et.onStateChanged(SimulatorState.Charging);
+    et.onStateChanged(ChargerState.Charging);
     Thread.sleep(1000); // Simulate 1 second of charging.
-    et.onStateChanged(SimulatorState.PoweredOff);
+    et.onStateChanged(ChargerState.PoweredOff);
     float energyAfterSession1 = et.getEnergyActiveImportRegister();
 
-    et.onStateChanged(SimulatorState.Charging);
+    et.onStateChanged(ChargerState.Charging);
     Thread.sleep(1000); // Simulate 1 second of charging.
-    et.onStateChanged(SimulatorState.PoweredOff);
+    et.onStateChanged(ChargerState.PoweredOff);
     float energyAfterSession2 = et.getEnergyActiveImportRegister();
 
     // Lifetime energy should increase over sessions.
@@ -141,7 +141,7 @@ public class ElectricalTransitionTest {
   @Test
   public void testZeroInterval() {
     ElectricalTransition et = new ElectricalTransition();
-    et.onStateChanged(SimulatorState.Charging);
+    et.onStateChanged(ChargerState.Charging);
     float energyInterval = et.getEnergyActiveImportInterval(0);
     assertEquals(0, energyInterval, "Energy consumption for a zero interval should be zero.");
   }

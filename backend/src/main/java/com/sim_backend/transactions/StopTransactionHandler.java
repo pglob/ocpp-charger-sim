@@ -1,8 +1,8 @@
 package com.sim_backend.transactions;
 
 import com.sim_backend.electrical.ElectricalTransition;
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.*;
@@ -13,22 +13,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Getter;
 
 /*
- * This class handles simulator status followed by a StopTransaction message.
+ * This class handles charger status followed by a StopTransaction message.
  *
  */
 @Getter
 public class StopTransactionHandler {
-  private SimulatorStateMachine stateMachine;
+  private ChargerStateMachine stateMachine;
   private OCPPWebSocketClient client;
 
   // Constructor
-  public StopTransactionHandler(SimulatorStateMachine stateMachine, OCPPWebSocketClient client) {
+  public StopTransactionHandler(ChargerStateMachine stateMachine, OCPPWebSocketClient client) {
     this.stateMachine = stateMachine;
     this.client = client;
   }
 
   /**
-   * Initiate StopTransaction, handles StopTransaction requests, responses and simulator status
+   * Initiate StopTransaction, handles StopTransaction requests, responses and charger status
    *
    * @param transactionId transactionId from StartTransaction
    * @param idTag id of user
@@ -58,7 +58,7 @@ public class StopTransactionHandler {
           }
           // The central system cannot prevent a StopTransaction
           System.out.println("Stop Transaction Completed...");
-          stateMachine.transition(SimulatorState.Available);
+          stateMachine.transition(ChargerState.Available);
           client.clearOnReceiveMessage(StopTransactionResponse.class);
           stopInProgress.set(false);
         });

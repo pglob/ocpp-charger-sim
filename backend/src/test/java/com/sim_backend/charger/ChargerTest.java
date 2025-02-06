@@ -1,11 +1,11 @@
-package com.sim_backend.simulator;
+package com.sim_backend.charger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import org.junit.jupiter.api.AfterEach;
@@ -13,23 +13,23 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 
-class SimulatorTest {
+class ChargerTest {
 
   // Construction mocks for dependencies to avoid network connections
   private MockedConstruction<OCPPWebSocketClient> wsClientConstruction;
-  private MockedConstruction<SimulatorLoop> simLoopConstruction;
+  private MockedConstruction<ChargerLoop> chargerLoopConstruction;
 
   @AfterEach
   void tearDown() {
     if (wsClientConstruction != null) {
       wsClientConstruction.close();
     }
-    if (simLoopConstruction != null) {
-      simLoopConstruction.close();
+    if (chargerLoopConstruction != null) {
+      chargerLoopConstruction.close();
     }
   }
 
-  /** This test verifies that calling Boot() initializes the Simulator and its components */
+  /** This test verifies that calling Boot() initializes the Charger and its components */
   @Test
   void testBoot() throws Exception {
     // Set up mocks for the components that would create network connections
@@ -39,9 +39,9 @@ class SimulatorTest {
             (mock, context) -> {
               doNothing().when(mock).close(anyInt(), anyString());
             });
-    simLoopConstruction =
+    chargerLoopConstruction =
         Mockito.mockConstruction(
-            SimulatorLoop.class,
+            ChargerLoop.class,
             (mock, context) -> {
               doNothing().when(mock).requestStop();
               // Stub run() to simulate a long-running loop
@@ -60,36 +60,36 @@ class SimulatorTest {
                   .run();
             });
 
-    // Start the simulator
-    Simulator sim = new Simulator();
-    sim.Boot();
+    // Start the charger
+    Charger charger = new Charger();
+    charger.Boot();
 
     // Verify that the components were created
-    assertNotNull(sim.getStateMachine(), "State machine should be initialized");
-    assertNotNull(sim.getElec(), "Electrical transition should be initialized");
-    assertNotNull(sim.getWsClient(), "WebSocket client should be initialized");
-    assertNotNull(sim.getTransactionHandler(), "Transaction handler should be initialized");
+    assertNotNull(charger.getStateMachine(), "State machine should be initialized");
+    assertNotNull(charger.getElec(), "Electrical transition should be initialized");
+    assertNotNull(charger.getWsClient(), "WebSocket client should be initialized");
+    assertNotNull(charger.getTransactionHandler(), "Transaction handler should be initialized");
 
-    // Verify that the SimulatorLoop was created
-    assertNotNull(sim.getSimulatorLoop(), "Simulator loop should be initialized");
+    // Verify that the charger loop was created
+    assertNotNull(charger.getChargerLoop(), "Charger loop should be initialized");
     assertEquals(
         1,
-        simLoopConstruction.constructed().size(),
-        "Exactly one SimulatorLoop should be constructed");
+        chargerLoopConstruction.constructed().size(),
+        "Exactly one charger loop should be constructed");
 
-    // Verify that the simulator thread is created and is running
-    assertNotNull(sim.getSimulatorThread(), "Simulator thread should be initialized");
+    // Verify that the charger thread is created and is running
+    assertNotNull(charger.getChargerThread(), "Charger thread should be initialized");
     Thread.sleep(50); // Give the thread time to start
-    assertTrue(sim.getSimulatorThread().isAlive(), "Simulator thread should be alive");
+    assertTrue(charger.getChargerThread().isAlive(), "Charger thread should be alive");
 
-    sim.getSimulatorLoop().requestStop();
-    sim.getSimulatorThread().interrupt();
-    sim.getSimulatorThread().join();
+    charger.getChargerLoop().requestStop();
+    charger.getChargerThread().interrupt();
+    charger.getChargerThread().join();
   }
 
   /**
    * This test confirms that calling Reboot() shuts down the current components and then
-   * reinitializes the Simulator
+   * reinitializes the Charger
    */
   @Test
   void testReboot() throws Exception {
@@ -100,9 +100,9 @@ class SimulatorTest {
             (mock, context) -> {
               doNothing().when(mock).close(anyInt(), anyString());
             });
-    simLoopConstruction =
+    chargerLoopConstruction =
         Mockito.mockConstruction(
-            SimulatorLoop.class,
+            ChargerLoop.class,
             (mock, context) -> {
               doNothing().when(mock).requestStop();
               // Stub run() to simulate a long-running loop
@@ -121,57 +121,58 @@ class SimulatorTest {
                   .run();
             });
 
-    // Start the simulator
-    Simulator sim = new Simulator();
-    sim.Boot();
+    // Start the charger
+    Charger charger = new Charger();
+    charger.Boot();
 
     // Save references to the current components
-    OCPPWebSocketClient oldWsClient = sim.getWsClient();
-    SimulatorStateMachine oldStateMachine = sim.getStateMachine();
-    TransactionHandler oldTHandler = sim.getTransactionHandler();
-    Thread oldThread = sim.getSimulatorThread();
+    OCPPWebSocketClient oldWsClient = charger.getWsClient();
+    ChargerStateMachine oldStateMachine = charger.getStateMachine();
+    TransactionHandler oldTHandler = charger.getTransactionHandler();
+    Thread oldThread = charger.getChargerThread();
 
     // Reboot
-    sim.Reboot();
+    charger.Reboot();
     Thread.sleep(2100); // Allow time for the reboot to complete
 
     // Verify that new component instances were created
-    assertNotNull(sim.getWsClient(), "WebSocket client should be reinitialized after reboot");
+    assertNotNull(charger.getWsClient(), "WebSocket client should be reinitialized after reboot");
     assertNotSame(
         oldWsClient,
-        sim.getWsClient(),
+        charger.getWsClient(),
         "A new WebSocket client instance should be created after reboot");
 
-    assertNotNull(sim.getStateMachine(), "State machine should be reinitialized after reboot");
+    assertNotNull(charger.getStateMachine(), "State machine should be reinitialized after reboot");
     assertNotSame(
         oldStateMachine,
-        sim.getStateMachine(),
+        charger.getStateMachine(),
         "A new state machine instance should be created after reboot");
 
     assertNotNull(
-        sim.getTransactionHandler(), "Transaction handler should be reinitialized after reboot");
+        charger.getTransactionHandler(),
+        "Transaction handler should be reinitialized after reboot");
     assertNotSame(
         oldTHandler,
-        sim.getTransactionHandler(),
+        charger.getTransactionHandler(),
         "A new transaction handler instance should be created after reboot");
 
-    // Verify that a new simulator thread is running
+    // Verify that a new charger thread is running
     assertNotNull(
-        sim.getSimulatorThread(), "Simulator thread should be reinitialized after reboot");
+        charger.getChargerThread(), "Charger thread should be reinitialized after reboot");
     assertNotSame(
         oldThread,
-        sim.getSimulatorThread(),
-        "A new simulator thread should be created after reboot");
+        charger.getChargerThread(),
+        "A new charger thread should be created after reboot");
     Thread.sleep(50); // Give the thread time to start
     assertTrue(
-        sim.getSimulatorThread().isAlive(), "New simulator thread should be alive after reboot");
+        charger.getChargerThread().isAlive(), "New charger thread should be alive after reboot");
 
     // Verify that the reboot lock is released
     assertFalse(
-        sim.isRebootInProgress(), "Reboot should not be in progress after reboot completes");
+        charger.isRebootInProgress(), "Reboot should not be in progress after reboot completes");
 
-    sim.getSimulatorLoop().requestStop();
-    sim.getSimulatorThread().interrupt();
-    sim.getSimulatorThread().join();
+    charger.getChargerLoop().requestStop();
+    charger.getChargerThread().interrupt();
+    charger.getChargerThread().join();
   }
 }

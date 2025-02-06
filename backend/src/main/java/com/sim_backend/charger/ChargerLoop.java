@@ -1,27 +1,27 @@
-package com.sim_backend.simulator;
+package com.sim_backend.charger;
 
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 
 /**
- * Represents the main loop of the Simulator. This loop is responsible for scheduling and processing
- * messages for the WebSocket client associated with the Simulator. It runs in its own thread and
- * can be stopped by setting a flag or interrupting the thread
+ * Represents the main loop of the Charger. This loop is responsible for scheduling and processing
+ * messages for the WebSocket client associated with the Charger. It runs in its own thread and can
+ * be stopped by setting a flag or interrupting the thread
  */
-public class SimulatorLoop implements Runnable {
+public class ChargerLoop implements Runnable {
 
   /** A flag indicating when the loop should stop */
   private volatile boolean stopRequested = false;
 
-  /** The Simulator instance associated with this loop */
-  private final Simulator sim;
+  /** The Charger instance associated with this loop */
+  private final Charger charger;
 
   /**
-   * Constructs a new SimulatorLoop for the given Simulator
+   * Constructs a new ChargerLoop for the given Charger
    *
-   * @param sim the Simulator instance whose WebSocket client will be used for processing messages
+   * @param charger the Charger instance whose WebSocket client will be used for processing messages
    */
-  public SimulatorLoop(Simulator sim) {
-    this.sim = sim;
+  public ChargerLoop(Charger charger) {
+    this.charger = charger;
   }
 
   /** Requests that the loop stops processing */
@@ -30,15 +30,15 @@ public class SimulatorLoop implements Runnable {
   }
 
   /**
-   * Processes one iteration of the Simulator loop
+   * Processes one iteration of the Charger loop
    *
    * @return {@code true} if the processing should continue, or {@code false} if the loop should
    *     exit
    */
   public boolean process() {
     try {
-      sim.getWsClient().getScheduler().tick();
-      sim.getWsClient().popAllMessages();
+      charger.getWsClient().getScheduler().tick();
+      charger.getWsClient().popAllMessages();
     } catch (OCPPMessageFailure e) {
       // TODO: Add error handling for OCPP message failures
     } catch (InterruptedException e) {
@@ -48,7 +48,7 @@ public class SimulatorLoop implements Runnable {
     return true;
   }
 
-  /** Runs the Simulator loop */
+  /** Runs the Charger loop */
   @Override
   public void run() {
     while (!stopRequested && !Thread.currentThread().isInterrupted()) {
