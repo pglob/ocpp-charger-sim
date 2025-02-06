@@ -14,11 +14,13 @@ import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.BootNotificationResponse;
 import com.sim_backend.websockets.types.OCPPMessage;
+import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,9 +65,9 @@ class BootNotificationObserverTest {
   @Test
   void onMessageReceived_WhenStatusAccepted_SetsHeartbeatAndTransitionsState() {
     // Arrange
-    BootNotificationResponse response = mock(BootNotificationResponse.class);
-    when(response.getStatus()).thenReturn(RegistrationStatus.ACCEPTED);
-    when(response.getInterval()).thenReturn(30);
+    BootNotificationResponse response =
+        Mockito.spy(
+            new BootNotificationResponse(RegistrationStatus.ACCEPTED, ZonedDateTime.now(), 20));
 
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
     when(webSocketClient.getScheduler()).thenReturn(messageScheduler);
@@ -78,16 +80,16 @@ class BootNotificationObserverTest {
     observer.onMessageReceived(message);
 
     // Assert
-    verify(messageScheduler).setHeartbeatInterval(30L, TimeUnit.SECONDS);
+    verify(messageScheduler).setHeartbeatInterval(20L, TimeUnit.SECONDS);
     verify(stateMachine).transition(SimulatorState.Available);
   }
 
   @Test
   void onMessageReceived_WhenStatusPending_RegistersJob() {
     // Arrange
-    BootNotificationResponse response = mock(BootNotificationResponse.class);
-    when(response.getStatus()).thenReturn(RegistrationStatus.PENDING);
-    when(response.getInterval()).thenReturn(15);
+    BootNotificationResponse response =
+        Mockito.spy(
+            new BootNotificationResponse(RegistrationStatus.PENDING, ZonedDateTime.now(), 20));
 
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
     when(webSocketClient.getScheduler()).thenReturn(messageScheduler);
@@ -100,15 +102,16 @@ class BootNotificationObserverTest {
     observer.onMessageReceived(message);
 
     // Assert
-    verify(messageScheduler).registerJob(eq(15L), eq(TimeUnit.SECONDS), isBootNotification());
+    verify(messageScheduler).registerJob(eq(20L), eq(TimeUnit.SECONDS), isBootNotification());
   }
 
   @Test
   void onMessageReceived_WhenStatusRejected_RegistersJob() {
     // Arrange
-    BootNotificationResponse response = mock(BootNotificationResponse.class);
-    when(response.getStatus()).thenReturn(RegistrationStatus.REJECTED);
-    when(response.getInterval()).thenReturn(0);
+    // Arrange
+    BootNotificationResponse response =
+        Mockito.spy(
+            new BootNotificationResponse(RegistrationStatus.REJECTED, ZonedDateTime.now(), 240));
 
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
     when(webSocketClient.getScheduler()).thenReturn(messageScheduler);

@@ -26,17 +26,17 @@ import lombok.Setter;
 public class BootNotificationResponse extends OCPPMessageResponse {
 
   /** Status of the BootNotification (Accepted, Pending, Rejected). Required. */
-  @NotNull(message = "Registration status is required")
+  @NotNull(message = "BootNotificationResponse Registration status is required")
   @SerializedName("status")
   private RegistrationStatus status;
 
   /** Current time in ISO 8601 format. Required. */
-  @NotNull(message = "Current time is required")
+  @NotNull(message = "BootNotificationResponse Current time is required")
   @SerializedName("currentTime")
   private ZonedDateTime currentTime;
 
   /** Interval (time in seconds) for next BootNotification. Must be positive. */
-  @NotNull(message = "Interval is required")
+  @NotNull(message = "BootNotificationResponse Interval is required")
   @SerializedName("interval")
   private int interval;
 

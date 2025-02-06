@@ -13,10 +13,7 @@ import com.google.gson.JsonParser;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
-import com.sim_backend.websockets.messages.Authorize;
-import com.sim_backend.websockets.messages.BootNotification;
-import com.sim_backend.websockets.messages.Heartbeat;
-import com.sim_backend.websockets.messages.StatusNotification;
+import com.sim_backend.websockets.messages.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URI;
@@ -41,6 +38,9 @@ public class MessageController extends ControllerBase {
 
   public void authorize(Context ctx) {
     Authorize msg = new Authorize();
+    if (!MessageValidator.isValid(msg)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(msg));
+    }
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
@@ -57,12 +57,20 @@ public class MessageController extends ControllerBase {
             "IMSI",
             "Meter Type",
             "Meter S/N");
+
+    if (!MessageValidator.isValid(msg)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(msg));
+    }
+
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
 
   public void heartbeat(Context ctx) {
     Heartbeat msg = new Heartbeat();
+    if (!MessageValidator.isValid(msg)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(msg));
+    }
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
