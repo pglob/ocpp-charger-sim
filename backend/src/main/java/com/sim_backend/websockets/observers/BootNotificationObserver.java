@@ -1,8 +1,8 @@
 package com.sim_backend.websockets.observers;
 
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.IllegalStateException;
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
 import com.sim_backend.state.StateObserver;
 import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
@@ -19,10 +19,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class BootNotificationObserver implements OnOCPPMessageListener, StateObserver {
   private OCPPWebSocketClient webSocketClient;
-  private SimulatorStateMachine stateMachine;
+  private ChargerStateMachine stateMachine;
 
   public BootNotificationObserver(
-      OCPPWebSocketClient webSocketClient, SimulatorStateMachine stateMachine) {
+      OCPPWebSocketClient webSocketClient, ChargerStateMachine stateMachine) {
     this.webSocketClient = webSocketClient;
     this.stateMachine = stateMachine;
 
@@ -32,13 +32,13 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
   }
 
   /**
-   * Handles sending a BootNotification request to the Central System if the simulator is in the
+   * Handles sending a BootNotification request to the Central System if the charger is in the
    * correct state.
    */
   public void handleBootNotificationRequest() {
 
     // Ensure current state is booting
-    if (stateMachine.getCurrentState() == SimulatorState.BootingUp) {
+    if (stateMachine.getCurrentState() == ChargerState.BootingUp) {
       BootNotification bootNotification = new BootNotification();
 
       // Ensure no constraint violations
@@ -77,7 +77,7 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
         // Registration successful, set heartbeat from interval, update state
         // and synchronize time to match the Central System.
         scheduler.setHeartbeatInterval(interval, TimeUnit.SECONDS);
-        stateMachine.transition(SimulatorState.Available);
+        stateMachine.transition(ChargerState.Available);
         scheduler.synchronizeTime(response.getCurrentTime());
         break;
 
@@ -103,8 +103,8 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
   }
 
   @Override
-  public void onStateChanged(SimulatorState newState) {
-    if (newState == SimulatorState.BootingUp) {
+  public void onStateChanged(ChargerState newState) {
+    if (newState == ChargerState.BootingUp) {
       handleBootNotificationRequest();
     }
   }

@@ -7,13 +7,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class ObserverTest {
-  private SimulatorStateMachine testStateMachine;
+  private ChargerStateMachine testStateMachine;
   private StateLogger testObserver;
 
   @BeforeEach
   void setUp() {
     testObserver = new StateLogger();
-    testStateMachine = new SimulatorStateMachine();
+    testStateMachine = new ChargerStateMachine();
     testStateMachine.addObserver(testObserver);
   }
 
@@ -24,64 +24,64 @@ public class ObserverTest {
 
   @Test
   void testLog() {
-    testStateMachine.transition(SimulatorState.BootingUp);
+    testStateMachine.transition(ChargerState.BootingUp);
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log PoweredOff to Bootingup");
 
-    testStateMachine.transition(SimulatorState.Available);
+    testStateMachine.transition(ChargerState.Available);
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log BootingUp to Available");
 
-    testStateMachine.transition(SimulatorState.Preparing);
+    testStateMachine.transition(ChargerState.Preparing);
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log Available to Prepraring");
 
-    testStateMachine.transition(SimulatorState.Charging);
+    testStateMachine.transition(ChargerState.Charging);
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log Preparing to Charging");
 
-    testStateMachine.transition(SimulatorState.Available);
+    testStateMachine.transition(ChargerState.Available);
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log Charging to Available");
 
-    testStateMachine.transition(SimulatorState.Preparing);
+    testStateMachine.transition(ChargerState.Preparing);
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log Available to Prepraring");
-    testStateMachine.transition(SimulatorState.Available);
+    testStateMachine.transition(ChargerState.Available);
 
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log Charging to Available");
-    testStateMachine.transition(SimulatorState.PoweredOff);
+    testStateMachine.transition(ChargerState.PoweredOff);
 
     assertEquals(
         testStateMachine.getCurrentState(),
         testObserver.getLastState(),
         "Observer Failed to Log Available to PoweredOff");
 
-    List<SimulatorState> expectedResult =
+    List<ChargerState> expectedResult =
         List.of(
-            SimulatorState.BootingUp,
-            SimulatorState.Available,
-            SimulatorState.Preparing,
-            SimulatorState.Charging,
-            SimulatorState.Available,
-            SimulatorState.Preparing,
-            SimulatorState.Available,
-            SimulatorState.PoweredOff);
+            ChargerState.BootingUp,
+            ChargerState.Available,
+            ChargerState.Preparing,
+            ChargerState.Charging,
+            ChargerState.Available,
+            ChargerState.Preparing,
+            ChargerState.Available,
+            ChargerState.PoweredOff);
 
     assertEquals(
         testObserver.getHistory(),
