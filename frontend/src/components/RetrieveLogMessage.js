@@ -18,7 +18,7 @@ export const fetchSentMessages = async () => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error fetching sent messages:', error);
+    console.log('Error fetching sent messages:', error);
     return [];
   }
 };
@@ -43,7 +43,7 @@ export const fetchReceivedMessages = async () => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error fetching received messages:', error);
+    console.log('Error fetching received messages:', error);
     return [];
   }
 };
