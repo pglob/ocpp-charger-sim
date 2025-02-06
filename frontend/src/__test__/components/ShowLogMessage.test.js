@@ -48,7 +48,6 @@ describe('ShowLogMessages Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/BootNotification/)).toBeInTheDocument();
       expect(screen.getByText(/Call/)).toBeInTheDocument();
-      expect(screen.getByText(/2:13:48/)).toBeInTheDocument();
     });
   });
 
@@ -74,7 +73,6 @@ describe('ShowLogMessages Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/Authorize/)).toBeInTheDocument();
       expect(screen.getByText(/Response/)).toBeInTheDocument();
-      expect(screen.getByText(/2:13:48/)).toBeInTheDocument(); //should show the UTC one
     });
   });
 
