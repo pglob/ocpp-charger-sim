@@ -92,11 +92,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @param message The received message.
    */
-  public void recordRxMessage(String message) {
+  public void recordRxMessage(String message, String messageName) {
     String timestamp = OffsetDateTime.now(ZoneOffset.UTC).toString();
-    // Replace the currentTime value using regex
-    String modifiedMessage =
-        message.replaceAll("\"currentTime\":\"[^\"]+\"", "\"currentTime\":\"" + timestamp + "\"");
+    String modifiedMessage = message.replaceFirst("\\[", "[\"" + messageName + "\", \"" + timestamp + "\", ");
     rxMessages.add(modifiedMessage);
   }
 
@@ -147,7 +145,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void onMessage(String s) {
     try {
       this.handleMessage(s);
-      this.recordRxMessage(s); // Record received message
     } catch (Exception exception) {
       log.error("Received Bad OCPP Message: ", exception);
     }
@@ -170,6 +167,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     JsonArray array = element.getAsJsonArray();
     String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
     String messageName = "";
+    String messageType = "";
     JsonObject data;
 
     int callId = array.get(CALL_ID_INDEX).getAsInt();
@@ -190,6 +188,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
         this.queue.clearPreviousMessage(prevMessage);
         OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
         messageName = info.messageName() + "Response";
+        messageType = info.messageName();
+        this.recordRxMessage(s, messageType);
         data = array.get(PAYLOAD_INDEX - 1).getAsJsonObject();
       }
       case OCPPMessage.CALL_ID_ERROR -> {
@@ -204,6 +204,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
         error.setErroredMessage(prevMessage);
         this.handleReceivedMessage(OCPPMessageError.class, error);
         log.warn("Received OCPPError {}", error.toString());
+        OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
+        messageType = info.messageName();
+        this.recordRxMessage(s, messageType);
         return;
       }
       default -> throw new OCPPBadCallID(callId, s);
