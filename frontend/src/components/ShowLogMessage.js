@@ -7,17 +7,20 @@ const ShowLogMessages = () => {
   const [receivedMessages, setReceivedMessages] = useState([]);
 
   // State to manage expanded details
-  const [expandedMessages, setExpandedMessages] = useState(new Set());
+  const [expandedSentMessages, setExpandedSentMessages] = useState(new Set());
+  const [expandedReceivedMessages, setExpandedReceivedMessages] = useState(
+    new Set()
+  );
 
   // State for dropdown menu selection (log message type)
-  const [logMessageType, setLogMessageType] = useState('default');
+  // const [logMessageType, setLogMessageType] = useState('default');
 
   // Helper function for mapping NumId to labels
   const getNumIdLabel = (NumId) => {
     return (
       {
         2: 'Call',
-        3: 'Respone',
+        3: 'Response',
         4: 'Error',
       }[NumId] || 'Unknown'
     );
@@ -38,23 +41,35 @@ const ShowLogMessages = () => {
   };
 
   // Helper function to toggle message details
-  const handleToggleDetails = (userId) => {
-    setExpandedMessages((prevExpanded) => {
-      const updated = new Set(prevExpanded);
-      if (updated.has(userId)) {
-        updated.delete(userId);
-      } else {
-        updated.add(userId);
-      }
-      return updated;
-    });
+  const handleToggleDetails = (userId, type) => {
+    if (type === 'sent') {
+      setExpandedSentMessages((prevExpanded) => {
+        const updated = new Set(prevExpanded);
+        if (updated.has(userId)) {
+          updated.delete(userId);
+        } else {
+          updated.add(userId);
+        }
+        return updated;
+      });
+    } else if (type === 'received') {
+      setExpandedReceivedMessages((prevExpanded) => {
+        const updated = new Set(prevExpanded);
+        if (updated.has(userId)) {
+          updated.delete(userId);
+        } else {
+          updated.add(userId);
+        }
+        return updated;
+      });
+    }
   };
 
   // Parse and format the message for display
   const parseMessage = (message) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
-      const [TimeStamp, NumId, userId, RequestType, payload] = parsedMessage;
+      const [TimeStamp, NumId, userId, messageName, payload] = parsedMessage;
       const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
@@ -68,21 +83,21 @@ const ShowLogMessages = () => {
       return (
         <div
           key={userId}
-          onClick={() => handleToggleDetails(userId)}
+          onClick={() => handleToggleDetails(userId, 'sent')}
           className="log-message-container"
         >
           {/* Grouped Content */}
           <div className="log-message-header">
             <p>
               <span>{formattedTime} - </span>
-              <strong>{RequestType}</strong>
+              <strong>{messageName}</strong>
             </p>
 
             {/* Message Number ID (numIdLabel) with a rectangular box */}
             <div className={`num-id-label ${numIdStyle}`}>{numIdLabel}</div>
           </div>
           {/* Expanded Details */}
-          {expandedMessages.has(userId) && (
+          {expandedSentMessages.has(userId) && (
             <div>
               <p>
                 <strong>User ID:</strong> {userId}
@@ -97,7 +112,6 @@ const ShowLogMessages = () => {
         </div>
       );
     } catch (error) {
-      console.error('Error parsing message:', error);
       return <p>Error parsing message</p>;
     }
   };
@@ -105,9 +119,10 @@ const ShowLogMessages = () => {
   const parseReceivedMessage = (message) => {
     try {
       const parseReceivedMessage = JSON.parse(message); // Parse the string into an array
-      const [NumId, userId, payload] = parseReceivedMessage;
-      const { status, currentTime, interval } = payload;
-      const formattedTime = new Date(currentTime).toLocaleTimeString('en-US', {
+      const [messageName, TimeStamp, NumId, userId, payload] =
+        parseReceivedMessage;
+      // const { status, currentTime, interval } = payload;
+      const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         second: '2-digit',
@@ -120,34 +135,41 @@ const ShowLogMessages = () => {
       return (
         <div
           key={userId}
-          onClick={() => handleToggleDetails(userId)}
+          onClick={() => handleToggleDetails(userId, 'received')}
           className="log-message-container"
         >
           <div className="log-message-header">
             {/* Main message display */}
             <p>
               <span>{formattedTime} - </span>
-              <strong>{status}</strong>
+              <strong>{messageName}</strong>
             </p>
 
             {/* Message Number ID (numIdLabel) with a rectangular box */}
             <div className={`num-id-label ${numIdStyle}`}>{numIdLabel}</div>
           </div>
           {/* Expanded Details: Message ID & Interval (Hidden until clicked) */}
-          {expandedMessages.has(userId) && (
+          {expandedReceivedMessages.has(userId) && (
             <div>
               <p>
                 <strong>User ID:</strong> {userId}
               </p>
-              <p>
-                <strong>Interval:</strong> {interval} seconds
-              </p>
+              {Object.entries(payload).map(([key, value]) =>
+                key !== 'interval' ? (
+                  <p key={key}>
+                    <strong>{key}:</strong> {value}
+                  </p>
+                ) : (
+                  <p key={key}>
+                    <strong>{key}:</strong> {value} seconds
+                  </p>
+                )
+              )}
             </div>
           )}
         </div>
       );
     } catch (error) {
-      console.error('Error parsing received message:', error);
       return <p>Error parsing received message</p>;
     }
   };
@@ -186,50 +208,39 @@ const ShowLogMessages = () => {
   });
 
   const sortedReceivedMessages = receivedMessages.sort((a, b) => {
-    const timeA = JSON.parse(a)[2].currentTime;
-    const timeB = JSON.parse(b)[2].currentTime;
+    const timeA = JSON.parse(a)[1];
+    const timeB = JSON.parse(b)[1];
 
     return new Date(timeB) - new Date(timeA);
   });
 
   return (
     <div>
-      {/* Dropdown Menu for Selecting Log Messages */}
-      <div className="dropdown-container">
-        <label htmlFor="logMessageType"> </label>
-        <select
-          id="logMessageType"
-          value={logMessageType}
-          onChange={(e) => setLogMessageType(e.target.value)}
-        >
-          <option value="default">Log Message</option>
-          <option value="sent">Sent Messages</option>
-          <option value="received">Received Messages</option>
-        </select>
+      {/* Sent Messages Section */}
+      <div className="round-rect-container">Sent Messages</div>
+      <div className="message-list-container">
+        {sortedSentMessages.length > 0 ? (
+          sortedSentMessages.map((message, index) => (
+            <div key={index}>{parseMessage(message)}</div>
+          ))
+        ) : (
+          <p className="no-messages">No sent messages found</p>
+        )}
       </div>
 
-      {/* Conditionally Render Based on Dropdown Selection */}
-      {logMessageType === 'sent' && (
-        <div className="message-list-container">
-          {sortedSentMessages.length > 0 ? (
-            sortedSentMessages.map((message) => parseMessage(message))
-          ) : (
-            <p className="no-messages">No sent messages found</p>
-          )}
-        </div>
-      )}
+      {/* Received Messages Section */}
 
-      {logMessageType === 'received' && (
-        <div className="message-list-container">
-          {sortedReceivedMessages.length > 0 ? (
-            sortedReceivedMessages.map((message) =>
-              parseReceivedMessage(message)
-            )
-          ) : (
-            <p className="no-messages">No received messages found</p>
-          )}
-        </div>
-      )}
+      <div className="round-rect-container">Received Messages</div>
+
+      <div className="message-list-container">
+        {sortedReceivedMessages.length > 0 ? (
+          sortedReceivedMessages.map((message, index) => (
+            <div key={index}>{parseReceivedMessage(message)}</div>
+          ))
+        ) : (
+          <p className="no-messages">No received messages found</p>
+        )}
+      </div>
     </div>
   );
 };
