@@ -35,53 +35,6 @@ public class StartTransactionHandlerTest {
     handler = new StartTransactionHandler(stateMachine, client);
   }
 
-  /*@Test
-  void preAuthorizeAcceptedtest() {
-    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Available);
-
-    AuthorizeResponse authorizeResponse =
-        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
-
-    doAnswer(
-            invocation -> {
-              OnOCPPMessageListener listener = invocation.getArgument(1);
-              OnOCPPMessage message = mock(OnOCPPMessage.class);
-              when(message.getMessage()).thenReturn(authorizeResponse);
-              listener.onMessageReceived(message);
-              return null;
-            })
-        .when(client)
-        .onReceiveMessage(eq(AuthorizeResponse.class), any());
-
-    handler.preAuthorize(1, "Accepted");
-    verify(client).pushMessage(any(Authorize.class));
-    verify(stateMachine).transition(SimulatorState.Preparing);
-  }
-
-  @Test
-  void preAuthorizeDeniedtest() {
-    when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Available);
-
-    AuthorizeResponse authorizeResponse =
-        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.BLOCKED));
-
-    doAnswer(
-            invocation -> {
-              OnOCPPMessageListener listener = invocation.getArgument(1);
-              OnOCPPMessage message = mock(OnOCPPMessage.class);
-              when(message.getMessage()).thenReturn(authorizeResponse);
-              listener.onMessageReceived(message);
-              return null;
-            })
-        .when(client)
-        .onReceiveMessage(eq(AuthorizeResponse.class), any());
-
-    handler.preAuthorize(1, "Blocked");
-    verify(client).pushMessage(any(Authorize.class));
-    assertEquals(
-        stateMachine.getCurrentState(), SimulatorState.Available, "State should be Available");
-  } */
-
   @Test
   void initiateStartTransactiontest() {
     when(stateMachine.getCurrentState()).thenReturn(SimulatorState.Preparing);

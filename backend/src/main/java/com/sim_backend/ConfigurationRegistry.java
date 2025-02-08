@@ -58,9 +58,6 @@ public class ConfigurationRegistry {
   /** A sample meter value interval. */
   private int MeterValueSampleInterval = 30;
 
-  /** Authorization Enable check. */
-  boolean AuthEnabled = true;
-
   /** Sample meter value data. */
   private MeterValuesSampledData meterValuesSampledData =
       MeterValuesSampledData.ENERGY_ACTIVE_IMPORT_REGISTER;
