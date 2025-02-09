@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ChargerFrame from './components/ChargerFrame';
 import ShowLogMessages from './components/ShowLogMessage';
+import ErrorMenu from './components/ErrorMenu';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -19,6 +20,7 @@ function App() {
       <h1>Frontend</h1>
       <p data-testid="message">Message from backend: {message}</p>
       <ChargerFrame />
+      <ErrorMenu />
       <ShowLogMessages />
     </div>
   );
