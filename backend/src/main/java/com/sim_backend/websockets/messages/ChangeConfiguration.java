@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
+import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,9 +15,11 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "ChangeConfiguration")
 public class ChangeConfiguration extends OCPPMessageRequest {
+  @NotBlank(message = "ChangeConfiguration key is required")
   @SerializedName("key")
   private final String key;
 
+  @NotBlank(message = "ChangeConfiguration value is required")
   @SerializedName("value")
   private final String value;
 

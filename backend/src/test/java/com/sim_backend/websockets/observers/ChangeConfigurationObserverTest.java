@@ -2,7 +2,7 @@ package com.sim_backend.websockets.observers;
 
 import static org.mockito.Mockito.*;
 
-import com.sim_backend.ConfigurationRegistry;
+import com.sim_backend.config.ConfigurationRegistry;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.ConfigurationStatus;
 import com.sim_backend.websockets.events.OnOCPPMessage;
@@ -26,7 +26,7 @@ public class ChangeConfigurationObserverTest {
   @BeforeEach
   void SetUp() {
     MockitoAnnotations.openMocks(this);
-    registry = new ConfigurationRegistry(null, null, null, null, 0, null);
+    registry = new ConfigurationRegistry(null, null);
     observer = new ChangeConfigurationObserver(client, registry);
   }
 

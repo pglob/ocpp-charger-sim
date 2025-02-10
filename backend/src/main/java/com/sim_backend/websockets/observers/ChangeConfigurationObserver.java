@@ -1,20 +1,29 @@
 package com.sim_backend.websockets.observers;
 
-import com.sim_backend.ConfigurationRegistry;
+import com.sim_backend.config.ConfigurationRegistry;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.MeterValuesSampledData;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.ChangeConfiguration;
 import com.sim_backend.websockets.messages.ChangeConfigurationResponse;
-import lombok.AllArgsConstructor;
+import com.sim_backend.websockets.messages.MessageValidator;
+import lombok.Getter;
 
 /** Observer that handles ConfigurationRegistry Change Request and Response */
-@AllArgsConstructor
+@Getter
 public class ChangeConfigurationObserver implements OnOCPPMessageListener {
 
   OCPPWebSocketClient client;
   ConfigurationRegistry registry;
+
+  /** Constructor self-register observer for the onReceiveMessage Callback */
+  public ChangeConfigurationObserver(OCPPWebSocketClient client, ConfigurationRegistry registry) {
+    this.client = client;
+    this.registry = registry;
+
+    client.onReceiveMessage(ChangeConfiguration.class, this);
+  }
 
   /**
    * Processes incoming ChangeConfiguration messages and handles the change request and response
@@ -27,6 +36,10 @@ public class ChangeConfigurationObserver implements OnOCPPMessageListener {
   public void onMessageReceived(OnOCPPMessage message) {
     if (!(message.getMessage() instanceof ChangeConfiguration request)) {
       throw new ClassCastException("Message is not an ChangeConfiguration Request");
+    }
+
+    if (!MessageValidator.isValid(request)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(request));
     }
 
     String status = null;
@@ -66,6 +79,11 @@ public class ChangeConfigurationObserver implements OnOCPPMessageListener {
     }
 
     ChangeConfigurationResponse response = new ChangeConfigurationResponse(status);
-    client.pushMessage(response);
+
+    if (!MessageValidator.isValid(response)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(response));
+    } else {
+      client.pushMessage(response);
+    }
   }
 }
