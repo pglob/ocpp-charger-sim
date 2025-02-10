@@ -12,9 +12,6 @@ const ShowLogMessages = () => {
     new Set()
   );
 
-  // State for dropdown menu selection (log message type)
-  // const [logMessageType, setLogMessageType] = useState('default');
-
   // Helper function for mapping NumId to labels
   const getNumIdLabel = (NumId) => {
     return (
@@ -65,7 +62,33 @@ const ShowLogMessages = () => {
     }
   };
 
-  // Parse and format the message for display
+  // Recursive helper function to render nested fields
+  const renderDeep = (value) => {
+    if (value === null || typeof value !== 'object') {
+      return String(value);
+    }
+    if (Array.isArray(value)) {
+      return (
+        <ul>
+          {value.map((item, index) => (
+            <li key={index}>{renderDeep(item)}</li>
+          ))}
+        </ul>
+      );
+    }
+    // Render message by iterating over their fields
+    return (
+      <ul>
+        {Object.entries(value).map(([subKey, subValue]) => (
+          <li key={subKey}>
+            <strong>{subKey}:</strong> {renderDeep(subValue)}
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  // Parse and format the sent message for display
   const parseMessage = (message) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
@@ -104,7 +127,7 @@ const ShowLogMessages = () => {
               </p>
               {Object.entries(payload).map(([key, value]) => (
                 <p key={key}>
-                  <strong>{key}:</strong> {value}
+                  <strong>{key}:</strong> {renderDeep(value)}
                 </p>
               ))}
             </div>
@@ -116,12 +139,11 @@ const ShowLogMessages = () => {
     }
   };
 
+  // Parse and format the received message for display
   const parseReceivedMessage = (message) => {
     try {
-      const parseReceivedMessage = JSON.parse(message); // Parse the string into an array
-      const [messageName, TimeStamp, NumId, messageId, payload] =
-        parseReceivedMessage;
-      // const { status, currentTime, interval } = payload;
+      const parsedMessage = JSON.parse(message); // Parse the string into an array
+      const [messageName, TimeStamp, NumId, messageId, payload] = parsedMessage;
       const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
@@ -154,17 +176,16 @@ const ShowLogMessages = () => {
               <p>
                 <strong>Message ID:</strong> {messageId}
               </p>
-              {Object.entries(payload).map(([key, value]) =>
-                key !== 'interval' ? (
-                  <p key={key}>
-                    <strong>{key}:</strong> {value}
-                  </p>
-                ) : (
-                  <p key={key}>
-                    <strong>{key}:</strong> {value} seconds
-                  </p>
-                )
-              )}
+              {Object.entries(payload).map(([key, value]) => (
+                <p key={key}>
+                  <strong>{key}:</strong>{' '}
+                  {key === 'interval' ? (
+                    <>{renderDeep(value)} seconds</>
+                  ) : (
+                    renderDeep(value)
+                  )}
+                </p>
+              ))}
             </div>
           )}
         </div>
@@ -210,7 +231,6 @@ const ShowLogMessages = () => {
   const sortedReceivedMessages = receivedMessages.sort((a, b) => {
     const timeA = JSON.parse(a)[1];
     const timeB = JSON.parse(b)[1];
-
     return new Date(timeB) - new Date(timeA);
   });
 
@@ -229,9 +249,7 @@ const ShowLogMessages = () => {
       </div>
 
       {/* Received Messages Section */}
-
       <div className="round-rect-container">Received Messages</div>
-
       <div className="message-list-container">
         {sortedReceivedMessages.length > 0 ? (
           sortedReceivedMessages.map((message, index) => (

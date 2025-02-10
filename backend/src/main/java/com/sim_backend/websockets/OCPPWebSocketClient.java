@@ -85,7 +85,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     String timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
     String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
     txMessages.add(messageWithTimestamp);
-    if (txMessages.size() > 20) {
+    if (txMessages.size() > 50) {
       txMessages.remove(0);
     }
   }
@@ -100,7 +100,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     String modifiedMessage =
         message.replaceFirst("\\[", "[\"" + messageName + "\", \"" + timestamp + "\", ");
     rxMessages.add(modifiedMessage);
-    if (rxMessages.size() > 20) {
+    if (rxMessages.size() > 50) {
       rxMessages.remove(0);
     }
   }
