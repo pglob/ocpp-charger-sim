@@ -10,6 +10,7 @@ import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.BootNotificationResponse;
+import com.sim_backend.websockets.messages.MessageValidator;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 
@@ -30,7 +31,15 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
 
     // Ensure current state is booting
     if (currState.getCurrentState() == SimulatorState.BootingUp) {
-      webSocketClient.pushMessage(new BootNotification());
+      BootNotification bootNotification = new BootNotification();
+
+      // Ensure no constraint violations
+      if (!MessageValidator.isValid(bootNotification)) {
+        throw new IllegalArgumentException(MessageValidator.log_message(bootNotification));
+      } else {
+        webSocketClient.pushMessage(new BootNotification());
+      }
+
     } else
       throw new IllegalStateException(
           "Invalid machine state to send a boot notification: " + currState.getCurrentState());
@@ -48,6 +57,11 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
 
     if (!(message.getMessage() instanceof BootNotificationResponse response))
       throw new ClassCastException("Message is not a BootNotificationResponse");
+
+    if (!MessageValidator.isValid(response)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(response));
+    }
+
     MessageScheduler scheduler = message.getClient().getScheduler();
     long interval = response.getInterval();
 

@@ -1,7 +1,3 @@
-/**
- * Represents an OCPP 1.6 Status Notification Request sent by a Charge Point to provide its
- * identity, configuration, and status to the Central System.
- */
 package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
@@ -10,7 +6,10 @@ import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
-import java.time.OffsetDateTime;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.time.ZonedDateTime;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -20,24 +19,30 @@ import lombok.Getter;
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StatusNotification")
 public final class StatusNotification extends OCPPMessageRequest {
 
+  @NotNull(message = "StatusNotification connectorId is required")
   @SerializedName("connectorId")
   private int connectorId;
 
+  @NotBlank(message = "Status Notification Error code is required and cannot be blank")
   @SerializedName("errorCode")
   private ChargePointErrorCode errorCode;
 
+  @Size(max = 50, message = "StatusNotification Info must not exceed 50 characters")
   @SerializedName("info")
   private String info;
 
+  @NotBlank(message = "StatusNotification Status is required and cannot be blank")
   @SerializedName("status")
   private ChargePointStatus status;
 
   @SerializedName("timestamp")
-  private OffsetDateTime timestamp;
+  private ZonedDateTime timestamp;
 
+  @Size(max = 255, message = "StatusNotification Vendor ID must not exceed 255 characters")
   @SerializedName("vendorId")
   private String vendorId;
 
+  @Size(max = 50, message = "StatusNotification Vendor error code must not exceed 50 characters")
   @SerializedName("vendorErrorCode")
   private String vendorErrorCode;
 
@@ -46,7 +51,7 @@ public final class StatusNotification extends OCPPMessageRequest {
       ChargePointErrorCode errorCode,
       String info,
       ChargePointStatus status,
-      OffsetDateTime timestamp,
+      ZonedDateTime timestamp,
       String vendorId,
       String vendorErrorCode) {
     this.connectorId = connectorId;

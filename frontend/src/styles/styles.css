@@ -65,3 +65,89 @@
   text-align: left; /* Left-aligned text */
   font-size: 16px; /* Optional: Set a consistent font size */
 }
+
+/* Main containerfor log message */
+.log-message-container {
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header with timestamp, request type, and NumId label */
+.log-message-header {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between elements */
+  font-size: 15px;
+}
+
+/* NumId label styling */
+.num-id-label {
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Different background colors based on NumId */
+.num-id-call {
+  background-color: #e8f0fe;
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
+.num-id-result {
+  background-color: #e8fee8;
+  border: 1px solid #28a745;
+  color: #28a745;
+}
+
+.num-id-error {
+  background-color: #fee8e8;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+}
+
+.num-id-unknown {
+  background-color: #f0f0f0;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+}
+
+/* Message list container */
+.message-list-container {
+  margin-top: 7px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  max-height: 150px;
+  width: 323px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.message-list {
+  font-size: 14px;
+}
+
+/* Centered text for empty message list */
+.no-messages {
+  text-align: center;
+}
+
+/* Styling for the round rectangle container for the message boxes header */
+.round-rect-container {
+  margin-top: 25px;
+  /* margin-bottom: 5px; */
+  background-color: #b3f4dc;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  display: inline-block;
+  color: #333;
+}

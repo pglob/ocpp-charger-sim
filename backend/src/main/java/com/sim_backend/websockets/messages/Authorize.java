@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -20,6 +22,8 @@ import lombok.Setter;
 public class Authorize extends OCPPMessageRequest {
 
   @SerializedName("idTag")
+  @NotBlank(message = "Authorize idTag must not be blank")
+  @Size(max = 20, message = "Authorize idTag must be at most 20 characters")
   private String idTag;
 
   // Constructor
@@ -34,10 +38,8 @@ public class Authorize extends OCPPMessageRequest {
     this.idTag = generateIdTag();
   }
 
-  public String generateIdTag() {
-    // Generate a UUID
-    String uuid = UUID.randomUUID().toString();
-    // Remove hyphens and truncate to 20 characters
-    return uuid.replace("-", "").substring(0, 20);
+  private String generateIdTag() {
+    // Generate a UUID, remove hyphens, and truncate to 20 characters
+    return UUID.randomUUID().toString().replace("-", "").substring(0, 20);
   }
 }

@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
+import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,12 +20,15 @@ public class StopTransaction extends OCPPMessageRequest {
   /*
    * TODO : transactionData needs to be implemented
    */
+  @NotNull(message = "StopTransaction transactionId is required")
   @SerializedName("transactionId")
   private int transactionId;
 
+  @NotNull(message = "StopTransaction meterStop is required")
   @SerializedName("meterStop")
   private int meterStop;
 
+  @NotNull(message = "StopTransaction timestamp is required")
   @SerializedName("timestamp")
   private String timestamp;
 

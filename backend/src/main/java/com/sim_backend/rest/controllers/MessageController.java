@@ -13,15 +13,12 @@ import com.google.gson.JsonParser;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
-import com.sim_backend.websockets.messages.Authorize;
-import com.sim_backend.websockets.messages.BootNotification;
-import com.sim_backend.websockets.messages.Heartbeat;
-import com.sim_backend.websockets.messages.StatusNotification;
+import com.sim_backend.websockets.messages.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import lombok.Getter;
 
 @Getter
@@ -41,6 +38,9 @@ public class MessageController extends ControllerBase {
 
   public void authorize(Context ctx) {
     Authorize msg = new Authorize();
+    if (!MessageValidator.isValid(msg)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(msg));
+    }
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
@@ -57,12 +57,20 @@ public class MessageController extends ControllerBase {
             "IMSI",
             "Meter Type",
             "Meter S/N");
+
+    if (!MessageValidator.isValid(msg)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(msg));
+    }
+
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
 
   public void heartbeat(Context ctx) {
     Heartbeat msg = new Heartbeat();
+    if (!MessageValidator.isValid(msg)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(msg));
+    }
     webSocketClient.pushMessage(msg);
     ctx.result("OK");
   }
@@ -94,10 +102,10 @@ public class MessageController extends ControllerBase {
         json.has("status")
             ? ChargePointStatus.valueOf(json.get("status").getAsString())
             : ChargePointStatus.Available;
-    OffsetDateTime timestamp =
+    ZonedDateTime timestamp =
         json.has("timestamp") && !json.get("timestamp").getAsString().isEmpty()
-            ? OffsetDateTime.parse(json.get("timestamp").getAsString())
-            : OffsetDateTime.now();
+            ? ZonedDateTime.parse(json.get("timestamp").getAsString())
+            : ZonedDateTime.now();
     String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString() : "";
     String vendorErrorCode =
         json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString() : "";
@@ -109,6 +117,14 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
+  public void getSentMessages(Context ctx) {
+    ctx.json(webSocketClient.getSentMessages()); // Return sent messages as JSON
+  }
+
+  public void getReceivedMessages(Context ctx) {
+    ctx.json(webSocketClient.getReceivedMessages()); // Return received messages as JSON
+  }
+
   @Override
   public void registerRoutes(Javalin app) {
     app.post("/api/message/authorize", this::authorize);
@@ -117,5 +133,7 @@ public class MessageController extends ControllerBase {
     app.post("/api/state/online", this::online);
     app.post("/api/state/offline", this::offline);
     app.post("/api/state/status", this::status);
+    app.get("/api/log/sentmessage", this::getSentMessages);
+    app.get("/api/log/receivedmessage", this::getReceivedMessages);
   }
 }

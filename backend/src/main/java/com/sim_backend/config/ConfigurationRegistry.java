@@ -1,4 +1,4 @@
-package com.sim_backend;
+package com.sim_backend.config;
 
 import com.sim_backend.websockets.constants.BootNotificationConstants;
 import com.sim_backend.websockets.enums.MeterValuesSampledData;
@@ -14,12 +14,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ConfigurationRegistry {
-
-  /** ChangeConfiguration authorization key */
-  private String authKey;
-
-  /** ChangeConfiguration authorization key value */
-  private String authKeyValue;
 
   /** Authorize response id tag */
   private String idTag;
@@ -61,4 +55,9 @@ public class ConfigurationRegistry {
   /** Sample meter value data. */
   private MeterValuesSampledData meterValuesSampledData =
       MeterValuesSampledData.ENERGY_ACTIVE_IMPORT_REGISTER;
+
+  public ConfigurationRegistry(String idTag, String centralSystemUrl) {
+    this.idTag = idTag;
+    this.centralSystemUrl = centralSystemUrl;
+  }
 }
