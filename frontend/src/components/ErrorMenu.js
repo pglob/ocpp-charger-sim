@@ -1,16 +1,47 @@
 import React, { useState } from 'react';
 import '../styles/styles.css';
 
+const errorCodes = [
+  'ConnectorLockFailure',
+  'EVCommunicationError',
+  'GroundFailure',
+  'HighTemperature',
+  'InternalError',
+  'LocalListConflict',
+  'NoError',
+  'OtherError',
+  'OverCurrentFailure',
+  'OverVoltage',
+  'PowerMeterFailure',
+  'PowerSwitchFailure',
+  'ReaderFailure',
+  'ResetFailure',
+  'UnderVoltage',
+  'WeakSignal',
+];
+
+const statusOptions = [
+  'Available',
+  'Preparing',
+  'Charging',
+  'SuspendedEVSE',
+  'SuspendedEV',
+  'Finishing',
+  'Faulted',
+  'Unavailable',
+  'Reserved',
+];
+
 const ErrorMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [useCurrentTimestamp, setUseCurrentTimestamp] = useState(false);
+  const [loading, setLoading] = useState(false);
   // State for the error details
   const [connectorId, setConnectorId] = useState('1');
   const [errorCode, setErrorCode] = useState('');
   const [info, setInfo] = useState('');
   const [status, setStatus] = useState('');
-  const [timestamp, setTimestamp] = useState('');
   const [vendorId, setVendorId] = useState('');
   const [vendorErrorCode, setVendorErrorCode] = useState('');
 
@@ -22,6 +53,7 @@ const ErrorMenu = () => {
   const closeMenu = () => {
     setIsOpen(false);
     setFeedback('');
+    setLoading(false);
   };
 
   const resetForm = () => {
@@ -29,9 +61,10 @@ const ErrorMenu = () => {
     setErrorCode('');
     setInfo('');
     setStatus('');
-    setTimestamp('');
     setVendorId('');
     setVendorErrorCode('');
+    setUseCurrentTimestamp(false);
+    setLoading(false);
   };
 
   const stopPropagation = (e) => {
@@ -40,16 +73,21 @@ const ErrorMenu = () => {
 
   const submit = (e) => {
     e.preventDefault();
-    const payload = {
+    setLoading(true); //submit effect
+
+    let payload = {
       connectorId,
       errorCode,
-      info,
       status,
-      timestamp,
-      vendorId,
-      vendorErrorCode,
     };
 
+    // Conditionally add optional fields
+    if (useCurrentTimestamp) payload.timestamp = '';
+    if (info.trim()) payload.info = info;
+    if (vendorId.trim()) payload.vendorId = vendorId;
+    if (vendorErrorCode.trim()) payload.vendorErrorCode = vendorErrorCode;
+
+    // Submit the form data to the backend
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/state/status`, {
       method: 'POST',
       headers: {
@@ -60,7 +98,8 @@ const ErrorMenu = () => {
       .then((response) => {
         if (!response.ok) {
           return response.text().then((text) => {
-            setFeedback('missing required fields, Please Try again');
+            setFeedback('Missing required fields, Please try again');
+            setLoading(false); //if fail, stop loading
             return Promise.reject(text);
           });
         }
@@ -68,15 +107,14 @@ const ErrorMenu = () => {
       })
       .then((data) => {
         setFeedback(data);
+        setTimeout(() => {
+          closeMenu();
+          resetForm();
+        }, 2500);
       })
       .catch((error) => {
         console.error('Error:', error);
       });
-
-    setTimeout(() => {
-      closeMenu();
-      resetForm();
-    }, 5000);
   };
 
   return (
@@ -90,7 +128,7 @@ const ErrorMenu = () => {
             <button className="modal-close-button" onClick={closeMenu}>
               X
             </button>
-            <h3>StatusNotification payload creater </h3>
+            <h3>StatusNotification Payload Creater </h3>
             {feedback && <div className="feedback">{feedback}</div>}
             <form onSubmit={submit}>
               <div className="form-item">
@@ -110,27 +148,12 @@ const ErrorMenu = () => {
                   value={errorCode}
                   onChange={(e) => setErrorCode(e.target.value)}
                 >
-                  <option value="">please select the error code</option>
-                  <option value="ConnectorLockFailure">
-                    ConnectorLockFailure
-                  </option>
-                  <option value="EVCommunicationError">
-                    EVCommunicationError
-                  </option>
-                  <option value="GroundFailure">GroundFailure</option>
-                  <option value="HighTemperature">HighTemperature</option>
-                  <option value="InternalError">InternalError</option>
-                  <option value="LocalListConflict">LocalListConflict</option>
-                  <option value="NoError">NoError</option>
-                  <option value="OtherError">OtherError</option>
-                  <option value="OverCurrentFailure">OverCurrentFailure</option>
-                  <option value="OverVoltage">OverVoltage</option>
-                  <option value="PowerMeterFailure">PowerMeterFailure</option>
-                  <option value="PowerSwitchFailure">PowerSwitchFailure</option>
-                  <option value="ReaderFailure">ReaderFailure</option>
-                  <option value="ResetFailure">ResetFailure</option>
-                  <option value="UnderVoltage">UnderVoltage</option>
-                  <option value="WeakSignal">WeakSignal</option>
+                  <option value="">select the error code</option>
+                  {errorCodes.map((code) => (
+                    <option key={code} value={code}>
+                      {code}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -150,16 +173,12 @@ const ErrorMenu = () => {
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
-                  <option value="">please select the status</option>
-                  <option value="Available">Available</option>
-                  <option value="Preparing">Preparing</option>
-                  <option value="Charging">Charging</option>
-                  <option value="SuspendedEVSE">SuspendedEVSE</option>
-                  <option value="SuspendedEV">SuspendedEV</option>
-                  <option value="Finishing">Finishing</option>
-                  <option value="Faulted">Faulted</option>
-                  <option value="Unavailable">Unavailable</option>
-                  <option value="Reserved">Reserved</option>
+                  <option value="">select the status</option>
+                  {statusOptions.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -168,19 +187,9 @@ const ErrorMenu = () => {
                   <input
                     type="checkbox"
                     checked={useCurrentTimestamp}
-                    onChange={(e) => {
-                      setUseCurrentTimestamp(e.target.checked);
-                      if (e.target.checked) {
-                        const now = new Date();
-                        const timestampStr =
-                          now.toISOString().slice(0, 16) + ':00Z';
-                        setTimestamp(timestampStr);
-                      } else {
-                        setTimestamp('');
-                      }
-                    }}
+                    onChange={(e) => setUseCurrentTimestamp(e.target.checked)}
                   />
-                  Use current timestamp
+                  Include current timestamp
                 </label>
               </div>
 
@@ -190,7 +199,7 @@ const ErrorMenu = () => {
                   type="text"
                   value={vendorId}
                   onChange={(e) => setVendorId(e.target.value)}
-                  placeholder="please enter the vendor ID"
+                  placeholder="enter the vendor ID"
                 />
               </div>
 
@@ -200,12 +209,17 @@ const ErrorMenu = () => {
                   type="text"
                   value={vendorErrorCode}
                   onChange={(e) => setVendorErrorCode(e.target.value)}
-                  placeholder="please enter the vendor error code"
+                  placeholder="enter the vendor error code"
                 />
               </div>
 
-              <button type="submit" className="submit-button">
-                Send StatusNotification
+              <button
+                type="submit"
+                className="submit-button"
+                disabled={loading}
+                style={{ opacity: loading ? 0.5 : 1 }} //change the opacity of the button when loading
+              >
+                {loading ? 'Submitting...' : 'Send StatusNotification'}
               </button>
             </form>
           </div>

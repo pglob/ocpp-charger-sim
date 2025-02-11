@@ -97,18 +97,37 @@ public class MessageController extends ControllerBase {
         json.has("errorCode")
             ? ChargePointErrorCode.valueOf(json.get("errorCode").getAsString())
             : ChargePointErrorCode.NoError;
-    String info = json.has("info") ? json.get("info").getAsString() : "";
+    
+    
+    String info = null;
+    if (json.has("info")) {
+        String possibleInfo = json.get("info").getAsString().trim();
+        if (!possibleInfo.isEmpty()) {
+            info = possibleInfo;
+        }
+    }
     ChargePointStatus status =
         json.has("status")
             ? ChargePointStatus.valueOf(json.get("status").getAsString())
             : ChargePointStatus.Available;
-    ZonedDateTime timestamp =
-        json.has("timestamp") && !json.get("timestamp").getAsString().isEmpty()
-            ? ZonedDateTime.parse(json.get("timestamp").getAsString())
-            : ZonedDateTime.now();
-    String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString() : "";
-    String vendorErrorCode =
-        json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString() : "";
+    ZonedDateTime timestamp = null;
+    if (json.has("timestamp")) {
+        timestamp = ZonedDateTime.now();
+    }
+    String vendorId = null;
+    if (json.has("vendorId")) {
+        String possibleVendorId = json.get("vendorId").getAsString().trim();
+        if (!possibleVendorId.isEmpty()) {
+            vendorId = possibleVendorId;
+        }
+    }
+    String vendorErrorCode = null;
+    if (json.has("vendorErrorCode")) {
+        String possibleVendorErrorCode = json.get("vendorErrorCode").getAsString().trim();
+        if (!possibleVendorErrorCode.isEmpty()) {
+            vendorErrorCode = possibleVendorErrorCode;
+        }
+    }
 
     StatusNotification msg =
         new StatusNotification(
