@@ -173,10 +173,12 @@ public class MessageController extends ControllerBase {
   }
 
   public void getSentMessages(Context ctx) {
+    if (!checkWsClient(ctx)) return;
     ctx.json(charger.getWsClient().getSentMessages()); // Return sent messages as JSON
   }
 
   public void getReceivedMessages(Context ctx) {
+    if (!checkWsClient(ctx)) return;
     ctx.json(charger.getWsClient().getReceivedMessages()); // Return received messages as JSON
   }
 

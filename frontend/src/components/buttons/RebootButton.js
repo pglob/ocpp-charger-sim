@@ -4,7 +4,7 @@ import ButtonBase from './ButtonBase';
 
 class RebootButtonLogic extends ButtonBase {
   constructor() {
-    super('Reboot', '/api/simulator/reboot'); // Set button name and endpoint
+    super('Reboot', '/api/charger/reboot'); // Set button name and endpoint
   }
 }
 
