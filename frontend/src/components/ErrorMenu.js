@@ -35,6 +35,7 @@ const statusOptions = [
 const ErrorMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [feedbacktype, setFeedbackType] = useState(false);
   const [useCurrentTimestamp, setUseCurrentTimestamp] = useState(false);
   const [loading, setLoading] = useState(false);
   // State for the error details
@@ -99,6 +100,7 @@ const ErrorMenu = () => {
         if (!response.ok) {
           return response.text().then((text) => {
             setFeedback('Missing required fields, Please try again');
+            setFeedbackType(false);
             setLoading(false); //if fail, stop loading
             return Promise.reject(text);
           });
@@ -107,6 +109,7 @@ const ErrorMenu = () => {
       })
       .then((data) => {
         setFeedback(data);
+        setFeedbackType(true);
         setTimeout(() => {
           closeMenu();
           resetForm();
@@ -128,11 +131,15 @@ const ErrorMenu = () => {
             <button className="modal-close-button" onClick={closeMenu}>
               X
             </button>
-            <h3>StatusNotification Payload Creater </h3>
-            {feedback && <div className="feedback">{feedback}</div>}
+            <h3>StatusNotification Payload Creator </h3>
+            {feedback && (
+              <div className={`feedback ${feedbacktype ? 'success' : 'error'}`}>
+                {feedback}
+              </div>
+            )}
             <form onSubmit={submit}>
               <div className="form-item">
-                <label>Connector ID (0 or 1):</label>
+                <label>Connector ID (required):</label>
                 <select
                   value={connectorId}
                   onChange={(e) => setConnectorId(e.target.value)}
@@ -143,12 +150,12 @@ const ErrorMenu = () => {
               </div>
 
               <div className="form-item">
-                <label>Error Code:</label>
+                <label>Error Code (required):</label>
                 <select
                   value={errorCode}
                   onChange={(e) => setErrorCode(e.target.value)}
                 >
-                  <option value="">select the error code</option>
+                  <option value="">select an error code</option>
                   {errorCodes.map((code) => (
                     <option key={code} value={code}>
                       {code}
@@ -163,17 +170,17 @@ const ErrorMenu = () => {
                   type="text"
                   value={info}
                   onChange={(e) => setInfo(e.target.value)}
-                  placeholder="an optional info"
+                  placeholder="enter any info"
                 />
               </div>
 
               <div className="form-item">
-                <label>Status:</label>
+                <label>Status (required):</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
-                  <option value="">select the status</option>
+                  <option value="">select a status </option>
                   {statusOptions.map((status) => (
                     <option key={status} value={status}>
                       {status}
@@ -199,7 +206,7 @@ const ErrorMenu = () => {
                   type="text"
                   value={vendorId}
                   onChange={(e) => setVendorId(e.target.value)}
-                  placeholder="enter the vendor ID"
+                  placeholder="enter a vendor ID"
                 />
               </div>
 
@@ -209,7 +216,7 @@ const ErrorMenu = () => {
                   type="text"
                   value={vendorErrorCode}
                   onChange={(e) => setVendorErrorCode(e.target.value)}
-                  placeholder="enter the vendor error code"
+                  placeholder="enter a vendor error code"
                 />
               </div>
 

@@ -236,13 +236,23 @@
 
 /* Feedback message */
 .feedback {
-  background-color: #ffdddd;
-  color: #d8000c;
-  padding: 8px;
+  padding: 10px;
   border-radius: 5px;
   text-align: center;
-  margin-bottom: 10px;
   font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.feedback.error {
+  background-color: #ffdddd;
+  color: #d8000c;
+  border: 1px solid #d8000c;
+}
+
+.feedback.success {
+  background-color: #ddffdd;
+  color: #008000;
+  border: 1px solid #008000;
 }
 
 /* Submit button */
