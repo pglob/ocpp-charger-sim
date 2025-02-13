@@ -4,8 +4,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.charger.Charger;
+import com.sim_backend.electrical.ElectricalTransition;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
@@ -20,7 +22,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class TransactionHandlerTest {
-  @Mock private SimulatorStateMachine stateMachine;
+  @Mock private ChargerStateMachine stateMachine;
+  @Mock private Charger charger;
+  @Mock private ElectricalTransition elec;
   @Mock private OCPPWebSocketClient client;
   @Mock private OCPPTime ocppTime;
   @Mock private MessageScheduler scheduler;
@@ -31,16 +35,19 @@ public class TransactionHandlerTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
+    when(charger.getWsClient()).thenReturn(client);
+    when(charger.getStateMachine()).thenReturn(stateMachine);
+    when(charger.getElec()).thenReturn(elec);
     when(client.getScheduler()).thenReturn(scheduler);
     when(scheduler.getTime()).thenReturn(ocppTime);
     when(ocppTime.getSynchronizedTime()).thenReturn(ZonedDateTime.parse("2025-01-19T00:00:00Z"));
-    transactionHandler = new TransactionHandler(stateMachine, client);
+    transactionHandler = new TransactionHandler(charger);
   }
 
   @Test
   void PreAuthorizeStarttest() {
     when(transactionHandler.getStartHandler().getStateMachine().getCurrentState())
-        .thenReturn(SimulatorState.Preparing);
+        .thenReturn(ChargerState.Preparing);
 
     AuthorizeResponse authorizeResponse =
         new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
@@ -73,7 +80,7 @@ public class TransactionHandlerTest {
 
     verify(transactionHandler.getStartHandler().getClient()).pushMessage(any(Authorize.class));
     verify(transactionHandler.getStartHandler().getStateMachine())
-        .transition(SimulatorState.Charging);
+        .transition(ChargerState.Charging);
     verify(transactionHandler.getStartHandler().getClient())
         .pushMessage(any(StartTransaction.class));
   }
@@ -81,7 +88,7 @@ public class TransactionHandlerTest {
   @Test
   void PreAuthorizeStoptest() {
     when(transactionHandler.getStopHandler().getStateMachine().getCurrentState())
-        .thenReturn(SimulatorState.Charging);
+        .thenReturn(ChargerState.Charging);
 
     AuthorizeResponse authorizeResponse =
         new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
@@ -114,7 +121,7 @@ public class TransactionHandlerTest {
 
     verify(transactionHandler.getStopHandler().getClient()).pushMessage(any(Authorize.class));
     verify(transactionHandler.getStopHandler().getStateMachine())
-        .transition(SimulatorState.Available);
+        .transition(ChargerState.Available);
     verify(transactionHandler.getStopHandler().getClient()).pushMessage(any(StopTransaction.class));
   }
 
@@ -137,6 +144,6 @@ public class TransactionHandlerTest {
 
     transactionHandler.preAuthorize(1, "idTag");
 
-    verify(stateMachine, times(1)).transition(SimulatorState.Available);
+    verify(stateMachine, times(1)).transition(ChargerState.Available);
   }
 }

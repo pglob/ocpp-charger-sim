@@ -1,7 +1,7 @@
 package com.sim_backend.electrical;
 
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.StateObserver;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,7 +45,7 @@ public class ElectricalTransition implements StateObserver {
   /** Constant representing the number of milliseconds in a second. Used for energy calculations. */
   private static final long MILLISECONDS_PER_SECOND = 1000;
 
-  public ElectricalTransition(SimulatorStateMachine stateMachine) {
+  public ElectricalTransition(ChargerStateMachine stateMachine) {
     stateMachine.addObserver(this);
   }
 
@@ -103,16 +103,16 @@ public class ElectricalTransition implements StateObserver {
   }
 
   /**
-   * Updates the electrical values based on the given simulator state. When transitioning from
+   * Updates the electrical values based on the given charger state. When transitioning from
    * Charging to a non-Charging state, the energy consumed in the current session is accumulated
    * into lifetimeEnergy.
    *
-   * @param simulatorState is the current simulator state
+   * @param chargerState is the current charger state
    */
   @Override
-  public void onStateChanged(SimulatorState simulatorState) {
+  public void onStateChanged(ChargerState chargerState) {
     // If we're leaving the Charging state, accumulate the current session energy.
-    if (simulatorState != SimulatorState.Charging) {
+    if (chargerState != ChargerState.Charging) {
       if (initialChargeTimestamp != 0) { // Only if there was an active charging session.
         long timeCharging = System.currentTimeMillis() - this.initialChargeTimestamp;
         float sessionEnergy =

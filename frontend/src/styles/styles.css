@@ -1,7 +1,104 @@
+/* =====================================================
+   Upper-level containers
+   ===================================================== */
+
+.charger-frames-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: left;
+  padding: 10px;
+}
+
+
+/* =====================================================
+   ChargerFrame Component & Sub-Components Styles
+   ===================================================== */
+
+/* Style for the ChargerFrame component */
+.charger-frame {
+  width: 300px;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #f9f9f9;
+}
+
+/* Style for the Charger Name */
+.charger-name {
+  margin-bottom: 20px; /* Larger gap for Charger Name */
+  font-size: 18px;     /* Larger font for Charger Name */
+  font-weight: bold;   /* Bold Charger Name */
+  width: 100%;
+}
+
+/* Container to hold text content and a button side by side */
+.content-and-button {
+  display: flex;
+  align-items: center;       /* Vertically center the content */
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Container for text content that fills up a space */
+.text-content-container {
+  flex: 1;
+}
+
+/* Style for individual text content items */
+.text-content {
+  width: 100%;
+  margin-bottom: 5px; /* Smaller margin */
+}
+
+.text-content p {
+  margin: 0;
+  text-align: left; /* Left-aligned text */
+  font-size: 16px;  /* Consistent font size */
+}
+
+
+/* =====================================================
+   Button & Dropdown Styles
+   ===================================================== */
+
+/* General button style */
+.button {
+  width: 200px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+/* A square button variant */
+.square-button {
+  width: 80px;
+  height: 80px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+/* Darken a button when pressed */
+button:active {
+  filter: brightness(85%);
+}
+
 /* Container for the Button component */
 .button-container {
   position: relative;
 }
+
 /* Style for the dropdown toggle button */
 .dropdown-toggle {
   margin-right: 10px;
@@ -19,20 +116,11 @@
   flex-direction: column;
 }
 
-/* Style for buttons*/
-.button {
-  width: 200px;
-  padding: 10px;
-  margin: 10px 0;
-  border: 2px solid #000;
-  border-radius: 8px;
-  background-color: #fff;
-  cursor: pointer;
-}
-
+/* Style for the dropdown button */
 .dropdown-button {
   margin-bottom: 8px;
 }
+
 /* Style for the ChargerFrame component */
 .charger-frame {
   width: 300px;
@@ -44,7 +132,6 @@
   justify-content: flex-start;
   align-items: center;
   background-color: #f9f9f9;
-  height: 500px;
 }
 
 /* Style for the Charger Name */

@@ -1,15 +1,10 @@
 package com.sim_backend;
 
+import com.sim_backend.charger.Charger;
 import com.sim_backend.rest.TestMessageController;
 import com.sim_backend.rest.controllers.ControllerBase;
 import com.sim_backend.rest.controllers.MessageController;
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
-import com.sim_backend.websockets.OCPPWebSocketClient;
-import com.sim_backend.websockets.messages.BootNotificationResponse;
-import com.sim_backend.websockets.observers.BootNotificationObserver;
 import io.javalin.Javalin;
-import java.net.URI;
 
 /** The entry into our program. */
 public final class Main {
@@ -17,36 +12,19 @@ public final class Main {
 
   public static void main(final String[] args) {
     // Initialize environment variables and configurations
-    SimConfig config = loadConfig();
+    AppConfig config = loadConfig();
 
     // Start Javalin server
     Javalin app = initializeFrontendAPI(config);
 
-    // Initialize WebSocket client
-    // TODO: Get central system URI from frontend or command line
-    OCPPWebSocketClient wsClient = initializeWebSocketClient("dummy-server", "9000");
+    // Create the charger
+    Charger charger = new Charger();
 
     // Register REST API controllers and routes
-    registerRoutes(app, wsClient);
+    registerRoutes(app, charger);
 
-    // Create Simulator State
-    SimulatorStateMachine stateMachine = new SimulatorStateMachine();
-
-    // Create Observers
-    // TODO: Add other observers
-    BootNotificationObserver bootObserver = new BootNotificationObserver(wsClient, stateMachine);
-
-    // Register observers with the state machine
-    stateMachine.addObserver(bootObserver);
-
-    // Register observers with the Websocket client
-    wsClient.onReceiveMessage(BootNotificationResponse.class, bootObserver);
-
-    // Boot the charger
-    stateMachine.transition(SimulatorState.BootingUp);
-
-    // Run the main simulator loop
-    SimulatorLoop.runSimulatorLoop(wsClient);
+    // Start the charger
+    charger.Boot();
   }
 
   /**
@@ -54,7 +32,7 @@ public final class Main {
    *
    * @return configuration object
    */
-  private static SimConfig loadConfig() {
+  private static AppConfig loadConfig() {
     String host =
         System.getenv("FRONTEND_HOST") != null ? System.getenv("FRONTEND_HOST") : "localhost";
     int frontendPort =
@@ -64,7 +42,7 @@ public final class Main {
         Integer.parseInt(
             System.getenv("BACKEND_PORT") != null ? System.getenv("BACKEND_PORT") : "8080");
 
-    return new SimConfig(host, frontendPort, backendPort);
+    return new AppConfig(host, frontendPort, backendPort);
   }
 
   /**
@@ -73,7 +51,7 @@ public final class Main {
    * @param config configuration object
    * @return initialized Javalin instance
    */
-  private static Javalin initializeFrontendAPI(SimConfig config) {
+  private static Javalin initializeFrontendAPI(AppConfig config) {
     return Javalin.create(
             cfg -> {
               cfg.bundledPlugins.enableCors(
@@ -86,34 +64,24 @@ public final class Main {
   }
 
   /**
-   * Initialize the WebSocket client.
-   *
-   * @return initialized OCPPWebSocketClient instance
-   */
-  private static OCPPWebSocketClient initializeWebSocketClient(String name, String port) {
-    URI wsUri = URI.create("ws://" + name + ":" + port);
-    return new OCPPWebSocketClient(wsUri);
-  }
-
-  /**
    * Register API routes with the Javalin app.
    *
    * @param app the Javalin app
    * @param wsClient the WebSocket client
    */
-  private static void registerRoutes(Javalin app, OCPPWebSocketClient wsClient) {
-    ControllerBase messageController = new MessageController(app, wsClient);
+  private static void registerRoutes(Javalin app, Charger charger) {
+    ControllerBase messageController = new MessageController(app, charger);
     messageController.registerRoutes(app);
     TestMessageController.registerRoutes(app);
   }
 
   /** Configuration object to hold server settings. */
-  private static class SimConfig {
+  private static class AppConfig {
     final String host;
     final int frontendPort;
     final int backendPort;
 
-    SimConfig(String host, int frontendPort, int backendPort) {
+    AppConfig(String host, int frontendPort, int backendPort) {
       this.host = host;
       this.frontendPort = frontendPort;
       this.backendPort = backendPort;
