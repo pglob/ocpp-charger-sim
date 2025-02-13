@@ -1,6 +1,6 @@
 package com.sim_backend.state;
 
-public enum SimulatorState {
+public enum ChargerState {
   PoweredOff,
   BootingUp,
   Available,

@@ -1,6 +1,6 @@
 /**
- * Controller class for handling OCPP charging simulator messages and states. This includes
- * processing authorize, boot, heartbeat, online, and offline requests.
+ * Controller class for handling OCPP charger messages and states. This includes processing
+ * authorize, boot, heartbeat, online, and offline requests.
  *
  * <p>The class interacts with the OCPPWebSocketClient to push messages to the backend and responds
  * to HTTP POST requests from the front end. Each endpoint corresponds to a specific action (e.g.,
@@ -10,42 +10,66 @@ package com.sim_backend.rest.controllers;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.charger.Charger;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.messages.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import lombok.Getter;
 
 @Getter
 public class MessageController extends ControllerBase {
 
-  private OCPPWebSocketClient webSocketClient;
+  private final Charger charger;
 
-  public MessageController(Javalin app) throws URISyntaxException {
+  public MessageController(Javalin app, Charger charger) {
     super(app);
-    this.webSocketClient = new OCPPWebSocketClient(new URI(""));
+    this.charger = charger;
   }
 
-  public MessageController(Javalin app, OCPPWebSocketClient webSocketClient) {
-    super(app);
-    this.webSocketClient = webSocketClient;
+  // Helper methods to check if components are available
+
+  private boolean checkWsClient(Context ctx) {
+    if (charger.getWsClient() == null) {
+      ctx.status(503).result("Charger is rebooting");
+      return false;
+    }
+    return true;
+  }
+
+  private boolean checkTransactionHandler(Context ctx) {
+    if (charger.getTransactionHandler() == null) {
+      ctx.status(503).result("Charger is rebooting");
+      return false;
+    }
+    return true;
+  }
+
+  private boolean checkElec(Context ctx) {
+    if (charger.getElec() == null) {
+      ctx.status(503).result("Charger is rebooting");
+      return false;
+    }
+    return true;
   }
 
   public void authorize(Context ctx) {
+    if (!checkWsClient(ctx)) return;
     Authorize msg = new Authorize();
+
     if (!MessageValidator.isValid(msg)) {
       throw new IllegalArgumentException(MessageValidator.log_message(msg));
     }
-    webSocketClient.pushMessage(msg);
+
+    charger.getWsClient().pushMessage(msg);
     ctx.result("OK");
   }
 
   public void boot(Context ctx) {
+    if (!checkWsClient(ctx)) return;
     BootNotification msg =
         new BootNotification(
             "CP Vendor",
@@ -62,28 +86,61 @@ public class MessageController extends ControllerBase {
       throw new IllegalArgumentException(MessageValidator.log_message(msg));
     }
 
-    webSocketClient.pushMessage(msg);
+    charger.getWsClient().pushMessage(msg);
     ctx.result("OK");
   }
 
   public void heartbeat(Context ctx) {
+    if (!checkWsClient(ctx)) return;
     Heartbeat msg = new Heartbeat();
+
     if (!MessageValidator.isValid(msg)) {
       throw new IllegalArgumentException(MessageValidator.log_message(msg));
     }
-    webSocketClient.pushMessage(msg);
+
+    charger.getWsClient().pushMessage(msg);
+    ctx.result("OK");
+  }
+
+  public void state(Context ctx) {
+    ChargerStateMachine stateMachine = charger.getStateMachine();
+    if (stateMachine == null) {
+      ctx.result("PoweredOff");
+      return;
+    }
+    ctx.result(stateMachine.getCurrentState().toString());
+  }
+
+  public void reboot(Context ctx) {
+    if (charger.isRebootInProgress()) {
+      ctx.status(503).result("Reboot already in progress");
+      return;
+    }
+
+    if (!checkWsClient(ctx)) return;
+    if (!checkElec(ctx)) return;
+    if (!checkTransactionHandler(ctx)) return;
+    charger.Reboot();
     ctx.result("OK");
   }
 
   public void online(Context ctx) {
+    if (!checkWsClient(ctx)) return;
+    if (!checkElec(ctx)) return;
+    if (!checkTransactionHandler(ctx)) return;
     ctx.result("OK");
   }
 
   public void offline(Context ctx) {
+    if (!checkWsClient(ctx)) return;
+    if (!checkElec(ctx)) return;
+    if (!checkTransactionHandler(ctx)) return;
     ctx.result("OK");
   }
 
   public void status(Context ctx) {
+    if (!checkWsClient(ctx)) return;
+
     String requestBody = ctx.body();
     JsonObject json = JsonParser.parseString(requestBody).getAsJsonObject();
 
@@ -129,11 +186,39 @@ public class MessageController extends ControllerBase {
     
 
   public void getSentMessages(Context ctx) {
-    ctx.json(webSocketClient.getSentMessages()); // Return sent messages as JSON
+    ctx.json(charger.getWsClient().getSentMessages()); // Return sent messages as JSON
   }
 
   public void getReceivedMessages(Context ctx) {
-    ctx.json(webSocketClient.getReceivedMessages()); // Return received messages as JSON
+    ctx.json(charger.getWsClient().getReceivedMessages()); // Return received messages as JSON
+  }
+
+  public void startCharge(Context ctx) {
+    if (!checkTransactionHandler(ctx)) return;
+    charger.getTransactionHandler().StartCharging(1, charger.getConfig().getIdTag());
+    ctx.result("OK");
+  }
+
+  public void stopCharge(Context ctx) {
+    if (!checkTransactionHandler(ctx)) return;
+    charger.getTransactionHandler().StopCharging(charger.getConfig().getIdTag());
+    ctx.result("OK");
+  }
+
+  public void meterValue(Context ctx) {
+    if (!checkElec(ctx)) return;
+    // Display only 4 significant digits
+    ctx.result(String.format("%.4g", charger.getElec().getEnergyActiveImportRegister()));
+  }
+
+  public void maxCurrent(Context ctx) {
+    if (!checkElec(ctx)) return;
+    ctx.result(String.valueOf(charger.getElec().getMaxCurrent()));
+  }
+
+  public void currentImport(Context ctx) {
+    if (!checkElec(ctx)) return;
+    ctx.result(String.valueOf(charger.getElec().getCurrentImport()));
   }
 
   @Override
@@ -141,10 +226,23 @@ public class MessageController extends ControllerBase {
     app.post("/api/message/authorize", this::authorize);
     app.post("/api/message/boot", this::boot);
     app.post("/api/message/heartbeat", this::heartbeat);
+
+    app.get("/api/state", this::state);
+
+    app.post("/api/charger/reboot", this::reboot);
+
     app.post("/api/state/online", this::online);
     app.post("/api/state/offline", this::offline);
     app.post("/api/state/status", this::status);
+
     app.get("/api/log/sentmessage", this::getSentMessages);
     app.get("/api/log/receivedmessage", this::getReceivedMessages);
+
+    app.post("/api/transaction/start-charge", this::startCharge);
+    app.post("/api/transaction/stop-charge", this::stopCharge);
+
+    app.get("/api/electrical/meter-value", this::meterValue);
+    app.get("/api/electrical/max-current", this::maxCurrent);
+    app.get("/api/electrical/current-import", this::currentImport);
   }
 }

@@ -23,6 +23,6 @@ public final class TestMessageController {
    * @param ctx the Javalin context
    */
   public static void getTestMessage(final Context ctx) {
-    ctx.result("Hello from the backend!");
+    ctx.result("Ok");
   }
 }
