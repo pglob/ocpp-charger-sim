@@ -5,6 +5,7 @@ import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.IllegalStateException;
 import com.sim_backend.state.StateObserver;
 import com.sim_backend.websockets.MessageScheduler;
+import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
@@ -76,7 +77,7 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
       case ACCEPTED:
         // Registration successful, set heartbeat from interval, update state
         // and synchronize time to match the Central System.
-        scheduler.setHeartbeatInterval(interval, TimeUnit.SECONDS);
+        scheduler.getTime().setHeartbeatInterval(interval, TimeUnit.SECONDS);
         stateMachine.transition(ChargerState.Available);
         scheduler.synchronizeTime(response.getCurrentTime());
         break;
@@ -90,7 +91,7 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
 
         if (interval == 0) {
           // Use default heartbeat interval if none given from central system.
-          interval = MessageScheduler.getHEARTBEAT_INTERVAL();
+          interval = OCPPTime.getHEARTBEAT_INTERVAL();
         }
 
         scheduler.registerJob(interval, TimeUnit.SECONDS, new BootNotification());

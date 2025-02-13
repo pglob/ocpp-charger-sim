@@ -5,6 +5,9 @@ import static org.mockito.Mockito.*;
 
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.types.OCPPMessage;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -14,17 +17,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class MessageSchedulerTest {
-  @Mock private OCPPWebSocketClient client;
+  @Spy
+  private OCPPWebSocketClient client = new OCPPWebSocketClient(new URI(""));
 
-  @Mock private OCPPTime time;
+  @Spy private OCPPTime time = new OCPPTime(client);
 
   @Mock private OCPPMessage message;
 
   private MessageScheduler scheduler;
 
-  @BeforeEach
+  public MessageSchedulerTest() throws URISyntaxException {
+  }
+
+    @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
     when(time.getSynchronizedTime()).thenReturn(ZonedDateTime.now());

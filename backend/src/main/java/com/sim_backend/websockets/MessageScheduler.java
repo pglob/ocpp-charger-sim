@@ -18,7 +18,7 @@ public class MessageScheduler {
   public static class TimedTask {
     ZonedDateTime time; // Time as ZonedDateTime
     Runnable task;
-    OCPPMessage message;
+    @Getter OCPPMessage message;
 
     TimedTask(ZonedDateTime time, Runnable task, OCPPMessage message) {
       this.time = time;

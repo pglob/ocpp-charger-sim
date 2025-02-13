@@ -8,6 +8,7 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.IllegalStateException;
 import com.sim_backend.websockets.MessageScheduler;
+import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.RegistrationStatus;
 import com.sim_backend.websockets.events.OnOCPPMessage;
@@ -70,7 +71,10 @@ class BootNotificationObserverTest {
             new BootNotificationResponse(RegistrationStatus.ACCEPTED, ZonedDateTime.now(), 20));
 
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
+    OCPPTime time = mock(OCPPTime.class);
+
     when(webSocketClient.getScheduler()).thenReturn(messageScheduler);
+    when(messageScheduler.getTime()).thenReturn(time);
 
     OnOCPPMessage message = mock(OnOCPPMessage.class);
     when(message.getMessage()).thenReturn(response);
@@ -80,7 +84,7 @@ class BootNotificationObserverTest {
     observer.onMessageReceived(message);
 
     // Assert
-    verify(messageScheduler).setHeartbeatInterval(20L, TimeUnit.SECONDS);
+    verify(time).setHeartbeatInterval(20L, TimeUnit.SECONDS);
     verify(stateMachine).transition(ChargerState.Available);
   }
 
@@ -126,7 +130,7 @@ class BootNotificationObserverTest {
     // Assert
     verify(messageScheduler)
         .registerJob(
-            eq(MessageScheduler.getHEARTBEAT_INTERVAL()),
+            eq(OCPPTime.getHEARTBEAT_INTERVAL()),
             eq(TimeUnit.SECONDS),
             isBootNotification());
   }

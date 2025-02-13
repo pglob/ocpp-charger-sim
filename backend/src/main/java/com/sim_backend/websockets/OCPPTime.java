@@ -40,7 +40,8 @@ public class OCPPTime implements AutoCloseable {
   final OnOCPPMessageListener listener =
       message -> {
         HeartbeatResponse response = (HeartbeatResponse) message.getMessage();
-        if (!heartbeat.message.getMessageID().equals(response.getMessageID())) {
+        if (heartbeat != null
+            && !heartbeat.message.getMessageID().equals(response.getMessageID())) {
           log.error(String.format("Received old message ID %s", response.getMessageID()));
           client.pushMessage(
               new OCPPMessageError(
@@ -117,9 +118,11 @@ public class OCPPTime implements AutoCloseable {
    * @param unit The unit of your interval.
    */
   public MessageScheduler.TimedTask setHeartbeatInterval(Long interval, TimeUnit unit) {
-    this.client.getScheduler().killJob(this.heartbeat);
+    if(this.heartbeat != null) {
+      this.client.getScheduler().killJob(this.heartbeat);
+    }
 
-    return (this.heartbeat =
-        this.client.getScheduler().periodicJob(0, interval, unit, new Heartbeat()));
+    this.heartbeat = this.client.getScheduler().periodicJob(0, interval, unit, new Heartbeat());
+    return this.heartbeat;
   }
 }

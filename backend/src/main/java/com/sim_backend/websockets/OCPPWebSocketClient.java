@@ -65,7 +65,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
       new ConcurrentHashMap<>();
 
   /** Our message scheduler. */
-  @Getter private final MessageScheduler scheduler = new MessageScheduler(this);
+  @Getter private MessageScheduler scheduler = null;
 
   /** The headers we send with our Websocket connection */
   public static final Map<String, String> headers = Map.of("Sec-WebSocket-Protocol", "ocpp1.6");
@@ -130,8 +130,10 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   public OCPPWebSocketClient(final URI serverUri) {
     super(serverUri, new Draft_6455(), headers, CONNECT_TIMEOUT);
+    scheduler = new MessageScheduler(this);
     this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
+
   }
 
   @Override
