@@ -179,7 +179,7 @@ public class MessageController extends ControllerBase {
           new StatusNotification(
               connectorId, errorCode, info, status, timestamp, vendorId, vendorErrorCode);
 
-      webSocketClient.pushMessage(msg);
+      charger.getWsClient().pushMessage(msg);
       ctx.result("OK");
 
     } catch (Exception e) {
