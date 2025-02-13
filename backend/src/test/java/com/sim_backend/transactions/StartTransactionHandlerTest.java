@@ -39,7 +39,7 @@ public class StartTransactionHandlerTest {
     when(ocppTime.getSynchronizedTime()).thenReturn(ZonedDateTime.parse("2025-01-19T00:00:00Z"));
     handler = new StartTransactionHandler(stateMachine, client);
   }
-  
+
   @Test
   void initiateStartTransactiontest() {
     when(stateMachine.getCurrentState()).thenReturn(ChargerState.Preparing);

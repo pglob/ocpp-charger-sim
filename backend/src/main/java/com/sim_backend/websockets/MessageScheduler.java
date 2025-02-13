@@ -1,7 +1,6 @@
 package com.sim_backend.websockets;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.types.OCPPMessage;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -19,10 +18,12 @@ public class MessageScheduler {
   public static class TimedTask {
     ZonedDateTime time; // Time as ZonedDateTime
     Runnable task;
+    OCPPMessage message;
 
-    TimedTask(ZonedDateTime time, Runnable task) {
+    TimedTask(ZonedDateTime time, Runnable task, OCPPMessage message) {
       this.time = time;
       this.task = task;
+      this.message = message;
     }
   }
 
@@ -30,8 +31,9 @@ public class MessageScheduler {
     long repeatDelay;
     ChronoUnit unit;
 
-    RepeatingTimedTask(ZonedDateTime time, long repeatTime, ChronoUnit unit, Runnable task) {
-      super(time, task);
+    RepeatingTimedTask(
+        ZonedDateTime time, long repeatTime, ChronoUnit unit, Runnable task, OCPPMessage message) {
+      super(time, task, message);
       this.unit = unit;
       this.repeatDelay = repeatTime;
     }
@@ -42,14 +44,6 @@ public class MessageScheduler {
 
   /** The OCPPWebSocket we will send our messages through. */
   private final OCPPWebSocketClient client;
-
-  /**
-   * Our set heartbeat interval, we don't want this too common but every 4 minutes should be enough.
-   */
-  @Getter private static final long HEARTBEAT_INTERVAL = 240L; // seconds
-
-  /** Our heartbeat job. */
-  private TimedTask heartbeat;
 
   /** Our scheduled tasks. */
   @VisibleForTesting final CopyOnWriteArrayList<TimedTask> tasks = new CopyOnWriteArrayList<>();
@@ -62,18 +56,6 @@ public class MessageScheduler {
   public MessageScheduler(OCPPWebSocketClient targetClient) {
     this.client = targetClient;
     this.time = new OCPPTime(targetClient);
-  }
-
-  /**
-   * Set our interval between heartbeats.
-   *
-   * @param interval The Duration between heartbeats.
-   * @param unit The unit of your interval.
-   */
-  public TimedTask setHeartbeatInterval(Long interval, TimeUnit unit) {
-    tasks.remove(this.heartbeat);
-
-    return (this.heartbeat = this.periodicJob(0, interval, unit, new Heartbeat()));
   }
 
   /**
@@ -126,7 +108,8 @@ public class MessageScheduler {
             getTime().getSynchronizedTime().plus(initialDelay, timeUnit.toChronoUnit()),
             delay,
             timeUnit.toChronoUnit(),
-            job);
+            job,
+            message);
     tasks.add(task);
     return task;
   }
@@ -150,7 +133,8 @@ public class MessageScheduler {
     Runnable job = this.createRunnable(message);
 
     TimedTask task =
-        new TimedTask(getTime().getSynchronizedTime().plus(delay, timeUnit.toChronoUnit()), job);
+        new TimedTask(
+            getTime().getSynchronizedTime().plus(delay, timeUnit.toChronoUnit()), job, message);
     tasks.add(task);
     return task;
   }
@@ -166,9 +150,18 @@ public class MessageScheduler {
       throw new IllegalArgumentException("timeToSend and message must not be null");
     }
 
-    TimedTask task = new TimedTask(timeToSend, this.createRunnable(message));
+    TimedTask task = new TimedTask(timeToSend, this.createRunnable(message), message);
     tasks.add(task);
     return task;
+  }
+
+  /**
+   * Kill a Registered Job.
+   *
+   * @param task the job to kill.
+   */
+  public void killJob(TimedTask task) {
+    tasks.remove(task);
   }
 
   /** Tick our scheduler to check for messages to be sent. */
@@ -196,7 +189,8 @@ public class MessageScheduler {
                 nextExecutionTime,
                 repeatingTask.repeatDelay,
                 repeatingTask.unit,
-                repeatingTask.task));
+                repeatingTask.task,
+                repeatingTask.message));
       }
     }
   }

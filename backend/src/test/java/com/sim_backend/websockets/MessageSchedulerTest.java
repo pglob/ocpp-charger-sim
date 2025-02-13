@@ -90,7 +90,8 @@ public class MessageSchedulerTest {
     long interval = 240L;
     TimeUnit unit = TimeUnit.SECONDS;
 
-    MessageScheduler.TimedTask heartbeatTask = scheduler.setHeartbeatInterval(interval, unit);
+    MessageScheduler.TimedTask heartbeatTask =
+        scheduler.getTime().setHeartbeatInterval(interval, unit);
 
     assertNotNull(heartbeatTask);
   }
@@ -142,7 +143,8 @@ public class MessageSchedulerTest {
 
     ZonedDateTime futureTime = ZonedDateTime.now().plusSeconds(15);
     Runnable taskRunnable = mock(Runnable.class);
-    MessageScheduler.TimedTask task = new MessageScheduler.TimedTask(futureTime, taskRunnable);
+    MessageScheduler.TimedTask task =
+        new MessageScheduler.TimedTask(futureTime, taskRunnable, new Heartbeat());
 
     // Add the task manually
     scheduler.tasks.add(task);
@@ -162,7 +164,8 @@ public class MessageSchedulerTest {
 
     ZonedDateTime futureTime = ZonedDateTime.now().plusSeconds(5);
     Runnable taskRunnable = mock(Runnable.class);
-    MessageScheduler.TimedTask task = new MessageScheduler.TimedTask(futureTime, taskRunnable);
+    MessageScheduler.TimedTask task =
+        new MessageScheduler.TimedTask(futureTime, taskRunnable, new Heartbeat());
 
     // Add the task manually
     scheduler.tasks.add(task);
@@ -183,7 +186,7 @@ public class MessageSchedulerTest {
     // Create a repeating task
     MessageScheduler.RepeatingTimedTask repeatingTask =
         new MessageScheduler.RepeatingTimedTask(
-            initialTime, repeatDelay, ChronoUnit.SECONDS, taskRunnable);
+            initialTime, repeatDelay, ChronoUnit.SECONDS, taskRunnable, new Heartbeat());
 
     // Add the task manually
     scheduler.tasks.add(repeatingTask);

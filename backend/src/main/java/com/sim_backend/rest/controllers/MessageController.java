@@ -150,40 +150,42 @@ public class MessageController extends ControllerBase {
     }
 
     try {
-        int connectorId = json.get("connectorId").getAsInt();
-        if (connectorId != 0 && connectorId != 1) {
-            throw new IllegalArgumentException(); 
-        }
+      int connectorId = json.get("connectorId").getAsInt();
+      if (connectorId != 0 && connectorId != 1) {
+        throw new IllegalArgumentException();
+      }
 
-        String errorCodeStr = json.get("errorCode").getAsString().trim();
-        ChargePointErrorCode errorCode = ChargePointErrorCode.valueOf(errorCodeStr);//if not valid, it will throw exception
+      String errorCodeStr = json.get("errorCode").getAsString().trim();
+      ChargePointErrorCode errorCode =
+          ChargePointErrorCode.valueOf(errorCodeStr); // if not valid, it will throw exception
 
-        String statusStr = json.get("status").getAsString().trim();
-        ChargePointStatus status = ChargePointStatus.valueOf(statusStr);////if not valid, it will throw exception
+      String statusStr = json.get("status").getAsString().trim();
+      ChargePointStatus status =
+          ChargePointStatus.valueOf(statusStr); // //if not valid, it will throw exception
 
-        String info = json.has("info") ? json.get("info").getAsString().trim() : null;
-        if (info != null && info.isEmpty()) info = null;
+      String info = json.has("info") ? json.get("info").getAsString().trim() : null;
+      if (info != null && info.isEmpty()) info = null;
 
-        ZonedDateTime timestamp = json.has("timestamp") ? ZonedDateTime.now() : null;
+      ZonedDateTime timestamp = json.has("timestamp") ? ZonedDateTime.now() : null;
 
-        String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString().trim() : null;
-        if (vendorId != null && vendorId.isEmpty()) vendorId = null;
+      String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString().trim() : null;
+      if (vendorId != null && vendorId.isEmpty()) vendorId = null;
 
-        String vendorErrorCode = json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString().trim() : null;
-        if (vendorErrorCode != null && vendorErrorCode.isEmpty()) vendorErrorCode = null;
+      String vendorErrorCode =
+          json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString().trim() : null;
+      if (vendorErrorCode != null && vendorErrorCode.isEmpty()) vendorErrorCode = null;
 
-        StatusNotification msg = new StatusNotification(
-            connectorId, errorCode, info, status, timestamp, vendorId, vendorErrorCode
-        );
+      StatusNotification msg =
+          new StatusNotification(
+              connectorId, errorCode, info, status, timestamp, vendorId, vendorErrorCode);
 
-        webSocketClient.pushMessage(msg);
-        ctx.result("OK");
+      webSocketClient.pushMessage(msg);
+      ctx.result("OK");
 
     } catch (Exception e) {
-        ctx.status(400).result("Invalid values for connectorId, errorCode, status"); 
+      ctx.status(400).result("Invalid values for connectorId, errorCode, status");
     }
-}
-    
+  }
 
   public void getSentMessages(Context ctx) {
     ctx.json(charger.getWsClient().getSentMessages()); // Return sent messages as JSON

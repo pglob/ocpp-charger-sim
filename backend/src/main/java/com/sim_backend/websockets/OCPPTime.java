@@ -1,12 +1,18 @@
 package com.sim_backend.websockets;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.JsonObject;
+import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
+import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.HeartbeatResponse;
+import com.sim_backend.websockets.types.OCPPMessageError;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /** Get Synchronized Time with our last received HeartbeatResponse. */
@@ -18,16 +24,33 @@ public class OCPPTime implements AutoCloseable {
   /** Our stored offset based on the time we received in our last HeartbeatResponse. */
   private final AtomicReference<Duration> offset = new AtomicReference<>(Duration.ZERO);
 
+  /** Our heartbeat job. */
+  private MessageScheduler.TimedTask heartbeat;
+
+  /**
+   * Our set heartbeat interval, we don't want this too common but every 4 minutes should be enough.
+   */
+  @Getter private static final long HEARTBEAT_INTERVAL = 240L; // seconds
+
+  /** The client we are listening on. */
+  private OCPPWebSocketClient client = null;
+
   /** Our stored OCPPMessageListener. */
   @VisibleForTesting
   final OnOCPPMessageListener listener =
       message -> {
         HeartbeatResponse response = (HeartbeatResponse) message.getMessage();
+        if (!heartbeat.message.getMessageID().equals(response.getMessageID())) {
+          log.error(String.format("Received old message ID %s", response.getMessageID()));
+          client.pushMessage(
+              new OCPPMessageError(
+                  ErrorCode.ProtocolError,
+                  "Received HeartbeatResponse with an old message ID",
+                  new JsonObject()));
+          return;
+        }
         setOffset(response.getCurrentTime());
       };
-
-  /** The client we are listening on. */
-  private OCPPWebSocketClient client = null;
 
   /**
    * Create an OCPP Synchronized Time Object.
@@ -85,5 +108,18 @@ public class OCPPTime implements AutoCloseable {
     } else {
       log.warn("Client is null, cannot deregister message listener.");
     }
+  }
+
+  /**
+   * Set our interval between heartbeats.
+   *
+   * @param interval The Duration between heartbeats.
+   * @param unit The unit of your interval.
+   */
+  public MessageScheduler.TimedTask setHeartbeatInterval(Long interval, TimeUnit unit) {
+    this.client.getScheduler().killJob(this.heartbeat);
+
+    return (this.heartbeat =
+        this.client.getScheduler().periodicJob(0, interval, unit, new Heartbeat()));
   }
 }
