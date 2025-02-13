@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Config Registry holds configuration and identification for the charge point and its simulator
+ * Config Registry holds configuration and identification for the simulated charge point and its
  * state.
  */
 @AllArgsConstructor

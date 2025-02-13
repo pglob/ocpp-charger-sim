@@ -17,6 +17,9 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StopTransaction")
 public class StopTransaction extends OCPPMessageRequest {
+  @SerializedName("idTag")
+  private String idTag;
+
   /*
    * TODO : transactionData needs to be implemented
    */
@@ -33,7 +36,8 @@ public class StopTransaction extends OCPPMessageRequest {
   private String timestamp;
 
   // Constructor
-  public StopTransaction(int transactionId, int meterStop, String timestamp) {
+  public StopTransaction(String idTag, int transactionId, int meterStop, String timestamp) {
+    this.idTag = idTag;
     this.transactionId = transactionId;
     this.meterStop = meterStop;
     this.timestamp = timestamp;

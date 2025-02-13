@@ -1,13 +1,16 @@
 package com.sim_backend.transactions;
 
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.electrical.ElectricalTransition;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.*;
 import com.sim_backend.websockets.messages.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 
 /*
@@ -16,41 +19,45 @@ import lombok.Getter;
  */
 @Getter
 public class StartTransactionHandler {
-  private SimulatorStateMachine stateMachine;
+  private ChargerStateMachine stateMachine;
   private OCPPWebSocketClient client;
   private int transactionId;
 
   // Constructor
-  public StartTransactionHandler(SimulatorStateMachine stateMachine, OCPPWebSocketClient client) {
+  public StartTransactionHandler(ChargerStateMachine stateMachine, OCPPWebSocketClient client) {
     this.stateMachine = stateMachine;
     this.client = client;
     this.transactionId = -1;
   }
 
   /**
-   * Initiate Start Transaction Handling StartTransaction Request, Response and simulator status If
+   * Initiate Start Transaction Handling StartTransaction Request, Response and charger status If
    * authorization is accepted, change a stateMachine status to Charging Switch to Available
    * otherwise
    *
    * @param connectorId ID of connector
    * @param idTag ID of user
-   * @param meterStart initial value of meter
+   * @param transactionId AtomicInteger used to pass the transactionId back to the
+   *     TransactionHandler
+   * @param elec ElectricalTransition for retrieving meter values
+   * @param stopInProgress AtomicBoolean to prevent initiateStopTransaction from running more than
+   *     once
    */
-  public void initiateStartTransaction(int connectorId, String idTag) {
+  public void initiateStartTransaction(
+      int connectorId,
+      String idTag,
+      AtomicInteger transactionId,
+      ElectricalTransition elec,
+      AtomicBoolean startInProgress) {
 
-    /*
-     * TODO : Swap meterStart value
-     */
-    int meterStart = 0;
+    // Convert from KWh to Wh
+    int meterStart = (int) (elec.getEnergyActiveImportRegister() * 1000.0f);
 
     OCPPTime ocppTime = client.getScheduler().getTime();
     ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
     String timestamp = zonetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
 
     StartTransaction startTransactionMessage =
-        /*
-         * TODO : Change temp arguments to meterStart
-         */
         new StartTransaction(connectorId, idTag, meterStart, timestamp);
     client.pushMessage(startTransactionMessage);
 
@@ -60,17 +67,17 @@ public class StartTransactionHandler {
           if (!(message.getMessage() instanceof StartTransactionResponse response)) {
             throw new ClassCastException("Message is not an StartTransactionResponse");
           }
-          if (response.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED) {
-            transactionId = response.getTransactionId();
+          if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
+            transactionId.set(response.getTransactionId());
             System.out.println(
                 "Start Transaction Completed... Transaction Id : " + response.getTransactionId());
-            stateMachine.transition(SimulatorState.Charging);
+            stateMachine.transition(ChargerState.Charging);
           } else {
             System.err.println("Transaction Failed to Start...");
-            stateMachine.transition(SimulatorState.Available);
+            stateMachine.transition(ChargerState.Available);
           }
+          client.clearOnReceiveMessage(StartTransactionResponse.class);
+          startInProgress.set(false);
         });
-
-    client.clearOnReceiveMessage(StartTransactionResponse.class);
   }
 }

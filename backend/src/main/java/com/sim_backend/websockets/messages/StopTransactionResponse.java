@@ -21,12 +21,12 @@ import lombok.Setter;
     messageName = "StopTransactionResponse")
 public class StopTransactionResponse extends OCPPMessageResponse {
   @SerializedName("idTagInfo")
-  private IdTagInfo idTaginfo;
+  private idTagInfo idTagInfo;
 
   @Getter
   @Setter
   @AllArgsConstructor
-  public static class IdTagInfo {
+  public static class idTagInfo {
 
     @NotBlank(message = "StopTransactionResponse status is required")
     @SerializedName("status")
@@ -34,7 +34,7 @@ public class StopTransactionResponse extends OCPPMessageResponse {
   }
 
   // Constructor
-  public StopTransactionResponse(String idTaginfo) {
-    this.idTaginfo = new IdTagInfo(AuthorizationStatus.fromString(idTaginfo));
+  public StopTransactionResponse(String idTagInfo) {
+    this.idTagInfo = new idTagInfo(AuthorizationStatus.fromString(idTagInfo));
   }
 }

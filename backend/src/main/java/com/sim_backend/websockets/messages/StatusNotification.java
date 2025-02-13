@@ -56,10 +56,10 @@ public final class StatusNotification extends OCPPMessageRequest {
       String vendorErrorCode) {
     this.connectorId = connectorId;
     this.errorCode = errorCode;
-    this.info = info != null ? info : "";
+    this.info = info;
     this.status = status;
     this.timestamp = timestamp;
-    this.vendorId = vendorId != null ? vendorId : "";
-    this.vendorErrorCode = vendorErrorCode != null ? vendorErrorCode : "";
+    this.vendorId = vendorId;
+    this.vendorErrorCode = vendorErrorCode;
   }
 }

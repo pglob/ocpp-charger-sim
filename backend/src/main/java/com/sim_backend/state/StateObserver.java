@@ -7,9 +7,9 @@ package com.sim_backend.state;
 public interface StateObserver {
 
   /**
-   * Called when the simulator's state transitions.
+   * Called when the charger's state transitions.
    *
    * @param newState the new state after the change.
    */
-  void onStateChanged(SimulatorState newState);
+  void onStateChanged(ChargerState newState);
 }

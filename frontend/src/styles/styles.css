@@ -1,7 +1,104 @@
+/* =====================================================
+   Upper-level containers
+   ===================================================== */
+
+.charger-frames-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: left;
+  padding: 10px;
+}
+
+
+/* =====================================================
+   ChargerFrame Component & Sub-Components Styles
+   ===================================================== */
+
+/* Style for the ChargerFrame component */
+.charger-frame {
+  width: 300px;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #f9f9f9;
+}
+
+/* Style for the Charger Name */
+.charger-name {
+  margin-bottom: 20px; /* Larger gap for Charger Name */
+  font-size: 18px;     /* Larger font for Charger Name */
+  font-weight: bold;   /* Bold Charger Name */
+  width: 100%;
+}
+
+/* Container to hold text content and a button side by side */
+.content-and-button {
+  display: flex;
+  align-items: center;       /* Vertically center the content */
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Container for text content that fills up a space */
+.text-content-container {
+  flex: 1;
+}
+
+/* Style for individual text content items */
+.text-content {
+  width: 100%;
+  margin-bottom: 5px; /* Smaller margin */
+}
+
+.text-content p {
+  margin: 0;
+  text-align: left; /* Left-aligned text */
+  font-size: 16px;  /* Consistent font size */
+}
+
+
+/* =====================================================
+   Button & Dropdown Styles
+   ===================================================== */
+
+/* General button style */
+.button {
+  width: 200px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+/* A square button variant */
+.square-button {
+  width: 80px;
+  height: 80px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+/* Darken a button when pressed */
+button:active {
+  filter: brightness(85%);
+}
+
 /* Container for the Button component */
 .button-container {
   position: relative;
 }
+
 /* Style for the dropdown toggle button */
 .dropdown-toggle {
   margin-right: 10px;
@@ -19,20 +116,11 @@
   flex-direction: column;
 }
 
-/* Style for buttons*/
-.button {
-  width: 200px;
-  padding: 10px;
-  margin: 10px 0;
-  border: 2px solid #000;
-  border-radius: 8px;
-  background-color: #fff;
-  cursor: pointer;
-}
-
+/* Style for the dropdown button */
 .dropdown-button {
   margin-bottom: 8px;
 }
+
 /* Style for the ChargerFrame component */
 .charger-frame {
   width: 300px;
@@ -44,7 +132,6 @@
   justify-content: flex-start;
   align-items: center;
   background-color: #f9f9f9;
-  height: 500px;
 }
 
 /* Style for the Charger Name */
@@ -150,4 +237,158 @@
   font-weight: bold;
   display: inline-block;
   color: #333;
+}
+
+/* Container for the ErrorMenu component */
+.error-menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Button to open the modal */
+.error-menu-container .dropdown-toggle {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.error-menu-container .dropdown-toggle:hover {
+  background-color: #b02a37;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal content */
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Close button */
+.modal-close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Form items */
+.form-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.form-item label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-item input,
+.form-item select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Feedback message */
+.feedback {
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.feedback.error {
+  background-color: #ffdddd;
+  color: #d8000c;
+  border: 1px solid #d8000c;
+}
+
+.feedback.success {
+  background-color: #ddffdd;
+  color: #008000;
+  border: 1px solid #008000;
+}
+
+/* Submit button */
+.submit-button {
+  width: 100%;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #218838;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .modal-content {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .form-item label {
+    font-size: 14px;
+  }
+
+  .form-item input,
+  .form-item select {
+    font-size: 12px;
+  }
+
+  .submit-button {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
