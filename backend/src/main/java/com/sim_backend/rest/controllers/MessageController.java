@@ -149,28 +149,41 @@ public class MessageController extends ControllerBase {
       return;
     }
 
-    int connectorId = json.get("connectorId").getAsInt();
-    ChargePointErrorCode errorCode =
-        ChargePointErrorCode.valueOf(json.get("errorCode").getAsString());
-    String info = json.has("info") ? json.get("info").getAsString() : "";
-    ChargePointStatus status =
-        json.has("status")
-            ? ChargePointStatus.valueOf(json.get("status").getAsString())
-            : ChargePointStatus.Available;
-    ZonedDateTime timestamp =
-        json.has("timestamp") && !json.get("timestamp").getAsString().isEmpty()
-            ? ZonedDateTime.parse(json.get("timestamp").getAsString())
-            : ZonedDateTime.now();
-    String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString() : "";
-    String vendorErrorCode =
-        json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString() : "";
+    try {
+        int connectorId = json.get("connectorId").getAsInt();
+        if (connectorId != 0 && connectorId != 1) {
+            throw new IllegalArgumentException(); 
+        }
 
-    StatusNotification msg =
-        new StatusNotification(
-            connectorId, errorCode, info, status, timestamp, vendorId, vendorErrorCode);
-    charger.getWsClient().pushMessage(msg);
-    ctx.result("OK");
-  }
+        String errorCodeStr = json.get("errorCode").getAsString().trim();
+        ChargePointErrorCode errorCode = ChargePointErrorCode.valueOf(errorCodeStr);//if not valid, it will throw exception
+
+        String statusStr = json.get("status").getAsString().trim();
+        ChargePointStatus status = ChargePointStatus.valueOf(statusStr);////if not valid, it will throw exception
+
+        String info = json.has("info") ? json.get("info").getAsString().trim() : null;
+        if (info != null && info.isEmpty()) info = null;
+
+        ZonedDateTime timestamp = json.has("timestamp") ? ZonedDateTime.now() : null;
+
+        String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString().trim() : null;
+        if (vendorId != null && vendorId.isEmpty()) vendorId = null;
+
+        String vendorErrorCode = json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString().trim() : null;
+        if (vendorErrorCode != null && vendorErrorCode.isEmpty()) vendorErrorCode = null;
+
+        StatusNotification msg = new StatusNotification(
+            connectorId, errorCode, info, status, timestamp, vendorId, vendorErrorCode
+        );
+
+        webSocketClient.pushMessage(msg);
+        ctx.result("OK");
+
+    } catch (Exception e) {
+        ctx.status(400).result("Invalid values for connectorId, errorCode, status"); 
+    }
+}
+    
 
   public void getSentMessages(Context ctx) {
     ctx.json(charger.getWsClient().getSentMessages()); // Return sent messages as JSON
