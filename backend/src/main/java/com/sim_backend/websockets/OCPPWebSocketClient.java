@@ -21,6 +21,8 @@ import com.sim_backend.websockets.exceptions.OCPPUnsupportedProtocol;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -28,6 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -145,6 +149,27 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public OCPPWebSocketClient(final URI serverUri) {
     super(serverUri, new Draft_6455(), headers, CONNECT_TIMEOUT);
     scheduler = new MessageScheduler(this);
+
+    // Setup SSL if connecting over TLS
+    if ("wss".equalsIgnoreCase(serverUri.getScheme())) {
+      try {
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, null, null);
+        int port = serverUri.getPort();
+        if (port == -1) port = 443;
+        SSLSocketFactory sniFactory =
+            new SniSSLSocketFactory(sslContext.getSocketFactory(), serverUri.getHost(), port);
+        this.setSocketFactory(sniFactory);
+      } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        e.printStackTrace();
+      }
+    }
+
+    try {
+      this.connectBlocking();
+    } catch (InterruptedException e) {
+      // Do nothing, there are reconnectBlocking() calls later when sending messages
+    }
     this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
   }
@@ -244,10 +269,15 @@ public class OCPPWebSocketClient extends WebSocketClient {
   }
 
   @Override
-  public void onClose(int i, String s, boolean b) {}
+  public void onClose(int i, String s, boolean b) {
+    String connectionCloser = "Connection closed by " + (b ? "remote" : "local");
+    log.info(connectionCloser + ": " + i + " " + s);
+  }
 
   @Override
-  public void onError(Exception e) {}
+  public void onError(Exception e) {
+    e.printStackTrace();
+  }
 
   /**
    * Parse a received OCPPRequest to extract its type and data.

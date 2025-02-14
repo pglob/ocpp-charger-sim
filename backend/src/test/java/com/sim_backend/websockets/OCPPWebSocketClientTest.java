@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.net.SocketFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -745,5 +746,43 @@ public class OCPPWebSocketClientTest {
     assertNotNull(error);
     assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
     assertEquals("Request details was not a json object", error.getErrorDescription());
+  }
+
+  @Test
+  void testWssSchemeSetsSniSSLSocketFactory()
+      throws URISyntaxException, NoSuchFieldException, IllegalAccessException {
+    // Given a "wss" URI
+    URI wssUri = new URI("wss://example.com:12345");
+
+    OCPPWebSocketClient client = new OCPPWebSocketClient(wssUri);
+
+    // Verify the WebSocketClient's 'socketFactory' is SniSSLSocketFactory
+    Field socketFactoryField = getSocketFactoryField();
+    SocketFactory actualFactory = (SocketFactory) socketFactoryField.get(client);
+    assertNotNull(actualFactory, "Expected socketFactory to be initialized for wss");
+    assertTrue(
+        actualFactory instanceof SniSSLSocketFactory,
+        "Expected a SniSSLSocketFactory when using a wss:// URI");
+  }
+
+  @Test
+  void testNonWssSchemeDoesNotSetSniSSLSocketFactory()
+      throws URISyntaxException, NoSuchFieldException, IllegalAccessException {
+    // Given a "ws" URI
+    URI wsUri = new URI("ws://example.com:12345");
+
+    OCPPWebSocketClient client = new OCPPWebSocketClient(wsUri);
+
+    // Verify the WebSocketClient's 'socketFactory' is not SniSSLSocketFactory
+    Field socketFactoryField = getSocketFactoryField();
+    SocketFactory actualFactory = (SocketFactory) socketFactoryField.get(client);
+    assertNull(actualFactory, "Expected socketFactory to be uninitialized for ws");
+  }
+
+  /** Helper to get the `socketFactory` field from the parent WebSocketClient class. */
+  private Field getSocketFactoryField() throws NoSuchFieldException {
+    Field field = org.java_websocket.client.WebSocketClient.class.getDeclaredField("socketFactory");
+    field.setAccessible(true);
+    return field;
   }
 }
