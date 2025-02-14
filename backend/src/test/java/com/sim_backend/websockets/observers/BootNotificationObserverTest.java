@@ -130,9 +130,7 @@ class BootNotificationObserverTest {
     // Assert
     verify(messageScheduler)
         .registerJob(
-            eq(OCPPTime.getHEARTBEAT_INTERVAL()),
-            eq(TimeUnit.SECONDS),
-            isBootNotification());
+            eq(OCPPTime.getHEARTBEAT_INTERVAL()), eq(TimeUnit.SECONDS), isBootNotification());
   }
 
   @Test

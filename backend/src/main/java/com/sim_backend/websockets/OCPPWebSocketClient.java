@@ -133,7 +133,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
     scheduler = new MessageScheduler(this);
     this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
-
   }
 
   @Override

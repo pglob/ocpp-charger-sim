@@ -7,6 +7,7 @@ import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.HeartbeatResponse;
 import com.sim_backend.websockets.types.OCPPMessageError;
+import com.sim_backend.websockets.types.OCPPRepeatingTimedTask;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -25,7 +26,7 @@ public class OCPPTime implements AutoCloseable {
   private final AtomicReference<Duration> offset = new AtomicReference<>(Duration.ZERO);
 
   /** Our heartbeat job. */
-  private MessageScheduler.TimedTask heartbeat;
+  private OCPPRepeatingTimedTask heartbeat;
 
   /**
    * Our set heartbeat interval, we don't want this too common but every 4 minutes should be enough.
@@ -117,8 +118,8 @@ public class OCPPTime implements AutoCloseable {
    * @param interval The Duration between heartbeats.
    * @param unit The unit of your interval.
    */
-  public MessageScheduler.TimedTask setHeartbeatInterval(Long interval, TimeUnit unit) {
-    if(this.heartbeat != null) {
+  public OCPPRepeatingTimedTask setHeartbeatInterval(Long interval, TimeUnit unit) {
+    if (this.heartbeat != null) {
       this.client.getScheduler().killJob(this.heartbeat);
     }
 
