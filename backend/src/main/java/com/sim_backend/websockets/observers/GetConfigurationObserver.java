@@ -71,12 +71,12 @@ public class GetConfigurationObserver implements OnOCPPMessageListener {
         if ("MeterValueSampleInterval".equals(key)) {
           configurationInfo.add(
               new GetConfigurationResponse.Configuration(
-                  key, String.valueOf(registry.getMeterValueSampleInterval()), true));
+                  key, String.valueOf(registry.getMeterValueSampleInterval()), false));
           count++;
         } else if ("MeterValuesSampledData".equals(key)) {
           configurationInfo.add(
               new GetConfigurationResponse.Configuration(
-                  key, String.valueOf(registry.getMeterValuesSampledData()), true));
+                  key, String.valueOf(registry.getMeterValuesSampledData()), false));
           count++;
         } else {
           unknownKeys.add(key);
