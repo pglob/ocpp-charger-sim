@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { FaCog } from 'react-icons/fa';
+import { FaCog, FaTimes } from 'react-icons/fa';
 import '../styles/styles.css';
 
 function ConfigGear() {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [idTag, setIdTag] = useState('');
   const [centralSystemUrl, setCentralSystemUrl] = useState('');
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // "success" or "error"
 
-  // Fetch the current configuration (idTag, centralSystemUr
+  // Fetch the current configuration
   const fetchConfig = async () => {
     try {
       const response = await fetch(
@@ -50,31 +52,28 @@ function ConfigGear() {
       if (!response.ok) {
         throw new Error('Failed to update configuration');
       }
-
-      const result = await response.text();
-      console.log(result); // Success message
-      alert('Configuration updated successfully');
     } catch (error) {
       console.error('Error updating configuration:', error);
     }
   };
 
-  // When the button is clicked, it fetches the current configuration and shows the modal
+  // Handle modal opening and fetching config
   const handleClick = async () => {
     await fetchConfig();
     setShowConfigModal(true);
   };
 
-  // Handle the update action
+  // Handle update action
   const handleUpdate = async () => {
     if (!idTag || !centralSystemUrl) {
-      alert('Both idTag and Central System URL are required.');
+      setMessage('Both idTag and Central System URL are required.');
+      setMessageType('error');
       return;
     }
-
     try {
       await updateConfig();
-      setShowConfigModal(false); // Close the modal after update
+      setShowConfigModal(false); // Close modal immediately after success
+      setMessage('');
     } catch (error) {
       console.error('Error updating configuration:', error);
     }
@@ -91,6 +90,20 @@ function ConfigGear() {
         <div className="config-modal-overlay">
           <div className="config-modal-content">
             <h2 className="config-heading">Update Configuration</h2>
+
+            {/* Display Message */}
+            {message && (
+              <div className={`config-message ${messageType}`}>
+                {message}
+                <button
+                  className="config-message-close"
+                  onClick={() => setMessage('')}
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            )}
+
             <label>
               idTag:
               <input
