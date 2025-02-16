@@ -128,6 +128,7 @@ public class MessageController extends ControllerBase {
     if (!checkWsClient(ctx)) return;
     if (!checkElec(ctx)) return;
     if (!checkTransactionHandler(ctx)) return;
+    charger.getWsClient().goOnline();
     ctx.result("OK");
   }
 
@@ -135,6 +136,7 @@ public class MessageController extends ControllerBase {
     if (!checkWsClient(ctx)) return;
     if (!checkElec(ctx)) return;
     if (!checkTransactionHandler(ctx)) return;
+    charger.getWsClient().goOffline();
     ctx.result("OK");
   }
 

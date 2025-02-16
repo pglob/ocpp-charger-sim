@@ -524,4 +524,21 @@ public class OCPPWebSocketClientTest {
     Heartbeat beat2 = new Heartbeat();
     assertFalse(client.pushMessage(beat2));
   }
+
+  @Test
+  void testOfflineFunctionality() throws InterruptedException, OCPPMessageFailure {
+    doAnswer(invocation -> null).when(client).send(anyString());
+
+    client.goOffline();
+
+    Heartbeat beat = new Heartbeat();
+    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    beatResponse.setMessageID(beat.getMessageID());
+    client.pushMessage(new Heartbeat());
+    client.addPreviousMessage(beat);
+    client.onMessage(beatResponse.toJsonString());
+    client.popAllMessages();
+
+    verify(client, times(0)).send(anyString());
+  }
 }
