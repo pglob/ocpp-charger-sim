@@ -22,6 +22,8 @@ function ConfigGear() {
         }
       );
       if (!response.ok) {
+        setMessage('Failed to fetch configration values.');
+        setMessageType('error');
         throw new Error('Failed to fetch configuration');
       }
       const config = await response.json();
@@ -50,6 +52,8 @@ function ConfigGear() {
       );
 
       if (!response.ok) {
+        setMessage('Failed to update configuration.');
+        setMessageType('error');
         throw new Error('Failed to update configuration');
       }
     } catch (error) {
