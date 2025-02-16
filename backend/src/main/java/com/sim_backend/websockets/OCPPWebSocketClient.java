@@ -21,8 +21,6 @@ import java.net.URI;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +58,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
   /** The OCPP Message Queue. */
   private final MessageQueue queue = new MessageQueue();
-  
+
   /** Our online status */
   @Getter private boolean Online = true;
 
