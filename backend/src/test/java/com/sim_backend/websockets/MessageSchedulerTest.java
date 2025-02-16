@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.types.OCPPMessage;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
