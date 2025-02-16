@@ -128,6 +128,7 @@ public class MessageController extends ControllerBase {
     if (!checkWsClient(ctx)) return;
     if (!checkElec(ctx)) return;
     if (!checkTransactionHandler(ctx)) return;
+    charger.getWsClient().goOnline();
     ctx.result("OK");
   }
 
@@ -135,6 +136,7 @@ public class MessageController extends ControllerBase {
     if (!checkWsClient(ctx)) return;
     if (!checkElec(ctx)) return;
     if (!checkTransactionHandler(ctx)) return;
+    charger.getWsClient().goOffline();
     ctx.result("OK");
   }
 
@@ -188,10 +190,12 @@ public class MessageController extends ControllerBase {
   }
 
   public void getSentMessages(Context ctx) {
+    if (!checkWsClient(ctx)) return;
     ctx.json(charger.getWsClient().getSentMessages()); // Return sent messages as JSON
   }
 
   public void getReceivedMessages(Context ctx) {
+    if (!checkWsClient(ctx)) return;
     ctx.json(charger.getWsClient().getReceivedMessages()); // Return received messages as JSON
   }
 
@@ -223,6 +227,45 @@ public class MessageController extends ControllerBase {
     ctx.result(String.valueOf(charger.getElec().getCurrentImport()));
   }
 
+  public void getIdTagCSurl(Context ctx) {
+    String idTag = charger.getConfig().getIdTag();
+    String centralSystemUrl = charger.getConfig().getCentralSystemUrl();
+    String configString =
+        String.format("{\"idTag\":\"%s\", \"centralSystemUrl\":\"%s\"}", idTag, centralSystemUrl);
+    ctx.json(configString);
+  }
+
+  public void updateIdTagCSurl(Context ctx) {
+    String requestBody = ctx.body();
+    JsonObject json = JsonParser.parseString(requestBody).getAsJsonObject();
+
+    // Extract idTag and centralSystemUrl from the JSON body
+    String idTag = json.has("idTag") ? json.get("idTag").getAsString() : null;
+    String centralSystemUrl =
+        json.has("centralSystemUrl") ? json.get("centralSystemUrl").getAsString() : null;
+
+    // Check if either idTag or centralSystemUrl is null
+    if (idTag == null || centralSystemUrl == null) {
+      ctx.status(400).result("Error: Missing idTag or centralSystemUrl.");
+      return;
+    }
+
+    // Check if idTag exceeds the maximum length of 20 characters
+    if (idTag.length() > 20) {
+      ctx.status(400).result("Error: idTag cannot exceed 20 characters.");
+      return;
+    }
+
+    charger.getConfig().setIdTag(idTag);
+    charger.getConfig().setCentralSystemUrl(centralSystemUrl);
+
+    String successMessage =
+        String.format(
+            "Config updated successfully. idTag: %s, centralSystemUrl: %s",
+            idTag, centralSystemUrl);
+    ctx.status(200).result(successMessage);
+  }
+
   @Override
   public void registerRoutes(Javalin app) {
     app.post("/api/message/authorize", this::authorize);
@@ -246,5 +289,8 @@ public class MessageController extends ControllerBase {
     app.get("/api/electrical/meter-value", this::meterValue);
     app.get("/api/electrical/max-current", this::maxCurrent);
     app.get("/api/electrical/current-import", this::currentImport);
+
+    app.get("/api/get-idtag-csurl", this::getIdTagCSurl);
+    app.post("/api/update-idtag-csurl", this::updateIdTagCSurl);
   }
 }

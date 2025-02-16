@@ -59,6 +59,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** The OCPP Message Queue. */
   private final MessageQueue queue = new MessageQueue();
 
+  /** Our online status */
+  @Getter private boolean Online = true;
+
   /** Subscribe to when we receive an OCPP message. */
   @VisibleForTesting
   public final Map<Class<?>, CopyOnWriteArrayList<OnOCPPMessageListener>> onReceiveMessage =
@@ -85,7 +88,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     String timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
     String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
     txMessages.add(messageWithTimestamp);
-    if (txMessages.size() > 20) {
+    if (txMessages.size() > 50) {
       txMessages.remove(0);
     }
   }
@@ -100,7 +103,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     String modifiedMessage =
         message.replaceFirst("\\[", "[\"" + messageName + "\", \"" + timestamp + "\", ");
     rxMessages.add(modifiedMessage);
-    if (rxMessages.size() > 20) {
+    if (rxMessages.size() > 50) {
       rxMessages.remove(0);
     }
   }
@@ -150,6 +153,10 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   @Override
   public void onMessage(String s) {
+    if (!isOnline()) {
+      return;
+    }
+
     try {
       this.handleMessage(s);
     } catch (Exception exception) {
@@ -362,11 +369,17 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @return The Send OCPP Message.
    */
   public OCPPMessage popMessage() throws OCPPMessageFailure, InterruptedException {
+    if (!this.isOnline()) {
+      return null;
+    }
     return queue.popMessage(this);
   }
 
   /** Pop the entire send queue. */
   public void popAllMessages() throws OCPPMessageFailure, InterruptedException {
+    if (!this.isOnline()) {
+      return;
+    }
     queue.popAllMessages(this);
   }
 
@@ -386,5 +399,17 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   public void clearPreviousMessage(final OCPPMessage msg) {
     queue.clearPreviousMessage(msg);
+  }
+
+  /** Take the websocket client offline. */
+  public void goOffline() {
+    this.stopConnectionLostTimer();
+    this.Online = false;
+  }
+
+  /** Take our websocket client back online */
+  public void goOnline() {
+    this.startConnectionLostTimer();
+    this.Online = true;
   }
 }

@@ -173,6 +173,8 @@ public class MessageScheduler {
 
   /** Tick our scheduler to check for messages to be sent. */
   public void tick() {
+    if (!client.isOnline()) return;
+
     tasks.sort(Comparator.comparing(a -> a.time));
 
     ZonedDateTime currentTime = getTime().getSynchronizedTime();
