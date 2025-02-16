@@ -27,8 +27,8 @@ public class GetConfigurationObserver implements OnOCPPMessageListener {
   }
 
   /**
-   * Processes incoming GetConfiguration messages and handles the Registry Keys, Value data request and
-   * response.
+   * Processes incoming GetConfiguration messages and handles the Registry Keys, Value data request
+   * and response.
    *
    * @param message the received OCPP message, expected to be a GetConfiguration.
    * @throws ClassCastException if the message is not a GetConfiguration.
@@ -56,12 +56,12 @@ public class GetConfigurationObserver implements OnOCPPMessageListener {
           new GetConfigurationResponse.Configuration(
               "MeterValueSampleInterval",
               String.valueOf(registry.getMeterValueSampleInterval()),
-              true));
+              false));
       configurationInfo.add(
           new GetConfigurationResponse.Configuration(
               "MeterValuesSampledData",
               String.valueOf(registry.getMeterValuesSampledData()),
-              true));
+              false));
     } else {
       int count = 0;
       for (String key : request.getKey()) {

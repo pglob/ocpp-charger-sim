@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "GetConfiguration")
 public class GetConfiguration extends OCPPMessageRequest {
-  @NotEmpty(message = "ChangeConfiguration key is required")
+  @Size(max = 50, message = "GetConfiguration key must not exceed 50 characters")
   @SerializedName("key")
   private final List<String> key;
 

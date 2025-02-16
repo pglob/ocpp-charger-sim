@@ -57,4 +57,25 @@ public class GetConfigurationObserverTest {
     assert response.getUnknownKey().get(0).equals("Unknown1");
     assert response.getUnknownKey().get(1).equals("Unknown2");
   }
+
+  @Test
+  void testEmptyKeyGetConfiguration() {
+    GetConfiguration request = new GetConfiguration(null);
+
+    when(message.getMessage()).thenReturn(request);
+    observer.onMessageReceived(message);
+
+    ArgumentCaptor<GetConfigurationResponse> captor =
+        ArgumentCaptor.forClass(GetConfigurationResponse.class);
+    verify(client, times(1)).pushMessage(captor.capture());
+    GetConfigurationResponse response = captor.getValue();
+
+    System.out.println(response);
+
+    assert response.getConfigurationKey().size() == 2;
+    assert response.getConfigurationKey().get(0).getKey().equals("MeterValueSampleInterval");
+    assert response.getConfigurationKey().get(0).getValue().equals("30");
+    assert response.getConfigurationKey().get(1).getKey().equals("MeterValuesSampledData");
+    assert response.getConfigurationKey().get(1).getValue().equals("ENERGY_ACTIVE_IMPORT_REGISTER");
+  }
 }
