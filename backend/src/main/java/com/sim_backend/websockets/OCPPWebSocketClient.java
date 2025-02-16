@@ -60,10 +60,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
   /** The OCPP Message Queue. */
   private final MessageQueue queue = new MessageQueue();
-
-  /** Our received messages while offline */
-  private final Deque<String> offlineQueue = new LinkedList<>();
-
+  
   /** Our online status */
   @Getter private boolean Online = true;
 
@@ -159,7 +156,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
   @Override
   public void onMessage(String s) {
     if (!isOnline()) {
-      offlineQueue.add(s);
       return;
     }
 
@@ -417,9 +413,5 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public void goOnline() {
     this.startConnectionLostTimer();
     this.Online = true;
-
-    while (!offlineQueue.isEmpty()) {
-      this.onMessage(offlineQueue.poll());
-    }
   }
 }
