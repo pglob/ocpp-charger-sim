@@ -1,29 +1,47 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import App from '../App';
 
-beforeEach(() => {
-  global.fetch = jest.fn(() =>
-    Promise.resolve({
-      text: () => Promise.resolve('Hello from the backend!'), // Mocked response
-    })
-  );
-});
+describe('App component', () => {
+  // Ensure the backend URL is defined for testing
+  beforeAll(() => {
+    process.env.REACT_APP_BACKEND_URL = 'http://localhost:8080';
+  });
 
-afterEach(() => {
-  jest.clearAllMocks(); // Ensure mocks are reset after each test
-});
+  afterEach(() => {
+    jest.clearAllMocks(); // Reset mocks after each test
+  });
 
-describe('dummy test for App.js', () => {
-  it('should display the message from the backend', async () => {
+  it('displays an error message when backend response is not "Ok"', async () => {
+    // Mock fetch to simulate a backend response that is not "Ok"
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      text: jest.fn().mockResolvedValue('Hello from the backend!'),
+    });
+
     render(<App />);
 
-    // Wait for the expected text to appear
+    // Wait for the error message to appear
+    const errorMessage = await waitFor(() => screen.getByTestId('message'));
+
+    expect(errorMessage).toHaveTextContent(
+      `ERROR: Backend at ${process.env.REACT_APP_BACKEND_URL} was not reachable`
+    );
+  });
+
+  it('does not display an error message when backend returns "Ok"', async () => {
+    // Mock fetch to simulate a successful backend response ("Ok")
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      text: jest.fn().mockResolvedValue('Ok'),
+    });
+
+    render(<App />);
+
+    // Wait to ensure that if an error message were to appear it would be caught.
     await waitFor(() => {
-      const messageElement = screen.getByTestId('message');
-      expect(messageElement.textContent).toBe(
-        'Message from backend: Hello from the backend!'
-      );
+      expect(screen.queryByTestId('message')).not.toBeInTheDocument();
     });
   });
 });

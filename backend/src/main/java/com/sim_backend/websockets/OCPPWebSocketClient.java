@@ -18,6 +18,9 @@ import com.sim_backend.websockets.exceptions.OCPPUnsupportedProtocol;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Map;
@@ -75,6 +78,59 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** The headers we send with our Websocket connection */
   public static final Map<String, String> headers = Map.of("Sec-WebSocket-Protocol", "ocpp1.6");
 
+  /** List to store transmitted messages. */
+  private final List<String> txMessages = new CopyOnWriteArrayList<>();
+
+  /** List to store received messages. */
+  private final List<String> rxMessages = new CopyOnWriteArrayList<>();
+
+  /**
+   * Record a transmitted message.
+   *
+   * @param message The transmitted message.
+   */
+  public void recordTxMessage(String message) {
+    String timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
+    String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
+    txMessages.add(messageWithTimestamp);
+    if (txMessages.size() > 50) {
+      txMessages.remove(0);
+    }
+  }
+
+  /**
+   * Record a received message.
+   *
+   * @param message The received message.
+   */
+  public void recordRxMessage(String message, String messageName) {
+    String timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
+    String modifiedMessage =
+        message.replaceFirst("\\[", "[\"" + messageName + "\", \"" + timestamp + "\", ");
+    rxMessages.add(modifiedMessage);
+    if (rxMessages.size() > 50) {
+      rxMessages.remove(0);
+    }
+  }
+
+  /**
+   * Get the list of transmitted messages.
+   *
+   * @return List of transmitted messages.
+   */
+  public List<String> getSentMessages() {
+    return txMessages;
+  }
+
+  /**
+   * Get the list of received messages.
+   *
+   * @return List of received messages.
+   */
+  public List<String> getReceivedMessages() {
+    return rxMessages;
+  }
+
   /**
    * Create an OCPP WebSocket Client.
    *
@@ -131,6 +187,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     JsonArray array = element.getAsJsonArray();
     String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
     String messageName = "";
+    String messageType = "";
     JsonObject data;
 
     int callId = array.get(CALL_ID_INDEX).getAsInt();
@@ -151,6 +208,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
         this.queue.clearPreviousMessage(prevMessage);
         OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
         messageName = info.messageName() + "Response";
+        messageType = info.messageName();
+        this.recordRxMessage(s, messageType);
         data = array.get(PAYLOAD_INDEX - 1).getAsJsonObject();
       }
       case OCPPMessage.CALL_ID_ERROR -> {
@@ -165,6 +224,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
         error.setErroredMessage(prevMessage);
         this.handleReceivedMessage(OCPPMessageError.class, error);
         log.warn("Received OCPPError {}", error.toString());
+        OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
+        messageType = info.messageName();
+        this.recordRxMessage(s, messageType);
         return;
       }
       default -> throw new OCPPBadCallID(callId, s);
@@ -276,6 +338,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message the message to be sent.
    */
   public boolean pushMessage(final OCPPMessage message) {
+    recordTxMessage(message.toJsonString()); // Record transmitted message
     return queue.pushMessage(message);
   }
 

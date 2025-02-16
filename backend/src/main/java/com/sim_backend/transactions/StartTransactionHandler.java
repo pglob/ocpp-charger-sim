@@ -1,14 +1,16 @@
 package com.sim_backend.transactions;
 
-import com.sim_backend.state.IllegalStateException;
-import com.sim_backend.state.SimulatorState;
-import com.sim_backend.state.SimulatorStateMachine;
+import com.sim_backend.electrical.ElectricalTransition;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.*;
 import com.sim_backend.websockets.messages.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 
 /*
@@ -17,73 +19,45 @@ import lombok.Getter;
  */
 @Getter
 public class StartTransactionHandler {
-  private SimulatorStateMachine stateMachine;
+  private ChargerStateMachine stateMachine;
   private OCPPWebSocketClient client;
+  private int transactionId;
 
   // Constructor
-  public StartTransactionHandler(SimulatorStateMachine stateMachine, OCPPWebSocketClient client) {
+  public StartTransactionHandler(ChargerStateMachine stateMachine, OCPPWebSocketClient client) {
     this.stateMachine = stateMachine;
     this.client = client;
+    this.transactionId = -1;
   }
 
   /**
-   * Authorization Process before Start Transaction When Authorize is accepted, change a
-   * stateMachine status to Preparing Stays Available otherwise
-   *
-   * @param connectorId ID of the connector
-   * @param idTag ID of the user
-   * @throws IllegalStateException if stateMachine status is not available
-   */
-  public void preAuthorize(int connectorId, String idTag) {
-    if (stateMachine.getCurrentState() != SimulatorState.Available) {
-      throw new IllegalStateException(
-          "Cannot start with the current state. current state: " + stateMachine.getCurrentState());
-    }
-
-    Authorize authorizeMessage = new Authorize(idTag);
-    client.pushMessage(authorizeMessage);
-
-    client.onReceiveMessage(
-        AuthorizeResponse.class,
-        message -> {
-          if (!(message.getMessage() instanceof AuthorizeResponse response)) {
-            throw new ClassCastException("Message is not an AuthorizeResponse");
-          }
-          if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
-            System.out.println("Authorization Accepted...");
-            System.out.println("Proceeding Transaction...");
-            stateMachine.transition(SimulatorState.Preparing);
-          } else {
-            System.err.println(
-                "Authorize Denied... Status : " + response.getIdTagInfo().getStatus());
-          }
-        });
-  }
-
-  /**
-   * Initiate Start Transaction Handling StartTransaction Request, Response and simulator status If
+   * Initiate Start Transaction Handling StartTransaction Request, Response and charger status If
    * authorization is accepted, change a stateMachine status to Charging Switch to Available
    * otherwise
    *
    * @param connectorId ID of connector
-   * @param connectorId ID of user
-   * @param meterStart initial value of meter
+   * @param idTag ID of user
+   * @param transactionId AtomicInteger used to pass the transactionId back to the
+   *     TransactionHandler
+   * @param elec ElectricalTransition for retrieving meter values
+   * @param stopInProgress AtomicBoolean to prevent initiateStopTransaction from running more than
+   *     once
    */
-  public void initiateStartTransaction(int connectorId, String idTag) {
+  public void initiateStartTransaction(
+      int connectorId,
+      String idTag,
+      AtomicInteger transactionId,
+      ElectricalTransition elec,
+      AtomicBoolean startInProgress) {
 
-    /*
-     * TODO : Swap meterStart value
-     */
-    int meterStart = 0;
+    // Convert from KWh to Wh
+    int meterStart = (int) (elec.getEnergyActiveImportRegister() * 1000.0f);
 
     OCPPTime ocppTime = client.getScheduler().getTime();
     ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
     String timestamp = zonetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
 
     StartTransaction startTransactionMessage =
-        /*
-         * TODO : Change temp arguments to meterStart
-         */
         new StartTransaction(connectorId, idTag, meterStart, timestamp);
     client.pushMessage(startTransactionMessage);
 
@@ -93,14 +67,17 @@ public class StartTransactionHandler {
           if (!(message.getMessage() instanceof StartTransactionResponse response)) {
             throw new ClassCastException("Message is not an StartTransactionResponse");
           }
-          if (response.getIdTaginfo().getStatus() == AuthorizationStatus.ACCEPTED) {
+          if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
+            transactionId.set(response.getTransactionId());
             System.out.println(
-                "Transaction Completed... Transaction Id : " + response.getTransactionId());
-            stateMachine.transition(SimulatorState.Charging);
+                "Start Transaction Completed... Transaction Id : " + response.getTransactionId());
+            stateMachine.transition(ChargerState.Charging);
           } else {
-            System.err.println("Transaction Failed...");
-            stateMachine.transition(SimulatorState.Available);
+            System.err.println("Transaction Failed to Start...");
+            stateMachine.transition(ChargerState.Available);
           }
+          client.clearOnReceiveMessage(StartTransactionResponse.class);
+          startInProgress.set(false);
         });
   }
 }

@@ -1,4 +1,4 @@
-package com.sim_backend;
+package com.sim_backend.config;
 
 import com.sim_backend.websockets.constants.BootNotificationConstants;
 import com.sim_backend.websockets.enums.MeterValuesSampledData;
@@ -7,19 +7,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Config Registry holds configuration and identification for the charge point and its simulator
+ * Config Registry holds configuration and identification for the simulated charge point and its
  * state.
  */
 @AllArgsConstructor
 @Getter
 @Setter
 public class ConfigurationRegistry {
-
-  /** ChangeConfiguration authorization key */
-  private String authKey;
-
-  /** ChangeConfiguration authorization key value */
-  private String authKeyValue;
 
   /** Authorize response id tag */
   private String idTag;
@@ -58,10 +52,12 @@ public class ConfigurationRegistry {
   /** A sample meter value interval. */
   private int MeterValueSampleInterval = 30;
 
-  /** Authorization Enable check. */
-  boolean AuthEnabled = true;
-
   /** Sample meter value data. */
   private MeterValuesSampledData meterValuesSampledData =
       MeterValuesSampledData.ENERGY_ACTIVE_IMPORT_REGISTER;
+
+  public ConfigurationRegistry(String idTag, String centralSystemUrl) {
+    this.idTag = idTag;
+    this.centralSystemUrl = centralSystemUrl;
+  }
 }

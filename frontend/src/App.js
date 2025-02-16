@@ -1,23 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import ChargerFrame from './components/ChargerFrame';
+import ShowLogMessages from './components/ShowLogMessage';
+import './styles/styles.css';
 
 function App() {
-  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState('loading');
 
-  // Hook to fetch data from backend when the component mounts
   useEffect(() => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/test`)
-      .then((response) => response.text())
-      .then((data) => setMessage(data))
-      .catch((error) => console.error('Error fetching test message:', error));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.text();
+      })
+      .then((data) => {
+        if (data === 'Ok') {
+          setStatus('success');
+        } else {
+          setStatus('failure');
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching test message:', error);
+        setStatus('failure');
+      });
   }, []);
 
-  // Render the component
   return (
     <div>
-      <h1>Frontend</h1>
-      <p data-testid="message">Message from backend: {message}</p>
-      <ChargerFrame />
+      <h1>OCPP Charger Simulator</h1>
+      {status === 'failure' && (
+        <b data-testid="message">
+          ERROR: Backend at {process.env.REACT_APP_BACKEND_URL} was not
+          reachable
+        </b>
+      )}
+      <div className="charger-frames-container">
+        <div>
+          <ChargerFrame />
+          <ShowLogMessages />
+        </div>
+      </div>
     </div>
   );
 }
