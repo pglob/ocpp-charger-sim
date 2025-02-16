@@ -100,7 +100,7 @@ public class SetChargingProfile {
     private List<ChargingSchedulePeriod> chargingSchedulePeriod;
 
     /** Minimum allowed charging rate. */
-    @SerializedName("status")
+    @SerializedName("minChargingRate")
     private Double minChargingRate;
   }
 
