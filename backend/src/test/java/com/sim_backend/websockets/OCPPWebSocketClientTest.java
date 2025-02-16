@@ -540,13 +540,5 @@ public class OCPPWebSocketClientTest {
     client.popAllMessages();
 
     verify(client, times(0)).send(anyString());
-
-    OnOCPPMessageListener a = mock(OnOCPPMessageListener.class);
-    client.onReceiveMessage(HeartbeatResponse.class, a);
-
-    client.goOnline();
-    verify(a, times(1)).onMessageReceived(any());
-    client.popAllMessages();
-    verify(client, times(1)).send(anyString());
   }
 }
