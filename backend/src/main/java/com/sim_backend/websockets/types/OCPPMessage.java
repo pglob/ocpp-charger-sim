@@ -2,6 +2,7 @@ package com.sim_backend.websockets.types;
 
 import static com.sim_backend.websockets.OCPPWebSocketClient.MESSAGE_PACKAGE;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.OCPPWebSocketClient;
@@ -76,9 +77,12 @@ public abstract class OCPPMessage {
     return UUID.randomUUID().toString();
   }
 
-  /** Refreshes a message, resetting its message ID to something new. */
-  public void refreshMessage() {
-    this.messageID = generateMessageID();
+  /** Deep clones a message using gson. */
+  public OCPPMessage cloneMessage() {
+    Gson gson = GsonUtilities.getGson();
+    OCPPMessage message = gson.fromJson(gson.toJsonTree(this), this.getClass());
+    message.setMessageID(generateMessageID());
+    return message;
   }
 
   /**

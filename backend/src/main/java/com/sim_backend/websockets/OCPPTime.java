@@ -26,7 +26,7 @@ public class OCPPTime implements AutoCloseable {
   private final AtomicReference<Duration> offset = new AtomicReference<>(Duration.ZERO);
 
   /** Our heartbeat job. */
-  private OCPPRepeatingTimedTask heartbeat;
+  @VisibleForTesting OCPPRepeatingTimedTask heartbeat;
 
   /**
    * Our set heartbeat interval, we don't want this too common but every 4 minutes should be enough.
@@ -41,9 +41,15 @@ public class OCPPTime implements AutoCloseable {
   final OnOCPPMessageListener listener =
       message -> {
         HeartbeatResponse response = (HeartbeatResponse) message.getMessage();
-        if (heartbeat != null
-            && !heartbeat.message.getMessageID().equals(response.getMessageID())) {
-          log.error(String.format("Received old message ID %s", response.getMessageID()));
+        if (this.heartbeat == null) {
+          log.error("Received HeartbeatResponse with no Heartbeat.");
+          return;
+        }
+
+        if (!this.heartbeat.message.getMessageID().equals(response.getMessageID())) {
+          log.error(
+              String.format(
+                  "Heartbeat listener received old message ID %s", response.getMessageID()));
           client.pushMessage(
               new OCPPMessageError(
                   ErrorCode.ProtocolError,

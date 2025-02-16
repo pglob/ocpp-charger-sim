@@ -22,7 +22,7 @@ public class OCPPMessageTest {
   void testGenerateID() {
     OCPPMessage message = new Heartbeat();
     String id = message.getMessageID();
-    message.refreshMessage();
-    assertNotEquals(message.getMessageID(), id);
+    OCPPMessage cloned = message.cloneMessage();
+    assertNotEquals(cloned.getMessageID(), id);
   }
 }
