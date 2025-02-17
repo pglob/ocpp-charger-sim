@@ -1,5 +1,6 @@
 package com.sim_backend.websockets;
 
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
@@ -7,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +41,10 @@ public class MessageQueue {
   private final Map<String, TimedMessage> previousMessages = new ConcurrentHashMap<>();
 
   /** The OCPP Message Queue. */
-  private final Deque<OCPPMessage> queue = new LinkedList<>();
+  @Getter private final Deque<OCPPMessage> queue = new LinkedList<>();
 
   /** Unique hashes to check for uniqueness */
-  private final Set<OCPPMessage> queueSet = new HashSet<>();
+  @Getter private final Set<OCPPMessage> queueSet = new HashSet<>();
 
   /** Create an OCPPMessage Queue. */
   public MessageQueue() {}
@@ -88,6 +90,9 @@ public class MessageQueue {
    */
   public OCPPMessage popMessage(final OCPPWebSocketClient client)
       throws OCPPMessageFailure, InterruptedException {
+    // Before sending a new message, check for any timed-out previous messages
+    checkTimeouts(client);
+
     OCPPMessage message = queue.poll();
     if (message != null) {
       if (message instanceof OCPPMessageRequest && isBusy()) {
@@ -173,5 +178,76 @@ public class MessageQueue {
     if (msg instanceof OCPPMessageRequest) {
       this.previousMessages.remove(msg.getMessageID());
     }
+  }
+
+  /**
+   * Check for any timed-out previous messages and call onTimeout() on their associated listeners.
+   *
+   * @param client The OCPPWebSocketClient instance.
+   */
+  public void checkTimeouts(OCPPWebSocketClient client) {
+    Instant now = Instant.now();
+    Iterator<Map.Entry<String, TimedMessage>> iterator = previousMessages.entrySet().iterator();
+
+    while (iterator.hasNext()) {
+      Map.Entry<String, TimedMessage> entry = iterator.next();
+      TimedMessage timedMessage = entry.getValue();
+      Duration duration = Duration.between(timedMessage.timestamp, now);
+
+      if (duration.getSeconds() > RESPONSE_TIME_OUT) {
+        // Map the timed-out message to its complementary message.
+        Class<?> complementClass;
+        try {
+          complementClass = getComplementMessageClass(timedMessage.message.getClass());
+        } catch (ClassNotFoundException e) {
+          e.printStackTrace();
+          continue;
+        }
+
+        // Notify all listeners registered for the complementary message type.
+        if (client.onReceiveMessage.containsKey(complementClass)) {
+          for (var listener : client.onReceiveMessage.get(complementClass)) {
+            listener.onTimeout();
+          }
+        }
+        // Remove the timed-out message.
+        iterator.remove();
+      }
+    }
+  }
+
+  /**
+   * Finds the complementary class for a given message. For example Heartbeat -> HeartbeatResponse
+   * and HeartbeatResponse -> Heartbeat.
+   *
+   * @param messageClass The class to "invert"
+   */
+  private Class<?> getComplementMessageClass(Class<?> messageClass) throws ClassNotFoundException {
+    OCPPMessageInfo info = messageClass.getAnnotation(OCPPMessageInfo.class);
+    if (info == null) {
+      throw new ClassNotFoundException(
+          messageClass.toString() + " annotation not defined correctly");
+    }
+
+    // For a request, add "Response" to the message name
+    if (info.messageCallID() == OCPPMessage.CALL_ID_REQUEST) {
+      String responseName = info.messageName() + "Response";
+      Class<?> complement = OCPPMessage.getMessageByName(responseName);
+      if (complement != null) {
+        return complement;
+      }
+    }
+    // For a response, remove "Response" from the message name
+    else if (info.messageCallID() == OCPPMessage.CALL_ID_RESPONSE) {
+      String reqName = info.messageName();
+      reqName = reqName.substring(0, reqName.length() - "Response".length());
+      Class<?> complement = OCPPMessage.getMessageByName(reqName);
+      if (complement != null) {
+        return complement;
+      }
+    }
+
+    // This class is not setup correctly
+    throw new ClassNotFoundException(messageClass.toString() + " is missing its complement");
   }
 }
