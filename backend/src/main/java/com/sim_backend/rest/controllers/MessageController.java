@@ -48,6 +48,14 @@ public class MessageController extends ControllerBase {
     return true;
   }
 
+  private boolean checkStateMachine(Context ctx) {
+    if (charger.getStateMachine() == null) {
+      ctx.status(503).result("Charger is rebooting");
+      return false;
+    }
+    return true;
+  }
+
   private boolean checkElec(Context ctx) {
     if (charger.getElec() == null) {
       ctx.status(503).result("Charger is rebooting");
@@ -103,12 +111,17 @@ public class MessageController extends ControllerBase {
   }
 
   public void state(Context ctx) {
+    if (!checkWsClient(ctx)) return;
+    if (!checkStateMachine(ctx)) return;
+
     ChargerStateMachine stateMachine = charger.getStateMachine();
     if (stateMachine == null) {
       ctx.result("PoweredOff");
       return;
     }
-    ctx.result(stateMachine.getCurrentState().toString());
+    String offlineState = charger.getWsClient().isOnline() ? "" : " (Offline)";
+
+    ctx.result(stateMachine.getCurrentState().toString() + offlineState);
   }
 
   public void reboot(Context ctx) {
@@ -126,16 +139,14 @@ public class MessageController extends ControllerBase {
 
   public void online(Context ctx) {
     if (!checkWsClient(ctx)) return;
-    if (!checkElec(ctx)) return;
-    if (!checkTransactionHandler(ctx)) return;
+
     charger.getWsClient().goOnline();
     ctx.result("OK");
   }
 
   public void offline(Context ctx) {
     if (!checkWsClient(ctx)) return;
-    if (!checkElec(ctx)) return;
-    if (!checkTransactionHandler(ctx)) return;
+
     charger.getWsClient().goOffline();
     ctx.result("OK");
   }

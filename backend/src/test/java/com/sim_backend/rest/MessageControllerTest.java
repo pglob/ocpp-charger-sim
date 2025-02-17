@@ -97,12 +97,26 @@ class MessageControllerTest {
   void testState() {
     // Arrange
     when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.PoweredOff);
+    when(mockWsClient.isOnline()).thenReturn(true);
 
     // Act
     messageController.state(mockContext);
 
     // Assert
     verify(mockContext).result("PoweredOff");
+  }
+
+  @Test
+  void testStateOffline() {
+    // Arrange
+    when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.PoweredOff);
+    when(mockWsClient.isOnline()).thenReturn(false);
+
+    // Act
+    messageController.state(mockContext);
+
+    // Assert
+    verify(mockContext).result("PoweredOff (Offline)");
   }
 
   @Test
