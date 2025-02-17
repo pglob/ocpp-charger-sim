@@ -6,6 +6,8 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.AuthorizationStatus;
+import com.sim_backend.websockets.events.OnOCPPMessage;
+import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.AuthorizeResponse;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,7 +36,7 @@ public class TransactionHandler {
   /** The ElectricalTransition instance tracking charging parameters */
   private ElectricalTransition elec;
 
-  /** The charger's current idTa */
+  /** The charger's current idTag */
   private String idTag;
 
   /** The current transaction id */
@@ -75,35 +77,48 @@ public class TransactionHandler {
     Authorize authorizeMessage = new Authorize(idTag);
     client.pushMessage(authorizeMessage);
 
-    client.onReceiveMessage(
-        AuthorizeResponse.class,
-        message -> {
-          if (!(message.getMessage() instanceof AuthorizeResponse response)) {
-            throw new ClassCastException("Message is not an AuthorizeResponse");
-          }
-
-          if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
-            System.out.println("Authorization Accepted...");
-            System.out.println("Proceeding with Transaction...");
-            if (stateMachine.getCurrentState() == ChargerState.Preparing) {
-              startHandler.initiateStartTransaction(
-                  connectorId, idTag, transactionId, elec, startInProgress);
-              this.idTag = idTag;
-            } else if (stateMachine.getCurrentState() == ChargerState.Charging) {
-              stopHandler.initiateStopTransaction(transactionId.get(), idTag, elec, stopInProgress);
+    final OnOCPPMessageListener listener =
+        new OnOCPPMessageListener() {
+          @Override
+          public void onMessageReceived(OnOCPPMessage message) {
+            client.deleteOnReceiveMessage(AuthorizeResponse.class, this);
+            if (!(message.getMessage() instanceof AuthorizeResponse response)) {
+              throw new ClassCastException("Message is not an AuthorizeResponse");
+            }
+            if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
+              System.out.println("Authorization Accepted...");
+              System.out.println("Proceeding with Transaction...");
+              if (stateMachine.getCurrentState() == ChargerState.Preparing) {
+                startHandler.initiateStartTransaction(
+                    connectorId, idTag, transactionId, elec, startInProgress);
+                TransactionHandler.this.idTag = idTag;
+              } else if (stateMachine.getCurrentState() == ChargerState.Charging) {
+                stopHandler.initiateStopTransaction(
+                    transactionId.get(), idTag, elec, stopInProgress);
+              } else {
+                System.err.println(
+                    "Invalid State Detected... Current State: " + stateMachine.getCurrentState());
+              }
             } else {
               System.err.println(
-                  "Invalid State Detected... Current State: " + stateMachine.getCurrentState());
+                  "Authorize Denied... Status: " + response.getIdTagInfo().getStatus());
+              startInProgress.set(false);
+              stopInProgress.set(false);
+              stateMachine.transition(ChargerState.Available);
             }
-          } else {
-            System.err.println(
-                "Authorize Denied... Status: " + response.getIdTagInfo().getStatus());
+          }
+
+          @Override
+          public void onTimeout() {
+            client.deleteOnReceiveMessage(AuthorizeResponse.class, this);
+            System.err.println("Authorization timeout. Resetting transaction state.");
             startInProgress.set(false);
             stopInProgress.set(false);
             stateMachine.transition(ChargerState.Available);
           }
-          client.clearOnReceiveMessage(AuthorizeResponse.class);
-        });
+        };
+
+    client.onReceiveMessage(AuthorizeResponse.class, listener);
   }
 
   /**
@@ -155,7 +170,5 @@ public class TransactionHandler {
     } else {
       preAuthorize(-1, idTag);
     }
-
-    transactionId.set(-1);
   }
 }
