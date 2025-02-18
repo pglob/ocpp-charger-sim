@@ -168,7 +168,10 @@ public class MessageController extends ControllerBase {
       String info = json.has("info") ? json.get("info").getAsString().trim() : null;
       if (info != null && info.isEmpty()) info = null;
 
-      ZonedDateTime timestamp = json.has("timestamp") ? ZonedDateTime.now() : null;
+      ZonedDateTime timestamp =
+          json.has("timestamp")
+              ? charger.getWsClient().getScheduler().getTime().getSynchronizedTime()
+              : null;
 
       String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString().trim() : null;
       if (vendorId != null && vendorId.isEmpty()) vendorId = null;

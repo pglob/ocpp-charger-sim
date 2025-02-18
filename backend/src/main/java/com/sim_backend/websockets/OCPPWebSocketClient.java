@@ -57,7 +57,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public static final String MESSAGE_PACKAGE = "com.sim_backend.websockets.messages";
 
   /** The OCPP Message Queue. */
-  private final MessageQueue queue = new MessageQueue();
+  @Getter final MessageQueue queue = new MessageQueue();
 
   /** Our online status */
   @Getter private boolean Online = true;
@@ -334,6 +334,16 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public boolean pushMessage(final OCPPMessage message) {
     recordTxMessage(message.toJsonString()); // Record transmitted message
     return queue.pushMessage(message);
+  }
+
+  /**
+   * Add a OCPPMessage to the front of our send queue.
+   *
+   * @param prioMessage the message to be sent.
+   */
+  public boolean pushPriorityMessage(final OCPPMessage prioMessage) {
+    recordTxMessage(prioMessage.toJsonString());
+    return queue.pushPriorityMessage(prioMessage);
   }
 
   /**

@@ -5,8 +5,11 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
-import com.sim_backend.websockets.enums.*;
-import com.sim_backend.websockets.messages.*;
+import com.sim_backend.websockets.enums.AuthorizationStatus;
+import com.sim_backend.websockets.events.OnOCPPMessage;
+import com.sim_backend.websockets.events.OnOCPPMessageListener;
+import com.sim_backend.websockets.messages.StartTransaction;
+import com.sim_backend.websockets.messages.StartTransactionResponse;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,15 +35,15 @@ public class StartTransactionHandler {
 
   /**
    * Initiate Start Transaction Handling StartTransaction Request, Response and charger status If
-   * authorization is accepted, change a stateMachine status to Charging Switch to Available
-   * otherwise
+   * authorization is accepted, change a stateMachine status to Charging. Switch to Available
+   * otherwise.
    *
    * @param connectorId ID of connector
    * @param idTag ID of user
    * @param transactionId AtomicInteger used to pass the transactionId back to the
    *     TransactionHandler
    * @param elec ElectricalTransition for retrieving meter values
-   * @param stopInProgress AtomicBoolean to prevent initiateStopTransaction from running more than
+   * @param startInProgress AtomicBoolean to prevent initiateStartTransaction from running more than
    *     once
    */
   public void initiateStartTransaction(
@@ -61,23 +64,35 @@ public class StartTransactionHandler {
         new StartTransaction(connectorId, idTag, meterStart, timestamp);
     client.pushMessage(startTransactionMessage);
 
-    client.onReceiveMessage(
-        StartTransactionResponse.class,
-        message -> {
-          if (!(message.getMessage() instanceof StartTransactionResponse response)) {
-            throw new ClassCastException("Message is not an StartTransactionResponse");
+    final OnOCPPMessageListener listener =
+        new OnOCPPMessageListener() {
+          @Override
+          public void onMessageReceived(OnOCPPMessage message) {
+            client.deleteOnReceiveMessage(StartTransactionResponse.class, this);
+            if (!(message.getMessage() instanceof StartTransactionResponse response)) {
+              throw new ClassCastException("Message is not a StartTransactionResponse");
+            }
+            if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
+              transactionId.set(response.getTransactionId());
+              System.out.println(
+                  "Start Transaction Completed... Transaction Id : " + response.getTransactionId());
+              stateMachine.transition(ChargerState.Charging);
+            } else {
+              System.err.println("Transaction Failed to Start...");
+              stateMachine.transition(ChargerState.Available);
+            }
+            startInProgress.set(false);
           }
-          if (response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED) {
-            transactionId.set(response.getTransactionId());
-            System.out.println(
-                "Start Transaction Completed... Transaction Id : " + response.getTransactionId());
-            stateMachine.transition(ChargerState.Charging);
-          } else {
-            System.err.println("Transaction Failed to Start...");
+
+          @Override
+          public void onTimeout() {
+            client.deleteOnReceiveMessage(StartTransactionResponse.class, this);
+            System.err.println("Start Transaction timeout. Resetting transaction state.");
+            startInProgress.set(false);
             stateMachine.transition(ChargerState.Available);
           }
-          client.clearOnReceiveMessage(StartTransactionResponse.class);
-          startInProgress.set(false);
-        });
+        };
+
+    client.onReceiveMessage(StartTransactionResponse.class, listener);
   }
 }
