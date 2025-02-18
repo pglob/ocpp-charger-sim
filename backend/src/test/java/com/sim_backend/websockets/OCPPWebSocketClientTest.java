@@ -12,8 +12,12 @@ import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.*;
 import com.sim_backend.websockets.messages.*;
 import com.sim_backend.websockets.types.OCPPMessageError;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -540,6 +544,101 @@ public class OCPPWebSocketClientTest {
     client.popAllMessages();
 
     verify(client, times(0)).send(anyString());
+  }
+
+  @Test
+  public void testPushPriorityMessageSuccess() {
+    // Clear the internal queue for a clean start
+    client.queue.getQueue().clear();
+    client.queue.getQueueSet().clear();
+
+    // Start the queue with a single message
+    client.pushMessage(new BootNotification());
+
+    int initialTxMessages = client.getSentMessages().size();
+    Heartbeat heartbeat = new Heartbeat();
+
+    // Push a priority message; should return true
+    boolean result = client.pushPriorityMessage(heartbeat);
+    assertTrue(result, "Push priority message should return true when message is not in the queue");
+
+    // Verify the message is now at the front of the queue
+    assertFalse(client.isEmpty(), "Queue should not be empty after push");
+    assertEquals(
+        heartbeat,
+        client.queue.getQueue().peekFirst(),
+        "Priority message should be at the front of the queue");
+    assertTrue(
+        client.queue.getQueueSet().contains(heartbeat),
+        "Queue set should contain the pushed message");
+
+    // Verify that the message was recorded in the transmitted messages list
+    assertEquals(
+        initialTxMessages + 1,
+        client.getSentMessages().size(),
+        "A transmitted message should be recorded");
+  }
+
+  @Test
+  public void testPushPriorityMessageDuplicate() {
+    // Clear the internal queue for a clean start
+    client.queue.getQueue().clear();
+    client.queue.getQueueSet().clear();
+
+    Heartbeat heartbeat = new Heartbeat();
+
+    // First push should succeed
+    boolean firstPush = client.pushPriorityMessage(heartbeat);
+    assertTrue(firstPush, "First push priority message should succeed");
+
+    // Attempting to push the same message again should fail
+    boolean secondPush = client.pushPriorityMessage(heartbeat);
+    assertFalse(secondPush, "Duplicate push priority message should return false");
+
+    // The queue should only contain one instance of the message
+    assertEquals(
+        1,
+        client.queue.getQueue().size(),
+        "Queue should contain only one message after duplicate push attempt");
+  }
+
+  @Test
+  public void testCheckTimeouts() throws Exception {
+    // Create a Heartbeat message that will be timed out
+    Heartbeat heartbeat = new Heartbeat();
+    String testMsgId = "timeout-test";
+    heartbeat.setMessageID(testMsgId);
+
+    // Get the MessageQueue from our client
+    OCPPWebSocketClient client = new OCPPWebSocketClient(new java.net.URI("ws://dummy"));
+
+    // Access previousMessages
+    Field previousMessagesField = MessageQueue.class.getDeclaredField("previousMessages");
+    previousMessagesField.setAccessible(true);
+    @SuppressWarnings("unchecked")
+    Map<String, MessageQueue.TimedMessage> previousMessages =
+        (Map<String, MessageQueue.TimedMessage>) previousMessagesField.get(client.getQueue());
+
+    // Insert the message with a timestamp older than RESPONSE_TIME_OUT seconds
+    MessageQueue.TimedMessage timedMessage =
+        new MessageQueue.TimedMessage(
+            heartbeat, Instant.now().minus(Duration.ofSeconds(MessageQueue.RESPONSE_TIME_OUT + 5)));
+    previousMessages.put(heartbeat.getMessageID(), timedMessage);
+
+    // Register a listener for the complementary message type
+    OnOCPPMessageListener listener = mock(OnOCPPMessageListener.class);
+    client.onReceiveMessage(HeartbeatResponse.class, listener);
+
+    // Call checkTimeouts, which should trigger onTimeout() for the listener
+    client.getQueue().checkTimeouts(client);
+
+    // Verify that the onTimeout method was called once.
+    verify(listener, times(1)).onTimeout();
+
+    // Verify that the timed-out message was removed from previousMessages
+    assertFalse(
+        previousMessages.containsKey(testMsgId),
+        "Timed-out message should be removed from previousMessages");
   }
 
   @Test

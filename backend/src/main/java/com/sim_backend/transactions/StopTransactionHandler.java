@@ -5,8 +5,7 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
-import com.sim_backend.websockets.enums.*;
-import com.sim_backend.websockets.messages.*;
+import com.sim_backend.websockets.messages.StopTransaction;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,7 +27,7 @@ public class StopTransactionHandler {
   }
 
   /**
-   * Initiate StopTransaction, handles StopTransaction requests, responses and charger status
+   * Initiate StopTransaction, handles StopTransaction requests, responses and charger status.
    *
    * @param transactionId transactionId from StartTransaction
    * @param idTag id of user
@@ -50,17 +49,8 @@ public class StopTransactionHandler {
         new StopTransaction(idTag, transactionId, meterStop, timestamp);
     client.pushMessage(stopTransactionMessage);
 
-    client.onReceiveMessage(
-        StopTransactionResponse.class,
-        message -> {
-          if (!(message.getMessage() instanceof StopTransactionResponse)) {
-            throw new ClassCastException("Message is not a StopTransactionResponse");
-          }
-          // The central system cannot prevent a StopTransaction
-          System.out.println("Stop Transaction Completed...");
-          stateMachine.transition(ChargerState.Available);
-          client.clearOnReceiveMessage(StopTransactionResponse.class);
-          stopInProgress.set(false);
-        });
+    // No listener is used here since a Central System cannot prevent a transaction from stopping
+    System.out.println("Stop Transaction Completed...");
+    stateMachine.transition(ChargerState.Available);
   }
 }
