@@ -65,6 +65,21 @@ public class MessageQueue {
   }
 
   /**
+   * Add a OCPPMessage to the front of our send queue.
+   *
+   * @param prioMessage the message to be sent.
+   */
+  public boolean pushPriorityMessage(final OCPPMessage prioMessage) {
+    if (queueSet.contains(prioMessage)) {
+      return false;
+    }
+
+    queue.addFirst(prioMessage);
+    queueSet.add(prioMessage);
+    return true;
+  }
+
+  /**
    * Return the size of the send queue.
    *
    * @return size in int.

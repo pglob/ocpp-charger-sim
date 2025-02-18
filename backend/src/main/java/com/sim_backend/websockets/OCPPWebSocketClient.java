@@ -339,16 +339,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /**
    * Add a OCPPMessage to the front of our send queue.
    *
-   * @param message the message to be sent.
+   * @param prioMessage the message to be sent.
    */
   public boolean pushPriorityMessage(final OCPPMessage prioMessage) {
-    if (queue.getQueueSet().contains(prioMessage)) {
-      return false;
-    }
     recordTxMessage(prioMessage.toJsonString());
-    queue.getQueue().addFirst(prioMessage);
-    queue.getQueueSet().add(prioMessage);
-    return true;
+    return queue.pushPriorityMessage(prioMessage);
   }
 
   /**
