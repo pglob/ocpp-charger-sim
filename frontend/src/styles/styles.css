@@ -96,28 +96,14 @@ button:active {
 /* Container for the Button component */
 .button-container {
   position: relative;
-}
-
-/* Style for the dropdown toggle button */
-.dropdown-toggle {
-  margin-right: 10px;
-}
-
-/* Style for the dropdown menu */
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin-top: 10px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  flex-direction: row;
   display: flex;
-  flex-direction: column;
 }
 
 /* Style for the dropdown button */
 .dropdown-button {
   margin-bottom: 8px;
+  margin-left: 12px;
 }
 
 /* Style for the ChargerFrame component */

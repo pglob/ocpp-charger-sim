@@ -1,21 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import AuthorizeButton from '../components/buttons/AuthorizeButton';
-import BootButton from '../components/buttons/BootButton';
 import HeartbeatButton from '../components/buttons/HeartbeatButton';
 import ButtonBase from './buttons/ButtonBase';
 import '../styles/styles.css';
 
 // Implementation of the button component, which includes a drop-down menu and an online/offline button
 function Button({ isOnline, isActive }) {
-  const [openDropdown, setOpenDropdown] = useState(false); // Track dropdown open/close state
-
   // Create instances of each button class
-  const buttons = [
-    new AuthorizeButton(),
-    new BootButton(),
-    new HeartbeatButton(),
-  ];
+  const buttons = [new AuthorizeButton(), new HeartbeatButton()];
 
   // Handle Bring Online/Take Offline button click behavior
   const handleOnlineOffline = async () => {
@@ -32,35 +25,22 @@ function Button({ isOnline, isActive }) {
     }
   };
 
-  // Handle Dropdown menu open/close
-  const handleDropdown = () => {
-    setOpenDropdown(!openDropdown);
-  };
-
   return (
     <div className="button-container">
       {isOnline && isActive && (
         <>
-          {/* Dropdown toggle button */}
-          <button onClick={handleDropdown} className="dropdown-toggle">
-            {openDropdown ? 'Close Menu' : 'Send Messages'}
-          </button>
-
-          {/* Dropdown menu */}
-          {openDropdown && (
-            <div className="dropdown-menu">
-              {/* Render buttons dynamically */}
-              {buttons.map((button) => (
-                <button
-                  key={button.name}
-                  onClick={() => button.postRequest()} // Trigger specific button's postRequest
-                  className="dropdown-button"
-                >
-                  {button.name}
-                </button>
-              ))}
-            </div>
-          )}
+          <div>
+            {/* Render buttons dynamically */}
+            {buttons.map((button) => (
+              <button
+                key={button.name}
+                onClick={() => button.postRequest()} // Trigger specific button's postRequest
+              >
+                {button.name}
+              </button>
+            ))}
+          </div>
+          {/* )} */}
         </>
       )}
 
