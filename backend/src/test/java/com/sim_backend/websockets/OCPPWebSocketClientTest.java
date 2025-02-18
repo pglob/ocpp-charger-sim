@@ -25,14 +25,33 @@ import org.junit.jupiter.api.Test;
 
 public class OCPPWebSocketClientTest {
 
-  OCPPWebSocketClient client;
+  public static class TestOCPPWebSocketClient extends OCPPWebSocketClient {
+    public TestOCPPWebSocketClient(URI serverUri) {
+      super(serverUri);
+    }
+
+    @Override
+    public void startConnectionLostTimer() {}
+
+    @Override
+    public boolean connectBlocking() throws InterruptedException {
+      return true;
+    }
+
+    @Override
+    public boolean reconnectBlocking() throws InterruptedException {
+      return true;
+    }
+  }
+
+  TestOCPPWebSocketClient client;
   MessageQueue queue;
   OnOCPPMessage onOCPPMessageMock;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
     onOCPPMessageMock = mock(OnOCPPMessage.class);
-    client = spy(new OCPPWebSocketClient(new URI("")));
+    client = spy(new TestOCPPWebSocketClient(new URI("")));
     queue = mock(MessageQueue.class);
   }
 
@@ -612,7 +631,7 @@ public class OCPPWebSocketClientTest {
     heartbeat.setMessageID(testMsgId);
 
     // Get the MessageQueue from our client
-    OCPPWebSocketClient client = new OCPPWebSocketClient(new java.net.URI("ws://dummy"));
+    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(new java.net.URI("ws://dummy"));
 
     // Access previousMessages
     Field previousMessagesField = MessageQueue.class.getDeclaredField("previousMessages");
@@ -754,7 +773,7 @@ public class OCPPWebSocketClientTest {
     // Given a "wss" URI
     URI wssUri = new URI("wss://example.com:12345");
 
-    OCPPWebSocketClient client = new OCPPWebSocketClient(wssUri);
+    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(wssUri);
 
     // Verify the WebSocketClient's 'socketFactory' is SniSSLSocketFactory
     Field socketFactoryField = getSocketFactoryField();
@@ -771,7 +790,7 @@ public class OCPPWebSocketClientTest {
     // Given a "ws" URI
     URI wsUri = new URI("ws://example.com:12345");
 
-    OCPPWebSocketClient client = new OCPPWebSocketClient(wsUri);
+    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(wsUri);
 
     // Verify the WebSocketClient's 'socketFactory' is not SniSSLSocketFactory
     Field socketFactoryField = getSocketFactoryField();

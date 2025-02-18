@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.sim_backend.websockets.enums.ErrorCode;
+import com.sim_backend.websockets.OCPPWebSocketClientTest.TestOCPPWebSocketClient;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
@@ -23,7 +24,7 @@ import org.junit.jupiter.api.Test;
 public class OCPPTimeTest {
   public static final ZoneId UTC = ZoneId.of("UTC");
 
-  OCPPWebSocketClient client;
+  TestOCPPWebSocketClient client;
   MessageQueue queue;
   OnOCPPMessage onOCPPMessageMock;
   OCPPTime ocppTime;
@@ -31,7 +32,7 @@ public class OCPPTimeTest {
   @BeforeEach
   void setUp() throws URISyntaxException {
     onOCPPMessageMock = mock(OnOCPPMessage.class);
-    client = spy(new OCPPWebSocketClient(new URI("")));
+    client = spy(new TestOCPPWebSocketClient(new URI("")));
     ocppTime = client.getScheduler().getTime();
   }
 
