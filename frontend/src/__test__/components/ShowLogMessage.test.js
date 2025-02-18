@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ShowLogMessages from '../../../src/components/ShowLogMessage';
 import {
@@ -87,6 +87,50 @@ describe('ShowLogMessages Component', () => {
       expect(
         screen.getByText(/Error parsing received message/)
       ).toBeInTheDocument();
+    });
+  });
+
+  test('renders nested payload details correctly', async () => {
+    // Create a deeply nested payload for a received message
+    const nestedPayload = {
+      idTagInfo: {
+        status: 'Accepted',
+        extra: {
+          nestedKey: 'nestedValue',
+        },
+      },
+      anotherKey: ['item1', { subItem: 'subValue' }],
+    };
+
+    fetchReceivedMessages.mockResolvedValue([
+      JSON.stringify([
+        'DeepNestedMessage',
+        '2025-02-06T10:15:00.000Z',
+        3,
+        'unique-nested-message-id',
+        nestedPayload,
+      ]),
+    ]);
+
+    fetchSentMessages.mockResolvedValue([]); // No sent messages
+
+    render(<ShowLogMessages />);
+
+    // Wait for the message to be rendered
+    await waitFor(() => {
+      expect(screen.getByText(/DeepNestedMessage/)).toBeInTheDocument();
+    });
+
+    // Click the message to expand the nested details
+    fireEvent.click(screen.getByText(/DeepNestedMessage/));
+
+    // Verify that the nested details are rendered
+    await waitFor(() => {
+      expect(screen.getByText(/nestedKey/)).toBeInTheDocument();
+      expect(screen.getByText(/nestedValue/)).toBeInTheDocument();
+      expect(screen.getByText(/item1/)).toBeInTheDocument();
+      expect(screen.getByText(/subItem/)).toBeInTheDocument();
+      expect(screen.getByText(/subValue/)).toBeInTheDocument();
     });
   });
 });

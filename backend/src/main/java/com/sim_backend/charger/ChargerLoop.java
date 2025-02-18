@@ -1,5 +1,6 @@
 package com.sim_backend.charger;
 
+import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 
 /**
@@ -37,8 +38,10 @@ public class ChargerLoop implements Runnable {
    */
   public boolean process() {
     try {
-      charger.getWsClient().getScheduler().tick();
-      charger.getWsClient().popAllMessages();
+      OCPPWebSocketClient wsClient = charger.getWsClient();
+      wsClient.getScheduler().tick();
+      wsClient.getQueue().checkTimeouts(wsClient);
+      wsClient.popAllMessages();
     } catch (OCPPMessageFailure e) {
       // TODO: Add error handling for OCPP message failures
     } catch (InterruptedException e) {

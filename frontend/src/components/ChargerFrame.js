@@ -5,6 +5,7 @@ import ChargingButton from './buttons/ChargingButton';
 import '../styles/styles.css';
 import { pollChargerData } from './ChargerLabels';
 import RebootButton from './buttons/RebootButton';
+import ConfigGear from './ConfigIdTagUrl';
 
 function ChargerFrame() {
   const [data, setData] = useState([]);
@@ -55,6 +56,9 @@ function ChargerFrame() {
       </div>
       <RebootButton />
       <Button isOnline={isOnline} isActive={isActive} />
+      <div className="config-button-container">
+        <ConfigGear />
+      </div>
     </div>
   );
 }

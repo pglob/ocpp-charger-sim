@@ -104,6 +104,12 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
   }
 
   @Override
+  /** If the BootNotification times out, retry it with top priority. */
+  public void onTimeout() {
+    webSocketClient.pushPriorityMessage(new BootNotification());
+  }
+
+  @Override
   public void onStateChanged(ChargerState newState) {
     if (newState == ChargerState.BootingUp) {
       handleBootNotificationRequest();

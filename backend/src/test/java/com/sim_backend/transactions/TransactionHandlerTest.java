@@ -1,5 +1,6 @@
 package com.sim_backend.transactions;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -145,5 +146,38 @@ public class TransactionHandlerTest {
     transactionHandler.preAuthorize(1, "idTag");
 
     verify(stateMachine, times(1)).transition(ChargerState.Available);
+  }
+
+  @Test
+  void PreAuthorizeTimeoutTest() {
+    // Capture the registered listener and simulate a timeout by calling onTimeout()
+    doAnswer(
+            invocation -> {
+              OnOCPPMessageListener listener = invocation.getArgument(1);
+              listener.onTimeout();
+              return null;
+            })
+        .when(client)
+        .onReceiveMessage(eq(AuthorizeResponse.class), any());
+
+    // Call preAuthorize() to initiate the process
+    transactionHandler.preAuthorize(1, "timeoutId");
+
+    // Verify that an Authorize message was pushed
+    verify(client).pushMessage(any(Authorize.class));
+
+    // Verify that the listener's onTimeout() caused the client to delete the listener
+    verify(client).deleteOnReceiveMessage(eq(AuthorizeResponse.class), any());
+
+    // Verify that the state machine transitions to Available on timeout
+    verify(stateMachine).transition(ChargerState.Available);
+
+    // Verify that both startInProgress and stopInProgress flags are reset to false
+    assertFalse(
+        transactionHandler.getStartInProgress().get(),
+        "startInProgress should be false after a timeout");
+    assertFalse(
+        transactionHandler.getStopInProgress().get(),
+        "stopInProgress should be false after a timeout");
   }
 }

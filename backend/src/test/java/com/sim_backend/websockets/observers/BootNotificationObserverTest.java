@@ -112,7 +112,6 @@ class BootNotificationObserverTest {
   @Test
   void onMessageReceived_WhenStatusRejected_RegistersJob() {
     // Arrange
-    // Arrange
     BootNotificationResponse response =
         Mockito.spy(
             new BootNotificationResponse(RegistrationStatus.REJECTED, ZonedDateTime.now(), 240));
@@ -164,5 +163,14 @@ class BootNotificationObserverTest {
 
     // Assert
     verify(webSocketClient, never()).pushMessage(any());
+  }
+
+  @Test
+  void onTimeout_SendsPriorityNotification() {
+    // Act
+    observer.onTimeout();
+
+    // Assert: Verify that a BootNotification is pushed with top priority
+    verify(webSocketClient).pushPriorityMessage(isBootNotification());
   }
 }
