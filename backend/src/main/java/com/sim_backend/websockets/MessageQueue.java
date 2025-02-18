@@ -39,10 +39,10 @@ public class MessageQueue {
   private final Map<String, TimedMessage> previousMessages = new ConcurrentHashMap<>();
 
   /** The OCPP Message Queue. */
-  private final Deque<OCPPMessage> queue = new LinkedList<>();
+  @Getter private final Deque<OCPPMessage> queue = new LinkedList<>();
 
   /** Unique hashes to check for uniqueness */
-  private final Set<OCPPMessage> queueSet = new HashSet<>();
+  @Getter private final Set<OCPPMessage> queueSet = new HashSet<>();
 
   /** Create an OCPPMessage Queue. */
   public MessageQueue() {}

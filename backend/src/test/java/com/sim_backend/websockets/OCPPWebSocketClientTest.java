@@ -541,4 +541,60 @@ public class OCPPWebSocketClientTest {
 
     verify(client, times(0)).send(anyString());
   }
+
+  @Test
+  void testInvalidJSONCallError() throws Exception {
+    doAnswer(invocation -> null).when(client).send(anyString());
+    client.handleMessage("[1,");
+    OCPPMessageError error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(error.getErrorCode(), ErrorCode.FormatViolation);
+    assertEquals(
+        error.getErrorDescription(),
+        "java.io.EOFException: End of input at line 1 column 4 path $[1]");
+
+    client.handleMessage("");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(error.getErrorCode(), ErrorCode.FormatViolation);
+    assertEquals(error.getErrorDescription(), "Provided empty string");
+
+    assertThrows(
+        OCPPBadCallID.class,
+        () -> {
+          client.handleMessage("[5,\"w\", \"Heartbeat\", {}]");
+        });
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(error.getErrorCode(), ErrorCode.PropertyConstraintViolation);
+    assertEquals(error.getErrorDescription(), "Provided bad Call ID");
+
+    assertThrows(
+        OCPPUnsupportedMessage.class, () -> client.handleMessage("[2,\"w\", \"Water\", {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(error.getErrorCode(), ErrorCode.NotSupported);
+    assertEquals(error.getErrorDescription(), "Unsupported action");
+
+    assertThrows(
+        OCPPBadMessage.class, () -> client.handleMessage("[2,\"w\", \"Heartbeat\", {}, {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(error.getErrorCode(), ErrorCode.OccurenceConstraintViolation);
+    assertEquals(error.getErrorDescription(), "Request provided wrong number of array elements");
+
+    assertThrows(
+        OCPPBadMessage.class, () -> client.handleMessage("[4,\"w\", 2, \"Heartbeat\", {}, {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(error.getErrorCode(), ErrorCode.OccurenceConstraintViolation);
+    assertEquals(error.getErrorDescription(), "Error provided wrong number of array elements");
+
+    assertThrows(
+        OCPPBadMessage.class, () -> client.handleMessage("[3,\"w\", \"Heartbeat\", {}, {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(error.getErrorCode(), ErrorCode.OccurenceConstraintViolation);
+    assertEquals(error.getErrorDescription(), "Response provided wrong number of array elements");
+  }
 }
