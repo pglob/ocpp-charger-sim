@@ -160,7 +160,6 @@ class MessageControllerTest {
             + "\"errorCode\": \"NoError\","
             + "\"info\": \"\","
             + "\"status\": \"Available\","
-            + "\"timestamp\": \"2025-02-02T12:00:00Z\","
             + "\"vendorId\": \"\","
             + "\"vendorErrorCode\": \"\""
             + "}";
