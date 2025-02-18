@@ -643,7 +643,7 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-    void testWssSchemeSetsSniSSLSocketFactory()
+  void testWssSchemeSetsSniSSLSocketFactory()
       throws URISyntaxException, NoSuchFieldException, IllegalAccessException {
     // Given a "wss" URI
     URI wssUri = new URI("wss://example.com:12345");
