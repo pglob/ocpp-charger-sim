@@ -153,7 +153,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
       }
     }
 
-    this.connect();
+    try {
+      this.connectBlocking();
+    } catch (InterruptedException e) {
+      // Do nothing, there are reconnectBlocking() calls later when sending messages
+    }
     this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
   }
