@@ -326,7 +326,7 @@ public class MessageController extends ControllerBase {
 
     app.post("/api/{chargerId}/charger/reboot", this::reboot);
 
-    app.post("/api/{chargerId}d/state/online", this::online);
+    app.post("/api/{chargerId}/state/online", this::online);
     app.post("/api/{chargerId}/state/offline", this::offline);
     app.post("/api/{chargerId}/state/status", this::status);
 
