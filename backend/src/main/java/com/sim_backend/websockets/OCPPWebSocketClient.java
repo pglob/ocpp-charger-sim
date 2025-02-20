@@ -92,7 +92,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
     txMessages.add(messageWithTimestamp);
     if (txMessages.size() > 50) {
-      txMessages.remove(0);
+      txMessages.removeFirst();
     }
   }
 
@@ -107,7 +107,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
         message.replaceFirst("\\[", "[\"" + messageName + "\", \"" + timestamp + "\", ");
     rxMessages.add(modifiedMessage);
     if (rxMessages.size() > 50) {
-      rxMessages.remove(0);
+      rxMessages.removeFirst();
     }
   }
 
@@ -190,8 +190,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
       JsonArray array = element.getAsJsonArray();
       String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
-      String messageName = "";
-      String messageType = "";
+      String messageName;
+      String messageType;
       JsonObject data;
 
       int callId = array.get(CALL_ID_INDEX).getAsInt();
@@ -267,7 +267,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
             error.setMessageID(msgId);
             error.setErroredMessage(prevMessage);
             this.handleReceivedMessage(OCPPMessageError.class, error);
-            log.warn("Received OCPPError {}", error.toString());
+            log.warn("Received OCPPError {}", error);
             OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
             messageType = info.messageName();
             this.recordRxMessage(s, messageType);
