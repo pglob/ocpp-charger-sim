@@ -214,6 +214,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
           // handling a CallResult
           OCPPMessage prevMessage = this.queue.getPreviousMessage(msgId);
           if (prevMessage == null) {
+            this.pushMessage(
+                new OCPPMessageError(
+                    ErrorCode.ProtocolError,
+                    "Received Response with an unknown ID",
+                    new JsonObject()));
             log.warn("Received OCPP response message with an unknown ID {}: {}", msgId, s);
             throw new OCPPCannotProcessMessage(s, msgId);
           }
@@ -237,18 +242,46 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
           OCPPMessage prevMessage = this.queue.getPreviousMessage(msgId);
           if (prevMessage == null) {
+            this.pushMessage(
+                new OCPPMessageError(
+                    ErrorCode.ProtocolError,
+                    "Received Error with an unknown ID",
+                    new JsonObject()));
             log.warn("Received OCPP error message with an unknown ID {}: {}", msgId, s);
             throw new OCPPCannotProcessMessage(s, msgId);
           }
 
           this.queue.clearPreviousMessage(prevMessage);
-          OCPPMessageError error = new OCPPMessageError(array);
-          error.setErroredMessage(prevMessage);
-          this.handleReceivedMessage(OCPPMessageError.class, error);
-          log.warn("Received OCPPError {}", error.toString());
-          OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
-          messageType = info.messageName();
-          this.recordRxMessage(s, messageType);
+          try {
+            if (!array.get(OCPPMessageError.DETAIL_INDEX).isJsonObject()) {
+              this.pushMessage(
+                  new OCPPMessageError(
+                      ErrorCode.PropertyConstraintViolation,
+                      "Error details was not a json object",
+                      new JsonObject()));
+
+              return;
+            }
+            OCPPMessageError error =
+                new OCPPMessageError(
+                    ErrorCode.valueOf(array.get(OCPPMessageError.CODE_INDEX).getAsString()),
+                    array.get(OCPPMessageError.DESCRIPTION_INDEX).getAsString(),
+                    array.get(OCPPMessageError.DETAIL_INDEX).getAsJsonObject());
+            error.setMessageID(msgId);
+            error.setErroredMessage(prevMessage);
+            this.handleReceivedMessage(OCPPMessageError.class, error);
+            log.warn("Received OCPPError {}", error.toString());
+            OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
+            messageType = info.messageName();
+            this.recordRxMessage(s, messageType);
+          } catch (IllegalArgumentException exception) {
+            this.pushMessage(
+                new OCPPMessageError(
+                    ErrorCode.PropertyConstraintViolation,
+                    "Received Unknown Error Code",
+                    new JsonObject()));
+          }
+
           return;
         }
         default -> {

@@ -647,16 +647,16 @@ public class OCPPWebSocketClientTest {
     client.handleMessage("[1,");
     OCPPMessageError error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
-    assertEquals(error.getErrorCode(), ErrorCode.FormatViolation);
+    assertEquals(ErrorCode.FormatViolation, error.getErrorCode());
     assertEquals(
-        error.getErrorDescription(),
-        "java.io.EOFException: End of input at line 1 column 4 path $[1]");
+        "java.io.EOFException: End of input at line 1 column 4 path $[1]",
+        error.getErrorDescription());
 
     client.handleMessage("");
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
-    assertEquals(error.getErrorCode(), ErrorCode.FormatViolation);
-    assertEquals(error.getErrorDescription(), "Provided empty string");
+    assertEquals(ErrorCode.FormatViolation, error.getErrorCode());
+    assertEquals("Provided empty string", error.getErrorDescription());
 
     assertThrows(
         OCPPBadCallID.class,
@@ -665,35 +665,71 @@ public class OCPPWebSocketClientTest {
         });
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
-    assertEquals(error.getErrorCode(), ErrorCode.PropertyConstraintViolation);
-    assertEquals(error.getErrorDescription(), "Provided bad Call ID");
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Provided bad Call ID", error.getErrorDescription());
 
     assertThrows(
         OCPPUnsupportedMessage.class, () -> client.handleMessage("[2,\"w\", \"Water\", {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
-    assertEquals(error.getErrorCode(), ErrorCode.NotSupported);
-    assertEquals(error.getErrorDescription(), "Unsupported action");
+    assertEquals(ErrorCode.NotSupported, error.getErrorCode());
+    assertEquals("Unsupported action", error.getErrorDescription());
 
     assertThrows(
         OCPPBadMessage.class, () -> client.handleMessage("[2,\"w\", \"Heartbeat\", {}, {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
-    assertEquals(error.getErrorCode(), ErrorCode.OccurenceConstraintViolation);
-    assertEquals(error.getErrorDescription(), "Request provided wrong number of array elements");
+    assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
+    assertEquals("Request provided wrong number of array elements", error.getErrorDescription());
 
     assertThrows(
         OCPPBadMessage.class, () -> client.handleMessage("[4,\"w\", 2, \"Heartbeat\", {}, {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
-    assertEquals(error.getErrorCode(), ErrorCode.OccurenceConstraintViolation);
-    assertEquals(error.getErrorDescription(), "Error provided wrong number of array elements");
+    assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
+    assertEquals("Error provided wrong number of array elements", error.getErrorDescription());
 
     assertThrows(
         OCPPBadMessage.class, () -> client.handleMessage("[3,\"w\", \"Heartbeat\", {}, {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
-    assertEquals(error.getErrorCode(), ErrorCode.OccurenceConstraintViolation);
-    assertEquals(error.getErrorDescription(), "Response provided wrong number of array elements");
+    assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
+    assertEquals("Response provided wrong number of array elements", error.getErrorDescription());
+
+    assertThrows(OCPPCannotProcessMessage.class, () -> client.handleMessage("[3,\"w\", {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.ProtocolError, error.getErrorCode());
+    assertEquals("Received Response with an unknown ID", error.getErrorDescription());
+
+    assertThrows(
+        OCPPCannotProcessMessage.class, () -> client.handleMessage("[4,\"w\", 2, \"w\", {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.ProtocolError, error.getErrorCode());
+    assertEquals("Received Error with an unknown ID", error.getErrorDescription());
+
+    Heartbeat beat = new Heartbeat();
+    beat.setMessageID("heartbeat");
+    client.addPreviousMessage(beat);
+    client.handleMessage("[4,\"heartbeat\", 29999, \"w\", {}]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Received Unknown Error Code", error.getErrorDescription());
+
+    client.addPreviousMessage(beat);
+    client.handleMessage("[4,\"heartbeat\", -1, \"w\", {}]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Received Unknown Error Code", error.getErrorDescription());
+
+    client.addPreviousMessage(beat);
+    client.handleMessage("[4,\"heartbeat\", 2, \"w\", a]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Error details was not a json object", error.getErrorDescription());
   }
 }
