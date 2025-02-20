@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { FaCog, FaTimes } from 'react-icons/fa';
+import PropTypes from 'prop-types';
 import '../styles/styles.css';
 
-function ConfigGear() {
+function ConfigGear({ chargerID }) {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [idTag, setIdTag] = useState('');
   const [centralSystemUrl, setCentralSystemUrl] = useState('');
@@ -13,7 +14,7 @@ function ConfigGear() {
   const fetchConfig = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/get-idtag-csurl`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/${chargerID}/get-idtag-csurl`,
         {
           method: 'GET',
           headers: {
@@ -38,7 +39,7 @@ function ConfigGear() {
   const updateConfig = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/update-idtag-csurl`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/${chargerID}/update-idtag-csurl`,
         {
           method: 'POST',
           headers: {
@@ -144,5 +145,9 @@ function ConfigGear() {
     </div>
   );
 }
+
+ConfigGear.propTypes = {
+  chargerID: PropTypes.number.isRequired,
+};
 
 export default ConfigGear;

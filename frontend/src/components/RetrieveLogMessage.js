@@ -1,8 +1,8 @@
 // Function to get sent messages
-export const fetchSentMessages = async () => {
+export const fetchSentMessages = async (chargerID) => {
   try {
     const response = await fetch(
-      `${process.env.REACT_APP_BACKEND_URL}/api/log/sentmessage`,
+      `${process.env.REACT_APP_BACKEND_URL}/api/${chargerID}/log/sentmessage`,
       {
         method: 'GET',
         headers: {
@@ -24,10 +24,10 @@ export const fetchSentMessages = async () => {
 };
 
 // Function to get received messages
-export const fetchReceivedMessages = async () => {
+export const fetchReceivedMessages = async (chargerID) => {
   try {
     const response = await fetch(
-      `${process.env.REACT_APP_BACKEND_URL}/api/log/receivedmessage`,
+      `${process.env.REACT_APP_BACKEND_URL}/api/${chargerID}/log/receivedmessage`,
       {
         method: 'GET',
         headers: {

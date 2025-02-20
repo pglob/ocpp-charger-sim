@@ -18,14 +18,20 @@ public final class Main {
     Javalin app = initializeFrontendAPI(config);
 
     // Create the charger
-    Charger charger = new Charger();
+    Charger charger1 = new Charger();
+    Charger charger2 = new Charger();
+    Charger charger3 = new Charger();
+    Charger [] chargers = new Charger[] {charger1, charger2, charger3};
 
     // Register REST API controllers and routes
-    registerRoutes(app, charger);
+    registerRoutes(app, chargers);
 
     // Start the charger
-    charger.Boot();
+    for (Charger charger : chargers) {
+      charger.Boot();
+    }
   }
+  
 
   /**
    * Load configuration from environment variables or defaults.
@@ -69,8 +75,8 @@ public final class Main {
    * @param app the Javalin app
    * @param wsClient the WebSocket client
    */
-  private static void registerRoutes(Javalin app, Charger charger) {
-    ControllerBase messageController = new MessageController(app, charger);
+  private static void registerRoutes(Javalin app, Charger[] chargers) {
+    ControllerBase messageController = new MessageController(app, chargers);
     messageController.registerRoutes(app);
     TestMessageController.registerRoutes(app);
   }

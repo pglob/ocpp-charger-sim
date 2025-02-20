@@ -3,8 +3,8 @@ import React from 'react';
 import ButtonBase from './ButtonBase';
 
 class RebootButtonLogic extends ButtonBase {
-  constructor() {
-    super('Reboot', '/api/charger/reboot'); // Set button name and endpoint
+  constructor(chargerID) {
+    super('Reboot', `/api/${chargerID}/charger/reboot`); // Set button name and endpoint
   }
 }
 

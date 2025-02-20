@@ -6,17 +6,18 @@ import '../styles/styles.css';
 import { pollChargerData } from './ChargerLabels';
 import RebootButton from './buttons/RebootButton';
 import ConfigGear from './ConfigIdTagUrl';
+import PropTypes from 'prop-types';
 
-function ChargerFrame() {
+function ChargerFrame({ chargerID }) {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     // Start polling charger data every 5 seconds and state every 1 second
-    const intervalId = pollChargerData(setData, 5000, 1000);
+    const intervalId = pollChargerData(chargerID, setData, 5000, 1000);
 
     // Clean up the polling when the component unmounts
     return () => clearInterval(intervalId);
-  }, []);
+  }, [chargerID]);
 
   // Extract the simulator state
   const stateItem = data.find((item) => item.label === 'State');
@@ -52,15 +53,21 @@ function ChargerFrame() {
             </div>
           ))}
         </div>
-        {isActive && <ChargingButton stateValue={stateValue} />}
+        {isActive && (
+          <ChargingButton chargerID={chargerID} stateValue={stateValue} />
+        )}
       </div>
-      <RebootButton />
-      <Button isOnline={isOnline} isActive={isActive} />
+      <RebootButton chargerID={chargerID} />
+      <Button chargerID={chargerID} isOnline={isOnline} isActive={isActive} />
       <div className="config-button-container">
-        <ConfigGear />
+        <ConfigGear chargerID={chargerID} />
       </div>
     </div>
   );
 }
+
+ChargerFrame.propTypes = {
+  chargerID: PropTypes.number.isRequired,
+};
 
 export default ChargerFrame;

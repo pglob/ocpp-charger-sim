@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { fetchSentMessages, fetchReceivedMessages } from './RetrieveLogMessage';
+import PropTypes from 'prop-types';
 import '../styles/styles.css';
 
-const ShowLogMessages = () => {
+const ShowLogMessages = ({ chargerID }) => {
   const [sentMessages, setSentMessages] = useState([]);
   const [receivedMessages, setReceivedMessages] = useState([]);
 
@@ -198,8 +199,8 @@ const ShowLogMessages = () => {
   // Polling function to fetch data
   const pollMessages = () => {
     const fetchData = async () => {
-      const sentData = await fetchSentMessages();
-      const receivedData = await fetchReceivedMessages();
+      const sentData = await fetchSentMessages(chargerID);
+      const receivedData = await fetchReceivedMessages(chargerID);
       setSentMessages(sentData);
       setReceivedMessages(receivedData);
     };
@@ -219,7 +220,7 @@ const ShowLogMessages = () => {
 
     // Clear the interval when the component unmounts to avoid memory leaks
     return () => clearInterval(interval);
-  }, []);
+  }, [chargerID]);
 
   // Sort sent and received messages by timestamp, descending (most recent first)
   const sortedSentMessages = sentMessages.sort((a, b) => {
@@ -263,4 +264,7 @@ const ShowLogMessages = () => {
   );
 };
 
+ShowLogMessages.propTypes = {
+  chargerID: PropTypes.number.isRequired,
+};
 export default ShowLogMessages;
