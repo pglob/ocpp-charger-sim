@@ -243,18 +243,18 @@ class MessageControllerTest {
     messageController.registerRoutes(mockApp);
 
     // Assert
-    verify(mockApp).post(eq("/api/:chargerId/message/authorize"), any());
-    verify(mockApp).post(eq("/api/:chargerId/message/boot"), any());
-    verify(mockApp).post(eq("/api/:chargerId/message/heartbeat"), any());
-    verify(mockApp).get(eq("/api/:chargerId/state"), any());
-    verify(mockApp).post(eq("/api/:chargerId/charger/reboot"), any());
-    verify(mockApp).post(eq("/api/:chargerId/state/online"), any());
-    verify(mockApp).post(eq("/api/:chargerId/state/offline"), any());
-    verify(mockApp).post(eq("/api/:chargerId/state/status"), any());
-    verify(mockApp).post(eq("/api/:chargerId/transaction/start-charge"), any());
-    verify(mockApp).post(eq("/api/:chargerId/transaction/stop-charge"), any());
-    verify(mockApp).get(eq("/api/:chargerId/electrical/meter-value"), any());
-    verify(mockApp).get(eq("/api/:chargerId/electrical/max-current"), any());
-    verify(mockApp).get(eq("/api/:chargerId/electrical/current-import"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/message/authorize"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/message/boot"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/message/heartbeat"), any());
+    verify(mockApp).get(eq("/api/{chargerId}/state"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/charger/reboot"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/state/online"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/state/offline"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/state/status"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/transaction/start-charge"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/transaction/stop-charge"), any());
+    verify(mockApp).get(eq("/api/{chargerId}/electrical/meter-value"), any());
+    verify(mockApp).get(eq("/api/{chargerId}/electrical/max-current"), any());
+    verify(mockApp).get(eq("/api/{chargerId}/electrical/current-import"), any());
   }
 }

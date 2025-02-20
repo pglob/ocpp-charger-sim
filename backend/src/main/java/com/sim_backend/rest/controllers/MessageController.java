@@ -318,29 +318,29 @@ public class MessageController extends ControllerBase {
 
   @Override
   public void registerRoutes(Javalin app) {
-    app.post("/api/:chargerId/message/authorize", this::authorize);
-    app.post("/api/:chargerId/message/boot", this::boot);
-    app.post("/api/:chargerId/message/heartbeat", this::heartbeat);
+    app.post("/api/{chargerId}/message/authorize", this::authorize);
+    app.post("/api/{chargerId}/message/boot", this::boot);
+    app.post("/api/{chargerId}/message/heartbeat", this::heartbeat);
 
-    app.get("/api/:chargerId/state", this::state);
+    app.get("/api/{chargerId}/state", this::state);
 
-    app.post("/api/:chargerId/charger/reboot", this::reboot);
+    app.post("/api/{chargerId}/charger/reboot", this::reboot);
 
-    app.post("/api/:chargerId/state/online", this::online);
-    app.post("/api/:chargerId/state/offline", this::offline);
-    app.post("/api/:chargerId/state/status", this::status);
+    app.post("/api/{chargerId}d/state/online", this::online);
+    app.post("/api/{chargerId}/state/offline", this::offline);
+    app.post("/api/{chargerId}/state/status", this::status);
 
-    app.get("/api/:chargerId/log/sentmessage", this::getSentMessages);
-    app.get("/api/:chargerId/log/receivedmessage", this::getReceivedMessages);
+    app.get("/api/{chargerId}/log/sentmessage", this::getSentMessages);
+    app.get("/api/{chargerId}/log/receivedmessage", this::getReceivedMessages);
 
-    app.post("/api/:chargerId/transaction/start-charge", this::startCharge);
-    app.post("/api/:chargerId/transaction/stop-charge", this::stopCharge);
+    app.post("/api/{chargerId}/transaction/start-charge", this::startCharge);
+    app.post("/api/{chargerId}/transaction/stop-charge", this::stopCharge);
 
-    app.get("/api/:chargerId/electrical/meter-value", this::meterValue);
-    app.get("/api/:chargerId/electrical/max-current", this::maxCurrent);
-    app.get("/api/:chargerId/electrical/current-import", this::currentImport);
+    app.get("/api/{chargerId}/electrical/meter-value", this::meterValue);
+    app.get("/api/{chargerId}/electrical/max-current", this::maxCurrent);
+    app.get("/api/{chargerId}/electrical/current-import", this::currentImport);
 
-    app.get("/api/:chargerId/get-idtag-csurl", this::getIdTagCSurl);
-    app.post("/api/:chargerId/update-idtag-csurl", this::updateIdTagCSurl);
+    app.get("/api/{chargerId}/get-idtag-csurl", this::getIdTagCSurl);
+    app.post("/api/{chargerId}/update-idtag-csurl", this::updateIdTagCSurl);
   }
 }
