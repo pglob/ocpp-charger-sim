@@ -7,7 +7,7 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.OCPPTime;
-import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.OCPPWebSocketClientTest.TestOCPPWebSocketClient;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
@@ -18,12 +18,12 @@ import org.junit.jupiter.api.Test;
 
 public class StartTransactionTest {
 
-  OCPPWebSocketClient client;
+  TestOCPPWebSocketClient client;
   String time;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
-    client = spy(new OCPPWebSocketClient(new URI("")));
+    client = spy(new TestOCPPWebSocketClient(new URI("")));
     OCPPTime ocppTime = client.getScheduler().getTime();
     ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
     time = zonetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));

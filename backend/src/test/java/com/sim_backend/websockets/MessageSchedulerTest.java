@@ -3,6 +3,7 @@ package com.sim_backend.websockets;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.sim_backend.websockets.OCPPWebSocketClientTest.TestOCPPWebSocketClient;
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.types.OCPPMessage;
 import java.net.URI;
@@ -18,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class MessageSchedulerTest {
-  private OCPPWebSocketClient client;
+  private TestOCPPWebSocketClient client;
 
   @Mock private OCPPTime time;
 
@@ -30,7 +31,7 @@ public class MessageSchedulerTest {
   void setUp() throws URISyntaxException {
     MockitoAnnotations.openMocks(this);
     when(time.getSynchronizedTime()).thenReturn(ZonedDateTime.now());
-    client = spy(new OCPPWebSocketClient(new URI("ws://localhost:8080/sim_backend")));
+    client = spy(new TestOCPPWebSocketClient(new URI("ws://localhost:8080/sim_backend")));
     scheduler =
         new MessageScheduler(client) {
           @Override
