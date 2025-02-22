@@ -2,22 +2,21 @@ package com.sim_backend.websockets.types;
 
 import static com.sim_backend.websockets.OCPPWebSocketClient.MESSAGE_PACKAGE;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import java.util.Set;
 import java.util.UUID;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 /** An OCPP message. */
+@Slf4j
 @EqualsAndHashCode(exclude = "messageID", callSuper = false)
-public abstract class OCPPMessage {
+public abstract class OCPPMessage implements Cloneable {
   /** The call ID for a request. */
   public static final int CALL_ID_REQUEST = 2;
 
@@ -77,11 +76,10 @@ public abstract class OCPPMessage {
     return UUID.randomUUID().toString();
   }
 
-  /** Deep clones a message using gson. */
+  /** Clones a message and changes its ID. */
   public OCPPMessage cloneMessage() {
-    Gson gson = GsonUtilities.getGson();
-    OCPPMessage message = gson.fromJson(gson.toJsonTree(this), this.getClass());
-    message.setMessageID(generateMessageID());
+    OCPPMessage message = this.clone();
+    message.messageID = generateMessageID();
     return message;
   }
 
@@ -128,5 +126,15 @@ public abstract class OCPPMessage {
   @Override
   public String toString() {
     return String.format("%s = %s", this.getClass(), this.toJsonString());
+  }
+
+  @Override
+  protected OCPPMessage clone() {
+    try {
+      return (OCPPMessage) super.clone();
+    } catch (CloneNotSupportedException e) {
+      log.error("Failed clone", e);
+      throw new AssertionError();
+    }
   }
 }

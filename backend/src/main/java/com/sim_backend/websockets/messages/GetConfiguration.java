@@ -15,12 +15,17 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "GetConfiguration")
-public class GetConfiguration extends OCPPMessageRequest {
+public class GetConfiguration extends OCPPMessageRequest implements Cloneable {
   @Size(max = 50, message = "GetConfiguration key must not exceed 50 characters")
   @SerializedName("key")
   private final List<String> key;
 
   public GetConfiguration(List<String> key) {
     this.key = key;
+  }
+
+  @Override
+  protected GetConfiguration clone() {
+    return (GetConfiguration) super.clone();
   }
 }
