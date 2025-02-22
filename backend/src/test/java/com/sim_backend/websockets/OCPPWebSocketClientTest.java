@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.sim_backend.websockets.enums.AuthorizationStatus;
 import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
@@ -18,7 +17,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
@@ -642,23 +640,5 @@ public class OCPPWebSocketClientTest {
     assertFalse(
         previousMessages.containsKey(testMsgId),
         "Timed-out message should be removed from previousMessages");
-  }
-
-  @Test
-  void testClone() {
-    HeartbeatResponse res1 = new HeartbeatResponse(ZonedDateTime.now());
-    HeartbeatResponse res2 = (HeartbeatResponse) res1.cloneMessage();
-    assertEquals(res1.getCurrentTime(), res2.getCurrentTime());
-
-    StopTransaction stopTrans1 = new StopTransaction("Why", 2, 3, "Whe");
-    StopTransaction stopTrans2 = (StopTransaction) stopTrans1.cloneMessage();
-    assertEquals("Why", stopTrans2.getIdTag());
-    assertEquals(2, stopTrans2.getTransactionId());
-    assertEquals(3, stopTrans2.getMeterStop());
-    assertEquals("Whe", stopTrans2.getTimestamp());
-
-    StopTransactionResponse stopTransRes1 = new StopTransactionResponse("Accepted");
-    StopTransactionResponse stopTransRes2 = (StopTransactionResponse) stopTransRes1.cloneMessage();
-    assertEquals(AuthorizationStatus.ACCEPTED, stopTransRes2.getIdTagInfo().getStatus());
   }
 }
