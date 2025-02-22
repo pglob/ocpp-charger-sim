@@ -322,8 +322,8 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testAllThrowsException() throws OCPPMessageFailure {
-
+  public void testAllThrowsException() throws OCPPMessageFailure, InterruptedException {
+    doAnswer(invocation -> false).when(client).reconnectBlocking();
     Heartbeat beat = new Heartbeat();
 
     client.pushMessage(beat);
@@ -343,8 +343,8 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testThrowsException() throws OCPPMessageFailure {
-
+  public void testThrowsException() throws OCPPMessageFailure, InterruptedException {
+    doAnswer(invocation -> false).when(client).reconnectBlocking();
     Heartbeat beat = new Heartbeat();
 
     client.pushMessage(beat);
@@ -364,6 +364,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testRetryAfterFirstAttempt() throws Exception {
+    doAnswer(invocation -> false).when(client).reconnectBlocking();
     Heartbeat beat = new Heartbeat();
 
     client.pushMessage(beat);

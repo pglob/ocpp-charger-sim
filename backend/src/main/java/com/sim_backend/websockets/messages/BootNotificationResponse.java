@@ -23,7 +23,7 @@ import lombok.Setter;
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "BootNotificationResponse")
 @EqualsAndHashCode(callSuper = true)
-public class BootNotificationResponse extends OCPPMessageResponse {
+public class BootNotificationResponse extends OCPPMessageResponse implements Cloneable {
 
   /** Status of the BootNotification (Accepted, Pending, Rejected). Required. */
   @NotNull(message = "BootNotificationResponse Registration status is required")
@@ -44,5 +44,10 @@ public class BootNotificationResponse extends OCPPMessageResponse {
     this.status = RegistrationStatus.fromString(status);
     this.currentTime = currentTime;
     this.interval = interval;
+  }
+
+  @Override
+  protected BootNotificationResponse clone() {
+    return (BootNotificationResponse) super.clone();
   }
 }

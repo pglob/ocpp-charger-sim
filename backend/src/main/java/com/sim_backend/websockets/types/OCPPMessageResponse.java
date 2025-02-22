@@ -4,10 +4,12 @@ import com.google.gson.JsonArray;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 /** An OCPP CallResult message. */
 @EqualsAndHashCode(callSuper = true)
-public class OCPPMessageResponse extends OCPPMessage {
+@Slf4j
+public class OCPPMessageResponse extends OCPPMessage implements Cloneable {
   /**
    * Define the structure for a request message.
    *
@@ -23,5 +25,10 @@ public class OCPPMessageResponse extends OCPPMessage {
     array.add(GsonUtilities.getGson().toJsonTree(this));
 
     return array;
+  }
+
+  @Override
+  protected OCPPMessageResponse clone() {
+    return (OCPPMessageResponse) super.clone();
   }
 }

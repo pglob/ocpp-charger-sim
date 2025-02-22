@@ -7,11 +7,13 @@ import com.sim_backend.websockets.enums.ErrorCode;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /** A CallError message for OCPP. */
 @EqualsAndHashCode(callSuper = true)
 @Getter
-public class OCPPMessageError extends OCPPMessage {
+@Slf4j
+public class OCPPMessageError extends OCPPMessage implements Cloneable {
 
   /** The message id index in a received JsonArray. */
   private static final int MESSAGE_ID_INDEX = 1;
@@ -80,5 +82,10 @@ public class OCPPMessageError extends OCPPMessage {
     array.add(GsonUtilities.getGson().toJsonTree(this.errorDetails));
 
     return array;
+  }
+
+  @Override
+  protected OCPPMessageError clone() {
+    return (OCPPMessageError) super.clone();
   }
 }

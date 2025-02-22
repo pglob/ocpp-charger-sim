@@ -19,7 +19,7 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "HeartbeatResponse")
-public final class HeartbeatResponse extends OCPPMessageResponse {
+public final class HeartbeatResponse extends OCPPMessageResponse implements Cloneable {
 
   /** The Heartbeat's time. */
   @NotBlank(message = "HeartbeatResponse current time is required")
@@ -30,5 +30,10 @@ public final class HeartbeatResponse extends OCPPMessageResponse {
   public HeartbeatResponse() {
     super();
     this.currentTime = ZonedDateTime.now(ZoneId.of("UTC"));
+  }
+
+  @Override
+  protected HeartbeatResponse clone() {
+    return (HeartbeatResponse) super.clone();
   }
 }

@@ -19,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "Authorize")
-public class Authorize extends OCPPMessageRequest {
+public class Authorize extends OCPPMessageRequest implements Cloneable {
 
   @SerializedName("idTag")
   @NotBlank(message = "Authorize idTag must not be blank")
@@ -41,5 +41,10 @@ public class Authorize extends OCPPMessageRequest {
   private String generateIdTag() {
     // Generate a UUID, remove hyphens, and truncate to 20 characters
     return UUID.randomUUID().toString().replace("-", "").substring(0, 20);
+  }
+
+  @Override
+  protected Authorize clone() {
+    return (Authorize) super.clone();
   }
 }

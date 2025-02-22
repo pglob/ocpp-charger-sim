@@ -20,8 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "AuthorizeResponse")
-public class AuthorizeResponse extends OCPPMessageResponse {
-
+public class AuthorizeResponse extends OCPPMessageResponse implements Cloneable {
   @SerializedName("idTagInfo")
   private IdTagInfo idTagInfo;
 
@@ -38,5 +37,10 @@ public class AuthorizeResponse extends OCPPMessageResponse {
 
   public AuthorizeResponse(String status) {
     this.idTagInfo = new IdTagInfo(AuthorizationStatus.fromString(status));
+  }
+
+  @Override
+  protected AuthorizeResponse clone() {
+    return (AuthorizeResponse) super.clone();
   }
 }
