@@ -7,6 +7,8 @@ import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.observers.BootNotificationObserver;
+import com.sim_backend.websockets.observers.ChangeConfigurationObserver;
+import com.sim_backend.websockets.observers.GetConfigurationObserver;
 import java.net.URI;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.Getter;
@@ -77,6 +79,10 @@ public class Charger {
 
       // Create Observers
       BootNotificationObserver bootObserver = new BootNotificationObserver(wsClient, stateMachine);
+      ChangeConfigurationObserver changeConfigurationObserver =
+          new ChangeConfigurationObserver(wsClient, config);
+      GetConfigurationObserver getConfigurationObserver =
+          new GetConfigurationObserver(wsClient, config);
 
       // Transition the state machine to the BootingUp state
       stateMachine.transition(ChargerState.BootingUp);
