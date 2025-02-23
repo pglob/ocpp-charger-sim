@@ -19,8 +19,8 @@ public class StatusNotificationObserver implements StateObserver {
   private List<StatusNotification> statusNotificationQueue = new ArrayList<>();
 
   /**
-   * This sends a StatusNotification when State changes. If the client is offline it
-   * queues, when client is back online the last StatusNotification message to be sent.
+   * This sends a StatusNotification when State changes. If the client is offline it queues, when
+   * client is back online the last StatusNotification message to be sent.
    *
    * @param newState the new ChargerState after a transition.
    */
