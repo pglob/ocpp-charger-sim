@@ -9,6 +9,7 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.observers.BootNotificationObserver;
 import com.sim_backend.websockets.observers.ChangeConfigurationObserver;
 import com.sim_backend.websockets.observers.GetConfigurationObserver;
+import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import java.net.URI;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.Getter;
@@ -43,6 +44,9 @@ public class Charger {
 
   /** A lock to ensure that only one Boot() or Reboot() operation can run at a time */
   private final ReentrantLock bootRebootLock = new ReentrantLock();
+
+  /** The Observer for StatusNotification */
+  private StatusNotificationObserver statusNotificationObserver;
 
   /** Constructs a new Charger instance */
   public Charger() {
