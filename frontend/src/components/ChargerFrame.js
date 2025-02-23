@@ -38,7 +38,7 @@ function ChargerFrame({ chargerID }) {
     <div className="charger-frame">
       <div className="charger-name">
         <p style={{ margin: '0', textAlign: 'left' }}>
-          <strong>Charger A</strong>
+          <strong>Charger {chargerID}</strong>
         </p>
       </div>
 
