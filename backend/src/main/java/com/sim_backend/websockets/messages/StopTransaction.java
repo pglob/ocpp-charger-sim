@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StopTransaction")
-public class StopTransaction extends OCPPMessageRequest {
+public class StopTransaction extends OCPPMessageRequest implements Cloneable {
   @SerializedName("idTag")
   private String idTag;
 
@@ -41,5 +41,10 @@ public class StopTransaction extends OCPPMessageRequest {
     this.transactionId = transactionId;
     this.meterStop = meterStop;
     this.timestamp = timestamp;
+  }
+
+  @Override
+  protected StopTransaction clone() {
+    return (StopTransaction) super.clone();
   }
 }

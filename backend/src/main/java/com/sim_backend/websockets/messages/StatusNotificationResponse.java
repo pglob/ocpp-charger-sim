@@ -13,6 +13,11 @@ import lombok.EqualsAndHashCode;
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "StatusNotificationResponse")
-public class StatusNotificationResponse extends OCPPMessageResponse {
+public class StatusNotificationResponse extends OCPPMessageResponse implements Cloneable {
   // No fields are defined as per the protocol specification
+
+  @Override
+  protected StatusNotificationResponse clone() {
+    return (StatusNotificationResponse) super.clone();
+  }
 }

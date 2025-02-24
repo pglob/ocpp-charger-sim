@@ -5,6 +5,9 @@ import static org.mockito.Mockito.*;
 
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.types.OCPPMessage;
+import com.sim_backend.websockets.types.OCPPRepeatingTimedTask;
+import com.sim_backend.websockets.types.OCPPTimedTask;
+import com.sim_backend.websockets.types.TimedTask;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -16,15 +19,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class MessageSchedulerTest {
-  private OCPPWebSocketClient client;
+  @Spy private OCPPWebSocketClient client = new OCPPWebSocketClient(new URI(""));
 
-  @Mock private OCPPTime time;
+  @Spy private OCPPTime time = new OCPPTime(client);
 
   @Mock private OCPPMessage message;
 
   private MessageScheduler scheduler;
+
+  public MessageSchedulerTest() throws URISyntaxException {}
 
   @BeforeEach
   void setUp() throws URISyntaxException {
@@ -92,7 +98,7 @@ public class MessageSchedulerTest {
     long interval = 240L;
     TimeUnit unit = TimeUnit.SECONDS;
 
-    MessageScheduler.TimedTask heartbeatTask = scheduler.setHeartbeatInterval(interval, unit);
+    TimedTask heartbeatTask = scheduler.getTime().setHeartbeatInterval(interval, unit);
 
     assertNotNull(heartbeatTask);
   }
@@ -104,7 +110,7 @@ public class MessageSchedulerTest {
     TimeUnit unit = TimeUnit.SECONDS;
 
     // Register a periodic job
-    MessageScheduler.TimedTask task = scheduler.periodicJob(initialDelay, delay, unit, message);
+    OCPPTimedTask task = scheduler.periodicJob(initialDelay, delay, unit, message);
 
     // Verify the task is scheduled correctly
     assertNotNull(task);
@@ -118,7 +124,7 @@ public class MessageSchedulerTest {
     TimeUnit unit = TimeUnit.SECONDS;
 
     // Register a job with a 5 second delay
-    MessageScheduler.TimedTask task = scheduler.registerJob(delay, unit, message);
+    TimedTask task = scheduler.registerJob(delay, unit, message);
 
     // Verify the task is scheduled correctly
     assertNotNull(task);
@@ -130,7 +136,7 @@ public class MessageSchedulerTest {
     ZonedDateTime specificTime = ZonedDateTime.now().plusMinutes(1);
 
     // Register a job at a specific time
-    MessageScheduler.TimedTask task = scheduler.registerJob(specificTime, message);
+    OCPPTimedTask task = scheduler.registerJob(specificTime, message);
 
     // Verify the task is scheduled correctly
     assertNotNull(task);
@@ -143,8 +149,8 @@ public class MessageSchedulerTest {
     scheduler.tasks.clear();
 
     ZonedDateTime futureTime = ZonedDateTime.now().plusSeconds(15);
-    Runnable taskRunnable = mock(Runnable.class);
-    MessageScheduler.TimedTask task = new MessageScheduler.TimedTask(futureTime, taskRunnable);
+
+    OCPPTimedTask task = new OCPPTimedTask(futureTime, new Heartbeat(), client);
 
     // Add the task manually
     scheduler.tasks.add(task);
@@ -154,7 +160,7 @@ public class MessageSchedulerTest {
     scheduler.tick();
 
     // Verify that the task was executed
-    verify(taskRunnable, times(1)).run();
+    verify(client, times(1)).pushMessage(any(OCPPMessage.class));
   }
 
   @Test
@@ -164,7 +170,7 @@ public class MessageSchedulerTest {
 
     ZonedDateTime futureTime = ZonedDateTime.now().plusSeconds(5);
     Runnable taskRunnable = mock(Runnable.class);
-    MessageScheduler.TimedTask task = new MessageScheduler.TimedTask(futureTime, taskRunnable);
+    OCPPTimedTask task = new OCPPTimedTask(futureTime, new Heartbeat(), client);
 
     // Add the task manually
     scheduler.tasks.add(task);
@@ -180,12 +186,11 @@ public class MessageSchedulerTest {
   void testTickExecutesRepeatingTask() {
     ZonedDateTime initialTime = ZonedDateTime.now().plusSeconds(5);
     long repeatDelay = 10L; // Task repeats every 10 seconds
-    Runnable taskRunnable = mock(Runnable.class);
 
     // Create a repeating task
-    MessageScheduler.RepeatingTimedTask repeatingTask =
-        new MessageScheduler.RepeatingTimedTask(
-            initialTime, repeatDelay, ChronoUnit.SECONDS, taskRunnable);
+    OCPPRepeatingTimedTask repeatingTask =
+        new OCPPRepeatingTimedTask(
+            initialTime, repeatDelay, ChronoUnit.SECONDS, new Heartbeat(), client);
 
     // Add the task manually
     scheduler.tasks.add(repeatingTask);
@@ -195,7 +200,7 @@ public class MessageSchedulerTest {
     scheduler.tick();
 
     // Verify that the task was executed
-    verify(taskRunnable, times(1)).run();
+    verify(client, times(1)).pushMessage(any(OCPPMessage.class));
 
     // Verify that the task is rescheduled with the repeat delay
     assertTrue(

@@ -22,12 +22,17 @@ import lombok.Setter;
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "ChangeConfigurationResponse")
-public class ChangeConfigurationResponse extends OCPPMessageResponse {
+public class ChangeConfigurationResponse extends OCPPMessageResponse implements Cloneable {
   @NotNull(message = "ChangeConfigurationResponse status is required")
   @SerializedName("status")
   private ConfigurationStatus status; // Accepted, NotSupported, Rejected
 
   public ChangeConfigurationResponse(String status) {
     this.status = ConfigurationStatus.fromString(status);
+  }
+
+  @Override
+  protected ChangeConfigurationResponse clone() {
+    return (ChangeConfigurationResponse) super.clone();
   }
 }

@@ -21,7 +21,7 @@ import lombok.Setter;
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "StartTransactionResponse")
-public class StartTransactionResponse extends OCPPMessageResponse {
+public class StartTransactionResponse extends OCPPMessageResponse implements Cloneable {
   @SerializedName("transactionId")
   private int transactionId;
 
@@ -42,5 +42,10 @@ public class StartTransactionResponse extends OCPPMessageResponse {
   public StartTransactionResponse(int transactionId, String idTagInfo) {
     this.transactionId = transactionId;
     this.idTagInfo = new idTagInfo(AuthorizationStatus.fromString(idTagInfo));
+  }
+
+  @Override
+  protected StartTransactionResponse clone() {
+    return (StartTransactionResponse) super.clone();
   }
 }
