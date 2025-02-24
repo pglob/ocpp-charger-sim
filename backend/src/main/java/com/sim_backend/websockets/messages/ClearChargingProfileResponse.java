@@ -9,6 +9,7 @@ import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.ClearProfileStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -24,5 +25,6 @@ public final class ClearChargingProfileResponse extends OCPPMessageResponse {
 
   /** The status of the clear charging profile request. */
   @SerializedName("status")
+  @NotNull(message = "ClearChargingProfile status is required")
   private final ClearProfileStatus status;
 }

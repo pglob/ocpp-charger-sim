@@ -10,6 +10,7 @@ import com.sim_backend.websockets.enums.ChargingProfilePurpose;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -32,6 +33,7 @@ public final class ClearChargingProfile extends OCPPMessageRequest {
 
   /** The purpose of the charging profile to clear. */
   @SerializedName("chargingProfilePurpose")
+  @NotNull(message = "ClearChargingProfile chargingProfilePurpose is required")
   private final ChargingProfilePurpose chargingProfilePurpose;
 
   /** The stack level of the charging profile to clear. */
