@@ -41,6 +41,7 @@ class MessageControllerTest {
   void setUp() throws Exception {
     MockitoAnnotations.openMocks(this);
 
+    when(mockContext.pathParam("chargerId")).thenReturn("1");
     // Allow chaining on the context: ctx.status(…) returns ctx.
     when(mockContext.status(anyInt())).thenReturn(mockContext);
 
@@ -54,7 +55,7 @@ class MessageControllerTest {
     // Stub isRebootInProgress() to be false by default
     when(mockCharger.isRebootInProgress()).thenReturn(false);
 
-    messageController = new MessageController(mockApp, mockCharger);
+    messageController = new MessageController(mockApp, new Charger[] {mockCharger});
   }
 
   @Test
@@ -256,18 +257,18 @@ class MessageControllerTest {
     messageController.registerRoutes(mockApp);
 
     // Assert
-    verify(mockApp).post(eq("/api/message/authorize"), any());
-    verify(mockApp).post(eq("/api/message/boot"), any());
-    verify(mockApp).post(eq("/api/message/heartbeat"), any());
-    verify(mockApp).get(eq("/api/state"), any());
-    verify(mockApp).post(eq("/api/charger/reboot"), any());
-    verify(mockApp).post(eq("/api/state/online"), any());
-    verify(mockApp).post(eq("/api/state/offline"), any());
-    verify(mockApp).post(eq("/api/state/status"), any());
-    verify(mockApp).post(eq("/api/transaction/start-charge"), any());
-    verify(mockApp).post(eq("/api/transaction/stop-charge"), any());
-    verify(mockApp).get(eq("/api/electrical/meter-value"), any());
-    verify(mockApp).get(eq("/api/electrical/max-current"), any());
-    verify(mockApp).get(eq("/api/electrical/current-import"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/message/authorize"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/message/boot"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/message/heartbeat"), any());
+    verify(mockApp).get(eq("/api/{chargerId}/state"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/charger/reboot"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/state/online"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/state/offline"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/state/status"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/transaction/start-charge"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/transaction/stop-charge"), any());
+    verify(mockApp).get(eq("/api/{chargerId}/electrical/meter-value"), any());
+    verify(mockApp).get(eq("/api/{chargerId}/electrical/max-current"), any());
+    verify(mockApp).get(eq("/api/{chargerId}/electrical/current-import"), any());
   }
 }

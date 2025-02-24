@@ -32,7 +32,7 @@ const statusOptions = [
   'Reserved',
 ];
 
-const ErrorMenu = () => {
+const ErrorMenu = ({ chargerID }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [feedbacktype, setFeedbackType] = useState(false);
@@ -89,13 +89,16 @@ const ErrorMenu = () => {
     if (vendorErrorCode.trim()) payload.vendorErrorCode = vendorErrorCode;
 
     // Submit the form data to the backend
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/state/status`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    })
+    fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/api/${chargerID}/state/status`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      }
+    )
       .then((response) => {
         if (!response.ok) {
           return response.text().then((text) => {

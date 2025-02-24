@@ -10,6 +10,10 @@
   padding: 10px;
 }
 
+.charger-container {
+  flex: 1;
+  box-sizing: border-box;
+}
 /* =====================================================
    ChargerFrame Component & Sub-Components Styles
    ===================================================== */

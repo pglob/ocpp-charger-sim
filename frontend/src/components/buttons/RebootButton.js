@@ -1,16 +1,17 @@
 // RebootButton.js
 import React from 'react';
 import ButtonBase from './ButtonBase';
+import PropTypes from 'prop-types';
 
 class RebootButtonLogic extends ButtonBase {
-  constructor() {
-    super('Reboot', '/api/charger/reboot'); // Set button name and endpoint
+  constructor(chargerID) {
+    super('Reboot', `/api/${chargerID}/charger/reboot`); // Set button name and endpoint
   }
 }
 
-const RebootButton = () => {
+const RebootButton = ({ chargerID }) => {
   // Instantiate the logic helper
-  const rebootButton = new RebootButtonLogic();
+  const rebootButton = new RebootButtonLogic(chargerID);
 
   // Define the click handler that uses the logic from ButtonBase
   const handleClick = async () => {
@@ -28,4 +29,7 @@ const RebootButton = () => {
   );
 };
 
+RebootButton.propTypes = {
+  chargerID: PropTypes.number.isRequired,
+};
 export default RebootButton;
