@@ -64,6 +64,14 @@ public class MessageController extends ControllerBase {
     return true;
   }
 
+  private boolean checkStateMachine(Charger charger, Context ctx) {
+    if (charger.getStateMachine() == null) {
+      ctx.status(503).result("Charger is rebooting");
+      return false;
+    }
+    return true;
+  }
+
   private boolean checkElec(Charger charger, Context ctx) {
     if (charger.getElec() == null) {
       ctx.status(503).result("Charger is rebooting");
@@ -127,12 +135,16 @@ public class MessageController extends ControllerBase {
   public void state(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
+    if (!checkStateMachine(charger, ctx)) return;
     ChargerStateMachine stateMachine = charger.getStateMachine();
     if (stateMachine == null) {
       ctx.result("PoweredOff");
       return;
     }
-    ctx.result(stateMachine.getCurrentState().toString());
+    String offlineState = charger.getWsClient().isOnline() ? "" : " (Offline)";
+
+    ctx.result(stateMachine.getCurrentState().toString() + offlineState);
   }
 
   public void reboot(Context ctx) {
@@ -154,8 +166,7 @@ public class MessageController extends ControllerBase {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
     if (!checkWsClient(charger, ctx)) return;
-    if (!checkElec(charger, ctx)) return;
-    if (!checkTransactionHandler(charger, ctx)) return;
+
     charger.getWsClient().goOnline();
     ctx.result("OK");
   }
@@ -164,8 +175,7 @@ public class MessageController extends ControllerBase {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
     if (!checkWsClient(charger, ctx)) return;
-    if (!checkElec(charger, ctx)) return;
-    if (!checkTransactionHandler(charger, ctx)) return;
+
     charger.getWsClient().goOffline();
     ctx.result("OK");
   }
@@ -200,7 +210,10 @@ public class MessageController extends ControllerBase {
       String info = json.has("info") ? json.get("info").getAsString().trim() : null;
       if (info != null && info.isEmpty()) info = null;
 
-      ZonedDateTime timestamp = json.has("timestamp") ? ZonedDateTime.now() : null;
+      ZonedDateTime timestamp =
+          json.has("timestamp")
+              ? charger.getWsClient().getScheduler().getTime().getSynchronizedTime()
+              : null;
 
       String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString().trim() : null;
       if (vendorId != null && vendorId.isEmpty()) vendorId = null;

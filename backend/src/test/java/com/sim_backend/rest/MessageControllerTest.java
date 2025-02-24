@@ -97,12 +97,26 @@ class MessageControllerTest {
   void testState() {
     // Arrange
     when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.PoweredOff);
+    when(mockWsClient.isOnline()).thenReturn(true);
 
     // Act
     messageController.state(mockContext);
 
     // Assert
     verify(mockContext).result("PoweredOff");
+  }
+
+  @Test
+  void testStateOffline() {
+    // Arrange
+    when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.PoweredOff);
+    when(mockWsClient.isOnline()).thenReturn(false);
+
+    // Act
+    messageController.state(mockContext);
+
+    // Assert
+    verify(mockContext).result("PoweredOff (Offline)");
   }
 
   @Test
@@ -160,7 +174,6 @@ class MessageControllerTest {
             + "\"errorCode\": \"NoError\","
             + "\"info\": \"\","
             + "\"status\": \"Available\","
-            + "\"timestamp\": \"2025-02-02T12:00:00Z\","
             + "\"vendorId\": \"\","
             + "\"vendorErrorCode\": \"\""
             + "}";

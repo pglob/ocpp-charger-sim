@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import AuthorizeButton from '../components/buttons/AuthorizeButton';
-import BootButton from '../components/buttons/BootButton';
 import HeartbeatButton from '../components/buttons/HeartbeatButton';
 import ButtonBase from './buttons/ButtonBase';
 import '../styles/styles.css';
@@ -13,10 +12,8 @@ function Button({ chargerID, isOnline, isActive }) {
   // Create instances of each button class
   const buttons = [
     new AuthorizeButton(chargerID),
-    new BootButton(chargerID),
     new HeartbeatButton(chargerID),
   ];
-
   // Handle Bring Online/Take Offline button click behavior
   const handleOnlineOffline = async () => {
     const endpoint = isOnline
@@ -34,35 +31,22 @@ function Button({ chargerID, isOnline, isActive }) {
     }
   };
 
-  // Handle Dropdown menu open/close
-  const handleDropdown = () => {
-    setOpenDropdown(!openDropdown);
-  };
-
   return (
     <div className="button-container">
       {isOnline && isActive && (
         <>
-          {/* Dropdown toggle button */}
-          <button onClick={handleDropdown} className="dropdown-toggle">
-            {openDropdown ? 'Close Menu' : 'Send Messages'}
-          </button>
-
-          {/* Dropdown menu */}
-          {openDropdown && (
-            <div className="dropdown-menu">
-              {/* Render buttons dynamically */}
-              {buttons.map((button) => (
-                <button
-                  key={button.name}
-                  onClick={() => button.postRequest()} // Trigger specific button's postRequest
-                  className="dropdown-button"
-                >
-                  {button.name}
-                </button>
-              ))}
-            </div>
-          )}
+          <div>
+            {/* Render buttons dynamically */}
+            {buttons.map((button) => (
+              <button
+                key={button.name}
+                onClick={() => button.postRequest()} // Trigger specific button's postRequest
+              >
+                {button.name}
+              </button>
+            ))}
+          </div>
+          {/* )} */}
         </>
       )}
 
