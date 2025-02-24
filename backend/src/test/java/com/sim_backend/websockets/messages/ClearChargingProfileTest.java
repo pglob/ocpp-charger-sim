@@ -2,10 +2,15 @@ package com.sim_backend.websockets.messages;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.networknt.schema.InputFormat;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.ValidationMessage;
+import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ChargingProfilePurpose;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +26,7 @@ public class ClearChargingProfileTest {
   }
 
   @Test
-  public void testClearChargingProfileConstructor() {
+  public void testClearChargingProfile() {
 
     // Create the ClearChargingProfile object
     Integer id = 1;
@@ -42,6 +47,19 @@ public class ClearChargingProfileTest {
 
     // Assert that there are no validation errors
     assertTrue(violations.isEmpty(), "Expected no validation violations");
+
+    // Ensure message generation works
+    assert profile.generateMessage().size() == 4;
+    String message = GsonUtilities.toString(profile.generateMessage().get(2));
+
+    // Validate against schema
+    JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/ClearChargingProfile.json");
+    Set<ValidationMessage> errors = jsonSchema.validate(message, InputFormat.JSON);
+    if (!errors.isEmpty()) {
+      for (ValidationMessage error : errors) {
+        System.out.println(error);
+      }
+    }
   }
 
   @Test
