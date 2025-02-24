@@ -31,7 +31,6 @@ public final class Main {
       charger.Boot();
     }
   }
-  
 
   /**
    * Load configuration from environment variables or defaults.
