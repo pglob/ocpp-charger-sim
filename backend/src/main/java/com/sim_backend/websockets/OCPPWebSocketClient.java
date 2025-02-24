@@ -81,8 +81,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   private final List<String> rxMessages = new CopyOnWriteArrayList<>();
 
   /** StatusNotification Observer */
-  private final StatusNotificationObserver statusNotificationObserver =
-      new StatusNotificationObserver(this, null);
+  private final StatusNotificationObserver statusNotificationObserver;
 
   /**
    * Record a transmitted message.
@@ -136,10 +135,13 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @param serverUri The Websocket Address.
    */
-  public OCPPWebSocketClient(final URI serverUri) {
+  public OCPPWebSocketClient(
+      final URI serverUri, StatusNotificationObserver statusNotificationObserver) {
     super(serverUri, new Draft_6455(), headers, CONNECT_TIMEOUT);
     this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
+
+    this.statusNotificationObserver = statusNotificationObserver;
   }
 
   @Override

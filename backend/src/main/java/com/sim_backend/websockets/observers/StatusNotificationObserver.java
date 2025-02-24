@@ -7,16 +7,21 @@ import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.messages.StatusNotification;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 
 /** Observer that handles StatusNotification requests when charger state changes. */
 @AllArgsConstructor
+@Setter
 public class StatusNotificationObserver implements StateObserver {
 
-  private final OCPPWebSocketClient client;
-  private List<StatusNotification> statusNotificationQueue = new ArrayList<>();
+  private OCPPWebSocketClient client;
+  private StatusNotification statusNotificationQueue;
+
+  public StatusNotificationObserver(OCPPWebSocketClient client) {
+    this.client = client;
+    this.statusNotificationQueue = null;
+  }
 
   /**
    * This sends a StatusNotification when State changes. If the client is offline it queues, when
@@ -52,7 +57,7 @@ public class StatusNotificationObserver implements StateObserver {
       client.pushMessage(notification);
     } else {
       System.out.println("Client is Offine... Failed to Send StatusNotification");
-      statusNotificationQueue.add(notification);
+      statusNotificationQueue = notification;
     }
   }
 
@@ -71,12 +76,12 @@ public class StatusNotificationObserver implements StateObserver {
     };
   }
 
-  /** Called in client goOline() function. */
+  /** Called in client goOnline() function. */
   public void onClientGoOnline() {
-    if (!statusNotificationQueue.isEmpty()) {
+    if (statusNotificationQueue != null) {
       System.out.println("Client is back online. Send latest StatusNotification.");
-      client.pushMessage(statusNotificationQueue.get(statusNotificationQueue.size() - 1));
-      statusNotificationQueue.clear();
+      client.pushMessage(statusNotificationQueue);
+      statusNotificationQueue = null;
     }
   }
 }

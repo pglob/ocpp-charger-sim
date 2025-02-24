@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.sim_backend.websockets.messages.Heartbeat;
+import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.types.OCPPMessage;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,13 +25,18 @@ public class MessageSchedulerTest {
 
   @Mock private OCPPMessage message;
 
+  @Mock private StatusNotificationObserver statusNotificationObserver;
+
   private MessageScheduler scheduler;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
     MockitoAnnotations.openMocks(this);
     when(time.getSynchronizedTime()).thenReturn(ZonedDateTime.now());
-    client = spy(new OCPPWebSocketClient(new URI("ws://localhost:8080/sim_backend")));
+    client =
+        spy(
+            new OCPPWebSocketClient(
+                new URI("ws://localhost:8080/sim_backend"), statusNotificationObserver));
     scheduler =
         new MessageScheduler(client) {
           @Override

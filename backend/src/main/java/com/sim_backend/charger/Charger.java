@@ -45,8 +45,8 @@ public class Charger {
   /** A lock to ensure that only one Boot() or Reboot() operation can run at a time */
   private final ReentrantLock bootRebootLock = new ReentrantLock();
 
-  /** The Observer for StatusNotification */
-  private StatusNotificationObserver statusNotificationObserver;
+  private final StatusNotificationObserver statusNotificationObserver =
+      new StatusNotificationObserver(wsClient);
 
   /** Constructs a new Charger instance */
   public Charger() {
@@ -78,7 +78,9 @@ public class Charger {
       // Create the Charger's components
       stateMachine = new ChargerStateMachine();
       elec = new ElectricalTransition(stateMachine);
-      wsClient = new OCPPWebSocketClient(URI.create(config.getCentralSystemUrl()));
+      wsClient =
+          new OCPPWebSocketClient(
+              URI.create(config.getCentralSystemUrl()), statusNotificationObserver);
       transactionHandler = new TransactionHandler(this);
 
       // Create Observers
@@ -87,6 +89,11 @@ public class Charger {
           new ChangeConfigurationObserver(wsClient, config);
       GetConfigurationObserver getConfigurationObserver =
           new GetConfigurationObserver(wsClient, config);
+
+      statusNotificationObserver.setClient(wsClient);
+
+      // Add Observers
+      stateMachine.addObserver(statusNotificationObserver);
 
       // Transition the state machine to the BootingUp state
       stateMachine.transition(ChargerState.BootingUp);

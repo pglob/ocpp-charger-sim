@@ -11,6 +11,7 @@ import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.*;
 import com.sim_backend.websockets.messages.*;
+import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -25,13 +26,14 @@ import org.junit.jupiter.api.Test;
 public class OCPPWebSocketClientTest {
 
   OCPPWebSocketClient client;
+  StatusNotificationObserver statusNotificationObserver;
   MessageQueue queue;
   OnOCPPMessage onOCPPMessageMock;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
     onOCPPMessageMock = mock(OnOCPPMessage.class);
-    client = spy(new OCPPWebSocketClient(new URI("")));
+    client = spy(new OCPPWebSocketClient(new URI(""), statusNotificationObserver));
     queue = mock(MessageQueue.class);
   }
 
@@ -610,7 +612,8 @@ public class OCPPWebSocketClientTest {
     heartbeat.setMessageID(testMsgId);
 
     // Get the MessageQueue from our client
-    OCPPWebSocketClient client = new OCPPWebSocketClient(new java.net.URI("ws://dummy"));
+    OCPPWebSocketClient client =
+        new OCPPWebSocketClient(new java.net.URI("ws://dummy"), statusNotificationObserver);
 
     // Access previousMessages
     Field previousMessagesField = MessageQueue.class.getDeclaredField("previousMessages");
