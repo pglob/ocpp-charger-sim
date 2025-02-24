@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import AuthorizeButton from '../components/buttons/AuthorizeButton';
 import HeartbeatButton from '../components/buttons/HeartbeatButton';

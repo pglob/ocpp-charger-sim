@@ -34,7 +34,7 @@ export const chargerLabels = (chargerID) => [
  */
 export const pollChargerData = (
   chargerID,
-  callback,
+  callback = () => {},
   defaultInterval = 5000,
   stateInterval = 1000
 ) => {
