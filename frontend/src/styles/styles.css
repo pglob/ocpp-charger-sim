@@ -1,3 +1,7 @@
+* {
+  font-family: 'Inter', Arial, sans-serif;
+}
+
 /* =====================================================
    Upper-level containers
    ===================================================== */
@@ -80,6 +84,10 @@
   cursor: pointer;
 }
 
+.button:hover {
+  background-color: #f0f0f0;
+}
+
 /* A square button variant */
 .square-button {
   width: 80px;
@@ -92,22 +100,41 @@
   cursor: pointer;
 }
 
-/* Darken a button when pressed */
-button:active {
-  filter: brightness(85%);
+.square-button:hover {
+  background-color: #f0f0f0; /* Light gray on hover */
 }
 
 /* Container for the Button component */
 .button-container {
   position: relative;
   flex-direction: row;
+  flex-wrap: wrap;
   display: flex;
+}
+
+.other-buttons {
+  cursor: pointer;
+  border: 1.5px solid #000;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.other-buttons:hover {
+  background-color: #f0f0f0;
 }
 
 /* Style for the dropdown button */
 .dropdown-button {
   margin-bottom: 8px;
   margin-left: 12px;
+  cursor: pointer;
+  border: 1.5px solid #000;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.dropdown-button:hover {
+  background-color: #f0f0f0;
 }
 
 /* Style for the ChargerFrame component */
@@ -159,7 +186,7 @@ button:active {
   display: flex;
   align-items: center;
   gap: 10px; /* Space between elements */
-  font-size: 15px;
+  font-size: 14px;
 }
 
 /* NumId label styling */
@@ -208,7 +235,7 @@ button:active {
 }
 
 .message-list {
-  font-size: 14px;
+  font-size: 13px !important;
 }
 
 /* Centered text for empty message list */

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import AuthorizeButton from '../components/buttons/AuthorizeButton';
 import HeartbeatButton from '../components/buttons/HeartbeatButton';
@@ -7,8 +7,6 @@ import '../styles/styles.css';
 
 // Implementation of the button component, which includes a drop-down menu and an online/offline button
 function Button({ chargerID, isOnline, isActive }) {
-  const [openDropdown, setOpenDropdown] = useState(false); // Track dropdown open/close state
-
   // Create instances of each button class
   const buttons = [
     new AuthorizeButton(chargerID),
@@ -41,6 +39,7 @@ function Button({ chargerID, isOnline, isActive }) {
               <button
                 key={button.name}
                 onClick={() => button.postRequest()} // Trigger specific button's postRequest
+                className="other-buttons"
               >
                 {button.name}
               </button>
