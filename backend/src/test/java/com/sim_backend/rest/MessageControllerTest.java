@@ -41,6 +41,7 @@ class MessageControllerTest {
   void setUp() throws Exception {
     MockitoAnnotations.openMocks(this);
 
+    when(mockContext.pathParam("chargerId")).thenReturn("1");
     // Allow chaining on the context: ctx.status(…) returns ctx.
     when(mockContext.status(anyInt())).thenReturn(mockContext);
 
@@ -54,7 +55,7 @@ class MessageControllerTest {
     // Stub isRebootInProgress() to be false by default
     when(mockCharger.isRebootInProgress()).thenReturn(false);
 
-    messageController = new MessageController(mockApp, new Charger[] { mockCharger });
+    messageController = new MessageController(mockApp, new Charger[] {mockCharger});
   }
 
   @Test

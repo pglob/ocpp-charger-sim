@@ -21,7 +21,7 @@ public final class Main {
     Charger charger1 = new Charger();
     Charger charger2 = new Charger();
     Charger charger3 = new Charger();
-    Charger [] chargers = new Charger[] {charger1, charger2, charger3};
+    Charger[] chargers = new Charger[] {charger1, charger2, charger3};
 
     // Register REST API controllers and routes
     registerRoutes(app, chargers);
