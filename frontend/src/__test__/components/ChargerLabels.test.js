@@ -47,7 +47,7 @@ describe('pollChargerData', () => {
 
     const callback = jest.fn();
 
-    const intervals = pollChargerData(callback, 5000, 1000);
+    const intervals = pollChargerData('1', callback, 5000, 1000);
 
     // Advance timers to allow any pending tasks to resolve
     jest.advanceTimersByTime(0);
