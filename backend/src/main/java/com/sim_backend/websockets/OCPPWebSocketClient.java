@@ -6,11 +6,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPBadCallID;
 import com.sim_backend.websockets.exceptions.OCPPBadClass;
+import com.sim_backend.websockets.exceptions.OCPPBadMessage;
 import com.sim_backend.websockets.exceptions.OCPPCannotProcessMessage;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
@@ -25,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
@@ -34,6 +38,13 @@ import org.java_websocket.handshake.ServerHandshake;
 /** A WebSocket client for handling OCPP Messages. */
 @Slf4j
 public class OCPPWebSocketClient extends WebSocketClient {
+
+  @Getter
+  @AllArgsConstructor
+  private static class ParseResults {
+    String MessageType;
+    JsonObject data;
+  }
 
   /** The time to wait to try to reconnect. */
   public static final int CONNECTION_LOST_TIMER = 5;
@@ -89,7 +100,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
     txMessages.add(messageWithTimestamp);
     if (txMessages.size() > 50) {
-      txMessages.remove(0);
+      txMessages.removeFirst();
     }
   }
 
@@ -104,7 +115,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
         message.replaceFirst("\\[", "[\"" + messageName + "\", \"" + timestamp + "\", ");
     rxMessages.add(modifiedMessage);
     if (rxMessages.size() > 50) {
-      rxMessages.remove(0);
+      rxMessages.removeFirst();
     }
   }
 
@@ -162,81 +173,74 @@ public class OCPPWebSocketClient extends WebSocketClient {
       this.handleMessage(s);
     } catch (Exception exception) {
       log.error("Received Bad OCPP Message: ", exception);
+      this.pushCallError(
+          ErrorCode.InternalError, "Charger threw an exception:" + exception.getLocalizedMessage());
     }
   }
 
   /**
    * Handle an OCPP Message.
    *
-   * @param s The received message as a string.
+   * @param json The received message as a string.
    */
   @VisibleForTesting
-  void handleMessage(final String s) throws Exception {
+  void handleMessage(final String json) throws Exception {
     Gson gson = GsonUtilities.getGson();
-    JsonElement element = gson.fromJson(s, JsonElement.class);
+    try {
+      JsonElement element = gson.fromJson(json, JsonElement.class);
 
-    if (!element.isJsonArray()) {
-      throw new JsonParseException("Expected array got " + element);
-    }
-
-    JsonArray array = element.getAsJsonArray();
-    String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
-    String messageName = "";
-    String messageType = "";
-    JsonObject data;
-
-    int callId = array.get(CALL_ID_INDEX).getAsInt();
-    switch (callId) {
-      case OCPPMessage.CALL_ID_REQUEST -> {
-        // handling a simple Call
-        messageName = array.get(NAME_INDEX).getAsString();
-        data = array.get(PAYLOAD_INDEX).getAsJsonObject();
-      }
-      case OCPPMessage.CALL_ID_RESPONSE -> {
-        // handling a CallResult
-        OCPPMessage prevMessage = this.queue.getPreviousMessage(msgId);
-        if (prevMessage == null) {
-          log.warn("Received OCPP response message with an unknown ID {}: {}", msgId, s);
-          throw new OCPPCannotProcessMessage(s, msgId);
-        }
-
-        this.queue.clearPreviousMessage(prevMessage);
-        OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
-        messageName = info.messageName() + "Response";
-        messageType = info.messageName();
-        this.recordRxMessage(s, messageType);
-        data = array.get(PAYLOAD_INDEX - 1).getAsJsonObject();
-      }
-      case OCPPMessage.CALL_ID_ERROR -> {
-        OCPPMessage prevMessage = this.queue.getPreviousMessage(msgId);
-        if (prevMessage == null) {
-          log.warn("Received OCPP error message with an unknown ID {}: {}", msgId, s);
-          throw new OCPPCannotProcessMessage(s, msgId);
-        }
-
-        this.queue.clearPreviousMessage(prevMessage);
-        OCPPMessageError error = new OCPPMessageError(array);
-        error.setErroredMessage(prevMessage);
-        this.handleReceivedMessage(OCPPMessageError.class, error);
-        log.warn("Received OCPPError {}", error.toString());
-        OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
-        messageType = info.messageName();
-        this.recordRxMessage(s, messageType);
+      if (element == null) {
+        this.pushCallError(ErrorCode.FormatViolation, "Provided empty string");
         return;
       }
-      default -> throw new OCPPBadCallID(callId, s);
-    }
 
-    // We found our class
-    Class<?> messageClass = OCPPMessage.getMessageByName(messageName);
-    if (messageClass == null) {
-      log.warn("Could not find matching class for message name {}: {}", messageName, s);
-      throw new OCPPUnsupportedMessage(s, messageName);
-    }
+      if (!element.isJsonArray()) {
+        this.pushCallError(ErrorCode.FormatViolation, "Root Element should be an array");
+        throw new JsonParseException("Expected array got " + element);
+      }
 
-    OCPPMessage message = (OCPPMessage) gson.fromJson(data, messageClass);
-    message.setMessageID(msgId);
-    this.handleReceivedMessage(messageClass, message);
+      JsonArray array = element.getAsJsonArray();
+      String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
+
+      ParseResults results;
+
+      int callId = array.get(CALL_ID_INDEX).getAsInt();
+      switch (callId) {
+        case OCPPMessage.CALL_ID_REQUEST -> results = this.parseOCPPRequest(json, msgId, array);
+
+        case OCPPMessage.CALL_ID_RESPONSE -> results = this.parseOCPPResponse(json, msgId, array);
+
+        case OCPPMessage.CALL_ID_ERROR -> {
+          this.handleOCPPMessageError(json, msgId, array);
+          return;
+        }
+
+        default -> {
+          this.pushCallError(ErrorCode.PropertyConstraintViolation, "Provided bad Call ID", msgId);
+          throw new OCPPBadCallID(callId, json);
+        }
+      }
+
+      if (results == null) {
+        return;
+      }
+
+      Class<?> messageClass = OCPPMessage.getMessageByName(results.getMessageType());
+      if (messageClass == null) {
+        log.warn(
+            "Could not find matching class for message name {}: {}",
+            results.getMessageType(),
+            json);
+        this.pushCallError(ErrorCode.NotSupported, "Unsupported action", msgId);
+        throw new OCPPUnsupportedMessage(json, results.getMessageType());
+      }
+
+      OCPPMessage message = (OCPPMessage) gson.fromJson(results.getData(), messageClass);
+      message.setMessageID(msgId);
+      this.handleReceivedMessage(messageClass, message);
+    } catch (JsonSyntaxException exception) {
+      this.pushCallError(ErrorCode.FormatViolation, exception.getLocalizedMessage());
+    }
   }
 
   @Override
@@ -244,6 +248,147 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
   @Override
   public void onError(Exception e) {}
+
+  /**
+   * Parse a received OCPPRequest to extract its type and data.
+   *
+   * @param json The full message json.
+   * @param msgId The received message ID.
+   * @param array The JSONArray we received.
+   * @return The parsed results.
+   */
+  private ParseResults parseOCPPRequest(String json, String msgId, JsonArray array) {
+    if (array.size() != 4) {
+      this.pushCallError(
+          ErrorCode.OccurenceConstraintViolation,
+          "Request provided wrong number of array elements",
+          msgId);
+      throw new OCPPBadMessage("Request had invalid array length");
+    }
+
+    if (!array.get(PAYLOAD_INDEX).isJsonObject()) {
+      this.pushCallError(
+          ErrorCode.PropertyConstraintViolation, "Request details was not a json object", msgId);
+      return null;
+    }
+
+    String messageName = array.get(NAME_INDEX).getAsString();
+    return new ParseResults(messageName, array.get(PAYLOAD_INDEX).getAsJsonObject());
+  }
+
+  /**
+   * Parse an OCPPResponse to extract it's Json object and the given type of message.
+   *
+   * @param json The full message json.
+   * @param msgId The message ID.
+   * @param array The array of data.
+   * @return The parsed results.
+   * @throws OCPPCannotProcessMessage No previously sent messages found with a matching ID.
+   */
+  private ParseResults parseOCPPResponse(String json, String msgId, JsonArray array)
+      throws OCPPCannotProcessMessage {
+    if (array.size() != 3) {
+      this.pushCallError(
+          ErrorCode.OccurenceConstraintViolation,
+          "Response provided wrong number of array elements",
+          msgId);
+      throw new OCPPBadMessage("Response had invalid array length");
+    }
+
+    OCPPMessage prevMessage = this.queue.getPreviousMessage(msgId);
+    if (prevMessage == null) {
+      this.pushCallError(ErrorCode.ProtocolError, "Received Response with an unknown ID", msgId);
+      log.warn("Received OCPP response message with an unknown ID {}: {}", msgId, json);
+      throw new OCPPCannotProcessMessage(json, msgId);
+    }
+
+    if (!array.get(PAYLOAD_INDEX - 1).isJsonObject()) {
+      this.pushCallError(
+          ErrorCode.PropertyConstraintViolation, "Response details was not a json object", msgId);
+      return null;
+    }
+
+    this.queue.clearPreviousMessage(prevMessage);
+    OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
+
+    String messageName = info.messageName() + "Response";
+    this.recordRxMessage(json, info.messageName());
+    return new ParseResults(messageName, array.get(PAYLOAD_INDEX - 1).getAsJsonObject());
+  }
+
+  /**
+   * Handle a received OCPPMessageError.
+   *
+   * @param json The full message json.
+   * @param msgId The message ID.
+   * @param array The array of data.
+   * @throws OCPPCannotProcessMessage No previously sent messages found with a matching ID.
+   */
+  private void handleOCPPMessageError(String json, String msgId, JsonArray array)
+      throws OCPPCannotProcessMessage {
+    if (array.size() != 5) {
+      this.pushCallError(
+          ErrorCode.OccurenceConstraintViolation,
+          "Error provided wrong number of array elements",
+          msgId);
+      throw new OCPPBadMessage("Error had invalid array length");
+    }
+
+    OCPPMessage prevMessage = this.queue.getPreviousMessage(msgId);
+    if (prevMessage == null) {
+      this.pushCallError(ErrorCode.ProtocolError, "Received Error with an unknown ID", msgId);
+      log.warn("Received OCPP error message with an unknown ID {}: {}", msgId, json);
+      throw new OCPPCannotProcessMessage(json, msgId);
+    }
+
+    try {
+      if (!array.get(OCPPMessageError.DETAIL_INDEX).isJsonObject()) {
+        this.pushCallError(
+            ErrorCode.PropertyConstraintViolation, "Error details was not a json object", msgId);
+
+        return;
+      }
+
+      this.queue.clearPreviousMessage(prevMessage);
+      OCPPMessageError error =
+          new OCPPMessageError(
+              ErrorCode.valueOf(array.get(OCPPMessageError.CODE_INDEX).getAsString()),
+              array.get(OCPPMessageError.DESCRIPTION_INDEX).getAsString(),
+              array.get(OCPPMessageError.DETAIL_INDEX).getAsJsonObject());
+      error.setMessageID(msgId);
+      error.setErroredMessage(prevMessage);
+      this.handleReceivedMessage(OCPPMessageError.class, error);
+      log.warn("Received OCPPError {}", error);
+      OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
+      this.recordRxMessage(json, info.messageName());
+    } catch (IllegalArgumentException exception) {
+      this.pushCallError(
+          ErrorCode.PropertyConstraintViolation, "Received Unknown Error Code", msgId);
+    }
+  }
+
+  /**
+   * Push an OCPPMessageError to the stack.
+   *
+   * @param code The ErrorCode.
+   * @param description The error's description.
+   */
+  public void pushCallError(ErrorCode code, String description) {
+    this.pushMessage(new OCPPMessageError(code, description, new JsonObject()));
+  }
+
+  /**
+   * Push an OCPPMessageError to the stack.
+   *
+   * @param code The ErrorCode.
+   * @param description The error's description.
+   * @param msgID The message ID to send the error with.
+   */
+  public void pushCallError(ErrorCode code, String description, String msgID) {
+    OCPPMessageError error = new OCPPMessageError(code, description, new JsonObject());
+    error.setMessageID(msgID);
+    this.pushMessage(error);
+  }
 
   /**
    * Helper function for when we receive an OCPP message. This is not for registering a listener.

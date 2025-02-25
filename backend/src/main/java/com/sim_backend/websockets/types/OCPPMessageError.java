@@ -16,16 +16,16 @@ import lombok.extern.slf4j.Slf4j;
 public class OCPPMessageError extends OCPPMessage implements Cloneable {
 
   /** The message id index in a received JsonArray. */
-  private static final int MESSAGE_ID_INDEX = 1;
+  public static final int MESSAGE_ID_INDEX = 1;
 
   /** The error code index in a received JsonArray. */
-  private static final int CODE_INDEX = 2;
+  public static final int CODE_INDEX = 2;
 
   /** The description index in a received JsonArray. */
-  private static final int DESCRIPTION_INDEX = 3;
+  public static final int DESCRIPTION_INDEX = 3;
 
   /** The error details index in a received JsonArray. */
-  private static final int DETAIL_INDEX = 4;
+  public static final int DETAIL_INDEX = 4;
 
   /** The given error code. */
   private final transient ErrorCode errorCode;
@@ -52,19 +52,6 @@ public class OCPPMessageError extends OCPPMessage implements Cloneable {
     this.errorCode = errCode;
     this.errorDescription = errDescription;
     this.errorDetails = details;
-  }
-
-  /**
-   * Creates an OCPP error object given a JsonArray.
-   *
-   * @param array The given json array.
-   */
-  public OCPPMessageError(final JsonArray array) {
-    super();
-    this.messageID = array.get(MESSAGE_ID_INDEX).getAsString();
-    this.errorCode = ErrorCode.valueOf(array.get(CODE_INDEX).getAsString());
-    this.errorDescription = array.get(DESCRIPTION_INDEX).getAsString();
-    this.errorDetails = array.get(DETAIL_INDEX).getAsJsonObject();
   }
 
   /**
