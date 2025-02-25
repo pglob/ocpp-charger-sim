@@ -731,5 +731,18 @@ public class OCPPWebSocketClientTest {
     assertNotNull(error);
     assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
     assertEquals("Error details was not a json object", error.getErrorDescription());
+
+    client.addPreviousMessage(beat);
+    client.handleMessage("[3,\"heartbeat\", 2]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Response details was not a json object", error.getErrorDescription());
+
+    client.handleMessage("[2,\"heartbeat\", \"Heartbeat\", 2]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Request details was not a json object", error.getErrorDescription());
   }
 }
