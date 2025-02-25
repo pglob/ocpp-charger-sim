@@ -272,7 +272,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
 
     String messageName = array.get(NAME_INDEX).getAsString();
-    this.recordRxMessage(json, messageName);
     return new ParseResults(messageName, array.get(PAYLOAD_INDEX).getAsJsonObject());
   }
 
@@ -312,7 +311,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
 
     String messageName = info.messageName() + "Response";
-    this.recordRxMessage(json, messageName);
+    this.recordRxMessage(json, info.messageName());
     return new ParseResults(messageName, array.get(PAYLOAD_INDEX - 1).getAsJsonObject());
   }
 
@@ -359,7 +358,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
       error.setErroredMessage(prevMessage);
       this.handleReceivedMessage(OCPPMessageError.class, error);
       log.warn("Received OCPPError {}", error);
-      this.recordRxMessage(json, "OCPPMessageError");
+      OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
+      this.recordRxMessage(json, info.messageName());
     } catch (IllegalArgumentException exception) {
       this.pushCallError(
           ErrorCode.PropertyConstraintViolation, "Received Unknown Error Code", msgId);
