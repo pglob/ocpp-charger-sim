@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.OCPPWebSocketClientTest.TestOCPPWebSocketClient;
+import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;

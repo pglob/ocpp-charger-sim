@@ -23,7 +23,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 public class MessageSchedulerTest {
-  
+
   @Spy private TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(new URI(""));
 
   @Spy private OCPPTime time = new OCPPTime(client);
