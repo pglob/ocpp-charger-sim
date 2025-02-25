@@ -19,19 +19,39 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.net.SocketFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class OCPPWebSocketClientTest {
 
-  OCPPWebSocketClient client;
+  public static class TestOCPPWebSocketClient extends OCPPWebSocketClient {
+    public TestOCPPWebSocketClient(URI serverUri) {
+      super(serverUri);
+    }
+
+    @Override
+    public void startConnectionLostTimer() {}
+
+    @Override
+    public boolean connectBlocking() throws InterruptedException {
+      return true;
+    }
+
+    @Override
+    public boolean reconnectBlocking() throws InterruptedException {
+      return true;
+    }
+  }
+
+  TestOCPPWebSocketClient client;
   MessageQueue queue;
   OnOCPPMessage onOCPPMessageMock;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
     onOCPPMessageMock = mock(OnOCPPMessage.class);
-    client = spy(new OCPPWebSocketClient(new URI("")));
+    client = spy(new TestOCPPWebSocketClient(new URI("")));
     queue = mock(MessageQueue.class);
   }
 
@@ -611,7 +631,7 @@ public class OCPPWebSocketClientTest {
     heartbeat.setMessageID(testMsgId);
 
     // Get the MessageQueue from our client
-    OCPPWebSocketClient client = new OCPPWebSocketClient(new java.net.URI("ws://dummy"));
+    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(new java.net.URI("ws://dummy"));
 
     // Access previousMessages
     Field previousMessagesField = MessageQueue.class.getDeclaredField("previousMessages");
@@ -745,5 +765,43 @@ public class OCPPWebSocketClientTest {
     assertNotNull(error);
     assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
     assertEquals("Request details was not a json object", error.getErrorDescription());
+  }
+
+  @Test
+  void testWssSchemeSetsSniSSLSocketFactory()
+      throws URISyntaxException, NoSuchFieldException, IllegalAccessException {
+    // Given a "wss" URI
+    URI wssUri = new URI("wss://example.com:12345");
+
+    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(wssUri);
+
+    // Verify the WebSocketClient's 'socketFactory' is SniSSLSocketFactory
+    Field socketFactoryField = getSocketFactoryField();
+    SocketFactory actualFactory = (SocketFactory) socketFactoryField.get(client);
+    assertNotNull(actualFactory, "Expected socketFactory to be initialized for wss");
+    assertTrue(
+        actualFactory instanceof SniSSLSocketFactory,
+        "Expected a SniSSLSocketFactory when using a wss:// URI");
+  }
+
+  @Test
+  void testNonWssSchemeDoesNotSetSniSSLSocketFactory()
+      throws URISyntaxException, NoSuchFieldException, IllegalAccessException {
+    // Given a "ws" URI
+    URI wsUri = new URI("ws://example.com:12345");
+
+    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(wsUri);
+
+    // Verify the WebSocketClient's 'socketFactory' is not SniSSLSocketFactory
+    Field socketFactoryField = getSocketFactoryField();
+    SocketFactory actualFactory = (SocketFactory) socketFactoryField.get(client);
+    assertNull(actualFactory, "Expected socketFactory to be uninitialized for ws");
+  }
+
+  /** Helper to get the `socketFactory` field from the parent WebSocketClient class. */
+  private Field getSocketFactoryField() throws NoSuchFieldException {
+    Field field = org.java_websocket.client.WebSocketClient.class.getDeclaredField("socketFactory");
+    field.setAccessible(true);
+    return field;
   }
 }

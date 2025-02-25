@@ -52,5 +52,6 @@ public class StopTransactionHandler {
     // No listener is used here since a Central System cannot prevent a transaction from stopping
     System.out.println("Stop Transaction Completed...");
     stateMachine.transition(ChargerState.Available);
+    stopInProgress.set(false);
   }
 }
