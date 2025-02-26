@@ -195,6 +195,7 @@ public class MessageController extends ControllerBase {
           .getStatusNotificationObserver()
           .sendStatusNotification(
               connectorId, errorCode, info, status, timestamp, vendorId, vendorErrorCode);
+
       ctx.result("OK");
 
     } catch (Exception e) {

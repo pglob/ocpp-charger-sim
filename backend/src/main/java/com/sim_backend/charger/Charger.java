@@ -45,8 +45,7 @@ public class Charger {
   /** A lock to ensure that only one Boot() or Reboot() operation can run at a time */
   private final ReentrantLock bootRebootLock = new ReentrantLock();
 
-  private final StatusNotificationObserver statusNotificationObserver =
-      new StatusNotificationObserver(wsClient);
+  private StatusNotificationObserver statusNotificationObserver;
 
   /** Constructs a new Charger instance */
   public Charger() {
@@ -75,6 +74,7 @@ public class Charger {
       return;
     }
     try {
+      statusNotificationObserver = new StatusNotificationObserver();
       // Create the Charger's components
       stateMachine = new ChargerStateMachine();
       elec = new ElectricalTransition(stateMachine);
@@ -89,8 +89,6 @@ public class Charger {
           new ChangeConfigurationObserver(wsClient, config);
       GetConfigurationObserver getConfigurationObserver =
           new GetConfigurationObserver(wsClient, config);
-
-      statusNotificationObserver.setClient(wsClient);
 
       // Add Observers
       stateMachine.addObserver(statusNotificationObserver);

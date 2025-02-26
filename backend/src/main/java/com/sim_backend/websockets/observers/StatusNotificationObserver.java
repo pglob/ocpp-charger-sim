@@ -8,15 +8,15 @@ import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.messages.StatusNotification;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
-import lombok.Setter;
 
 /** Observer that handles StatusNotification requests when charger state changes. */
 @AllArgsConstructor
-@Setter
 public class StatusNotificationObserver implements StateObserver {
 
   private OCPPWebSocketClient client;
   private StatusNotification statusNotificationQueue;
+
+  public StatusNotificationObserver() {}
 
   public StatusNotificationObserver(OCPPWebSocketClient client) {
     this.client = client;
@@ -55,6 +55,7 @@ public class StatusNotificationObserver implements StateObserver {
 
     if (client.isOnline()) {
       client.pushMessage(notification);
+      statusNotificationQueue = null;
     } else {
       System.out.println("Client is Offine... Failed to Send StatusNotification");
       statusNotificationQueue = notification;
