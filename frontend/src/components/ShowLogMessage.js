@@ -222,8 +222,8 @@ const ShowLogMessages = ({ chargerID }) => {
     fetchData(); // Fetch once when the component mounts
 
     const interval = setInterval(() => {
-      fetchData(); // Refetch every 10 seconds (or set your preferred interval)
-    }, 10000);
+      fetchData(); // Refetch every 5 seconds
+    }, 5000);
 
     return interval;
   };
