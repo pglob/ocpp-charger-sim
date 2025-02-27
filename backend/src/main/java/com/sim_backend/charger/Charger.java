@@ -89,6 +89,7 @@ public class Charger {
           new ChangeConfigurationObserver(wsClient, config);
       GetConfigurationObserver getConfigurationObserver =
           new GetConfigurationObserver(wsClient, config);
+      statusNotificationObserver.setClient(wsClient);
 
       // Add Observers
       stateMachine.addObserver(statusNotificationObserver);

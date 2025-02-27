@@ -8,9 +8,11 @@ import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.messages.StatusNotification;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 
 /** Observer that handles StatusNotification requests when charger state changes. */
 @AllArgsConstructor
+@Setter
 public class StatusNotificationObserver implements StateObserver {
 
   private OCPPWebSocketClient client;
