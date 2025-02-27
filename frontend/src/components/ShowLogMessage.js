@@ -107,7 +107,28 @@ const ShowLogMessages = ({ chargerID }) => {
   const parseMessage = (message) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
-      const [TimeStamp, NumId, messageId, messageName, payload] = parsedMessage;
+      let TimeStamp, NumId, messageId, messageName, payload, description;
+      let hasConfigurationKey = false;
+      let hasObject = false;
+      if (
+        Object.prototype.hasOwnProperty.call(
+          parsedMessage[3],
+          'configurationKey'
+        )
+      ) {
+        hasConfigurationKey = true;
+        [TimeStamp, NumId, messageId, payload] = parsedMessage;
+        messageName = 'configurationKey';
+      } else {
+        if (typeof parsedMessage[4] !== 'object') {
+          [TimeStamp, NumId, messageId, messageName, description, payload] =
+            parsedMessage;
+        } else {
+          [TimeStamp, NumId, messageId, messageName, payload] = parsedMessage;
+          hasObject = true;
+        }
+      }
+
       const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
@@ -140,11 +161,29 @@ const ShowLogMessages = ({ chargerID }) => {
               <p>
                 <strong>Message ID:</strong> {messageId}
               </p>
-              {Object.entries(payload).map(([key, value]) => (
-                <p key={key}>
-                  <strong>{key}:</strong> {renderDeep(value)}
-                </p>
-              ))}
+
+              {hasConfigurationKey ? (
+                // Render all payload entries
+                Object.entries(payload.configurationKey[0]).map(
+                  ([key, value]) => (
+                    <p key={key}>
+                      <strong>{key}:</strong> {renderDeep(value)}
+                    </p>
+                  )
+                )
+              ) : hasObject ? (
+                Object.entries(payload).map(([key, value]) => (
+                  <p key={key}>
+                    <strong>{key}:</strong> {renderDeep(value)}
+                  </p>
+                ))
+              ) : (
+                <>
+                  <p>
+                    <strong>Description:</strong> {description}
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -158,7 +197,16 @@ const ShowLogMessages = ({ chargerID }) => {
   const parseReceivedMessage = (message) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
-      const [messageName, TimeStamp, NumId, messageId, payload] = parsedMessage;
+      let messageName, TimeStamp, NumId, messageId, type, payload;
+      if (parsedMessage.length === 6) {
+        [messageName, TimeStamp, NumId, messageId, type, payload] =
+          parsedMessage;
+        console.log('Request received message: {}', type);
+      }
+
+      if (parsedMessage.length === 5) {
+        [messageName, TimeStamp, NumId, messageId, payload] = parsedMessage;
+      }
       const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
