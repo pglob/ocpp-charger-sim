@@ -79,7 +79,7 @@ public class ChangeConfigurationObserver implements OnOCPPMessageListener {
     }
 
     ChangeConfigurationResponse response = new ChangeConfigurationResponse(status);
-
+    response.setMessageID(request.getMessageID());
     if (!MessageValidator.isValid(response)) {
       throw new IllegalArgumentException(MessageValidator.log_message(response));
     } else {

@@ -86,6 +86,7 @@ public class GetConfigurationObserver implements OnOCPPMessageListener {
 
     GetConfigurationResponse response =
         new GetConfigurationResponse(configurationInfo, unknownKeys);
+    response.setMessageID(request.getMessageID());
 
     if (!MessageValidator.isValid(response)) {
       throw new IllegalArgumentException(MessageValidator.log_message(response));
