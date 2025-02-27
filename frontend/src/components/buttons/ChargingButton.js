@@ -11,6 +11,9 @@ class ChargingButtonLogic extends ButtonBase {
     } else if (stateValue.includes('Available')) {
       // If available, offer to start charging
       super('Start Charging', `/api/${chargerID}/transaction/start-charge`);
+    } else if (stateValue.includes('Faulted')) {
+      // If Faulted, offer to clear the fault
+      super('Clear Fault', `/api/${chargerID}/charger/clear-fault`);
     } else {
       super('Unavailable', '');
     }
@@ -18,10 +21,12 @@ class ChargingButtonLogic extends ButtonBase {
 }
 
 const ChargingButton = ({ chargerID, stateValue }) => {
-  // Hide the button if the state is neither "Charging" nor "Available"
+  // Hide the button if the state is not "Charging", "Available" or "Faulted"
   if (
     !stateValue ||
-    (!stateValue.includes('Charging') && !stateValue.includes('Available'))
+    (!stateValue.includes('Charging') &&
+      !stateValue.includes('Available') &&
+      !stateValue.includes('Faulted'))
   ) {
     return null;
   }

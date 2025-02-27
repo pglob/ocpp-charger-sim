@@ -5,6 +5,7 @@ import ChargingButton from './buttons/ChargingButton';
 import '../styles/styles.css';
 import { pollChargerData } from './ChargerLabels';
 import RebootButton from './buttons/RebootButton';
+import ErrorMenu from './ErrorMenu';
 import ConfigGear from './ConfigIdTagUrl';
 import PropTypes from 'prop-types';
 
@@ -62,6 +63,7 @@ function ChargerFrame({ chargerID }) {
       <div className="config-button-container">
         <ConfigGear chargerID={chargerID} />
       </div>
+      <ErrorMenu chargerID={chargerID} />
     </div>
   );
 }
