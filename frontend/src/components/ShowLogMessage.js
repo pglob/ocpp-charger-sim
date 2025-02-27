@@ -108,7 +108,11 @@ const ShowLogMessages = ({ chargerID }) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
       let TimeStamp, NumId, messageId, messageName, payload, description;
+
+      //check if it is GetConfiguration
       let hasConfigurationKey = false;
+
+      //check if it is error
       let hasObject = false;
       if (
         Object.prototype.hasOwnProperty.call(
@@ -121,6 +125,7 @@ const ShowLogMessages = ({ chargerID }) => {
         messageName = 'configurationKey';
       } else {
         if (typeof parsedMessage[4] !== 'object') {
+          // error message
           [TimeStamp, NumId, messageId, messageName, description, payload] =
             parsedMessage;
         } else {
@@ -198,22 +203,25 @@ const ShowLogMessages = ({ chargerID }) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
       let messageName, TimeStamp, NumId, messageId, type, payload;
+
+      //CALL_ID_REQUEST
       if (parsedMessage.length === 6) {
         [messageName, TimeStamp, NumId, messageId, type, payload] =
           parsedMessage;
         console.log('Request received message: {}', type);
       }
 
+      //CALL_ID_RESPONSE
       if (parsedMessage.length === 5) {
         [messageName, TimeStamp, NumId, messageId, payload] = parsedMessage;
       }
+
       const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         second: '2-digit',
         hour12: true,
       });
-
       const numIdLabel = getNumIdLabel(NumId);
       const numIdStyle = getNumIdStyle(NumId); // Apply dynamic styling
 
