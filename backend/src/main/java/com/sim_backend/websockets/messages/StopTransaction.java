@@ -2,6 +2,7 @@ package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
+import com.sim_backend.websockets.enums.Reason;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import jakarta.validation.constraints.NotNull;
@@ -35,12 +36,33 @@ public class StopTransaction extends OCPPMessageRequest implements Cloneable {
   @SerializedName("timestamp")
   private String timestamp;
 
-  // Constructor
+  @SerializedName("reason")
+  private Reason reason;
+
+  // Constructor with no reason and no idTag
   public StopTransaction(String idTag, int transactionId, int meterStop, String timestamp) {
     this.idTag = idTag;
     this.transactionId = transactionId;
     this.meterStop = meterStop;
     this.timestamp = timestamp;
+  }
+
+  // Constructor with reason and no idTag
+  public StopTransaction(int transactionId, int meterStop, String timestamp, Reason reason) {
+    this.transactionId = transactionId;
+    this.meterStop = meterStop;
+    this.timestamp = timestamp;
+    this.reason = reason;
+  }
+
+  // Constructor with idTag and reason
+  public StopTransaction(
+      String idTag, int transactionId, int meterStop, String timestamp, Reason reason) {
+    this.idTag = idTag;
+    this.transactionId = transactionId;
+    this.meterStop = meterStop;
+    this.timestamp = timestamp;
+    this.reason = reason;
   }
 
   @Override

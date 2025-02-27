@@ -6,6 +6,7 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.AuthorizationStatus;
+import com.sim_backend.websockets.enums.Reason;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.Authorize;
@@ -72,8 +73,9 @@ public class TransactionHandler {
    *
    * @param connectorId the identifier of the connector to be used
    * @param idTag the user identification tag
+   * @param reason the reason for stopping the charging session. Leave null if not applicable
    */
-  public void preAuthorize(int connectorId, String idTag) {
+  public void preAuthorize(int connectorId, String idTag, Reason reason) {
     Authorize authorizeMessage = new Authorize(idTag);
     client.pushMessage(authorizeMessage);
 
@@ -94,17 +96,20 @@ public class TransactionHandler {
                 TransactionHandler.this.idTag = idTag;
               } else if (stateMachine.getCurrentState() == ChargerState.Charging) {
                 stopHandler.initiateStopTransaction(
-                    transactionId.get(), idTag, elec, stopInProgress);
+                    idTag, reason, transactionId, elec, stopInProgress);
               } else {
                 System.err.println(
                     "Invalid State Detected... Current State: " + stateMachine.getCurrentState());
+                startInProgress.set(false);
+                stopInProgress.set(false);
               }
             } else {
               System.err.println(
                   "Authorize Denied... Status: " + response.getIdTagInfo().getStatus());
               startInProgress.set(false);
               stopInProgress.set(false);
-              stateMachine.transition(ChargerState.Available);
+              // If charging, do not stop charging on an authorization failure
+              stateMachine.checkAndTransition(ChargerState.Preparing, ChargerState.Available);
             }
           }
 
@@ -114,7 +119,7 @@ public class TransactionHandler {
             System.err.println("Authorization timeout. Resetting transaction state.");
             startInProgress.set(false);
             stopInProgress.set(false);
-            stateMachine.transition(ChargerState.Available);
+            stateMachine.checkAndTransition(ChargerState.Preparing, ChargerState.Available);
           }
         };
 
@@ -132,7 +137,7 @@ public class TransactionHandler {
    * @param connectorId the identifier of the connector to be used
    * @param idTag the user identification tag
    */
-  public void StartCharging(int connectorId, String idTag) {
+  public void startCharging(int connectorId, String idTag) {
     if (stateMachine.getCurrentState() != ChargerState.Available || startInProgress.get()) {
       return;
     }
@@ -142,8 +147,11 @@ public class TransactionHandler {
       return;
     }
 
-    stateMachine.transition(ChargerState.Preparing);
-    preAuthorize(connectorId, idTag);
+    if (stateMachine.checkAndTransition(ChargerState.Available, ChargerState.Preparing)) {
+      preAuthorize(connectorId, idTag, null);
+    } else {
+      startInProgress.set(false);
+    }
   }
 
   /**
@@ -154,8 +162,9 @@ public class TransactionHandler {
    * authorized idTag, or it will initiate pre-authorization if the idTags differ.
    *
    * @param idTag the user identification tag
+   * @param reason the reason for stopping the charging session (can be null if Local)
    */
-  public void StopCharging(String idTag) {
+  public void stopCharging(String idTag, Reason reason) {
     if (stateMachine.getCurrentState() != ChargerState.Charging || stopInProgress.get()) {
       return;
     }
@@ -166,9 +175,33 @@ public class TransactionHandler {
     }
 
     if (idTag == null || this.idTag.equals(idTag)) {
-      stopHandler.initiateStopTransaction(transactionId.get(), idTag, elec, stopInProgress);
+      stopHandler.initiateStopTransaction(idTag, reason, transactionId, elec, stopInProgress);
     } else {
-      preAuthorize(-1, idTag);
+      preAuthorize(-1, idTag, reason);
     }
+  }
+
+  /**
+   * Stops a charging session without an idTag (due to error or reboot)
+   *
+   * <p>If the charger is in the Charging state and no stop transaction is already in progress, this
+   * method will directly stop the charging process without authorization.
+   *
+   * @param reason the reason for stopping the charging session
+   */
+  public void forceStopCharging(Reason reason) {
+    if ((stateMachine.getCurrentState() != ChargerState.Charging
+                && stateMachine.getCurrentState() != ChargerState.Faulted
+            || transactionId.get() == -1)
+        || stopInProgress.get()) {
+      return;
+    }
+
+    // Attempt to set the stopInProgress flag
+    if (!stopInProgress.compareAndSet(false, true)) {
+      return;
+    }
+
+    stopHandler.initiateStopTransaction(null, reason, transactionId, elec, stopInProgress);
   }
 }

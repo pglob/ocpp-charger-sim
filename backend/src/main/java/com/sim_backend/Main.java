@@ -28,7 +28,7 @@ public final class Main {
 
     // Start the charger
     for (Charger charger : chargers) {
-      charger.Boot();
+      charger.boot();
     }
   }
 

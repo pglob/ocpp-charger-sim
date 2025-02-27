@@ -158,7 +158,7 @@ public class MessageController extends ControllerBase {
     if (!checkWsClient(charger, ctx)) return;
     if (!checkElec(charger, ctx)) return;
     if (!checkTransactionHandler(charger, ctx)) return;
-    charger.Reboot();
+    charger.reboot();
     ctx.result("OK");
   }
 
@@ -184,12 +184,13 @@ public class MessageController extends ControllerBase {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
     if (!checkWsClient(charger, ctx)) return;
+    if (!checkStateMachine(charger, ctx)) return;
 
     String requestBody = ctx.body();
     JsonObject json = JsonParser.parseString(requestBody).getAsJsonObject();
 
-    if (!json.has("connectorId") || !json.has("errorCode") || !json.has("status")) {
-      ctx.status(400).result("Missing required fields: connectorId, errorCode, status");
+    if (!json.has("connectorId") || !json.has("errorCode")) {
+      ctx.status(400).result("Missing required fields: connectorId, errorCode");
       return;
     }
 
@@ -202,10 +203,6 @@ public class MessageController extends ControllerBase {
       String errorCodeStr = json.get("errorCode").getAsString().trim();
       ChargePointErrorCode errorCode =
           ChargePointErrorCode.valueOf(errorCodeStr); // if not valid, it will throw exception
-
-      String statusStr = json.get("status").getAsString().trim();
-      ChargePointStatus status =
-          ChargePointStatus.valueOf(statusStr); // //if not valid, it will throw exception
 
       String info = json.has("info") ? json.get("info").getAsString().trim() : null;
       if (info != null && info.isEmpty()) info = null;
@@ -222,6 +219,13 @@ public class MessageController extends ControllerBase {
           json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString().trim() : null;
       if (vendorErrorCode != null && vendorErrorCode.isEmpty()) vendorErrorCode = null;
 
+      if (errorCode != ChargePointErrorCode.NoError) {
+        charger.fault(errorCode);
+      }
+
+      ChargePointStatus status =
+          ChargePointStatus.fromString(charger.getStateMachine().getCurrentState().toString());
+
       charger
           .getStatusNotificationObserver()
           .sendStatusNotification(
@@ -230,7 +234,17 @@ public class MessageController extends ControllerBase {
       ctx.result("OK");
 
     } catch (Exception e) {
-      ctx.status(400).result("Invalid values for connectorId, errorCode, status");
+      ctx.status(400).result("Invalid values for connectorId, errorCode");
+    }
+  }
+
+  public void clearFault(Context ctx) {
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (charger.clearFault()) {
+      ctx.result("OK");
+    } else {
+      ctx.status(500);
     }
   }
 
@@ -252,7 +266,7 @@ public class MessageController extends ControllerBase {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
     if (!checkTransactionHandler(charger, ctx)) return;
-    charger.getTransactionHandler().StartCharging(1, charger.getConfig().getIdTag());
+    charger.getTransactionHandler().startCharging(1, charger.getConfig().getIdTag());
     ctx.result("OK");
   }
 
@@ -260,7 +274,7 @@ public class MessageController extends ControllerBase {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
     if (!checkTransactionHandler(charger, ctx)) return;
-    charger.getTransactionHandler().StopCharging(charger.getConfig().getIdTag());
+    charger.getTransactionHandler().stopCharging(charger.getConfig().getIdTag(), null);
     ctx.result("OK");
   }
 
@@ -338,6 +352,7 @@ public class MessageController extends ControllerBase {
     app.get("/api/{chargerId}/state", this::state);
 
     app.post("/api/{chargerId}/charger/reboot", this::reboot);
+    app.post("/api/{chargerId}/charger/clear-fault", this::clearFault);
 
     app.post("/api/{chargerId}/state/online", this::online);
     app.post("/api/{chargerId}/state/offline", this::offline);
