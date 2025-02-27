@@ -13,6 +13,18 @@ const ShowLogMessages = ({ chargerID }) => {
     new Set()
   );
 
+  // Track whether the user is selecting text
+  const [isSelectingText, setIsSelectingText] = useState(false);
+
+  // Function to handle mouseup event to check for text selection
+  const handleMouseUp = () => {
+    if (window.getSelection().toString().length > 0) {
+      setIsSelectingText(true); // Text is being selected
+    } else {
+      setIsSelectingText(false); // No text is selected
+    }
+  };
+
   // Helper function for mapping NumId to labels
   const getNumIdLabel = (NumId) => {
     return (
@@ -40,26 +52,28 @@ const ShowLogMessages = ({ chargerID }) => {
 
   // Helper function to toggle message details
   const handleToggleDetails = (userId, type) => {
-    if (type === 'sent') {
-      setExpandedSentMessages((prevExpanded) => {
-        const updated = new Set(prevExpanded);
-        if (updated.has(userId)) {
-          updated.delete(userId);
-        } else {
-          updated.add(userId);
-        }
-        return updated;
-      });
-    } else if (type === 'received') {
-      setExpandedReceivedMessages((prevExpanded) => {
-        const updated = new Set(prevExpanded);
-        if (updated.has(userId)) {
-          updated.delete(userId);
-        } else {
-          updated.add(userId);
-        }
-        return updated;
-      });
+    if (!isSelectingText) {
+      if (type === 'sent') {
+        setExpandedSentMessages((prevExpanded) => {
+          const updated = new Set(prevExpanded);
+          if (updated.has(userId)) {
+            updated.delete(userId);
+          } else {
+            updated.add(userId);
+          }
+          return updated;
+        });
+      } else if (type === 'received') {
+        setExpandedReceivedMessages((prevExpanded) => {
+          const updated = new Set(prevExpanded);
+          if (updated.has(userId)) {
+            updated.delete(userId);
+          } else {
+            updated.add(userId);
+          }
+          return updated;
+        });
+      }
     }
   };
 
@@ -218,8 +232,14 @@ const ShowLogMessages = ({ chargerID }) => {
   useEffect(() => {
     const interval = pollMessages();
 
+    // Add event listener for mouseup to detect text selection
+    document.addEventListener('mouseup', handleMouseUp);
+
     // Clear the interval when the component unmounts to avoid memory leaks
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
   }, [chargerID]);
 
   // Sort sent and received messages by timestamp, descending (most recent first)
