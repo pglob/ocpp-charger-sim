@@ -6,6 +6,8 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.enums.ChargePointErrorCode;
+import com.sim_backend.websockets.enums.Reason;
 import com.sim_backend.websockets.observers.BootNotificationObserver;
 import com.sim_backend.websockets.observers.ChangeConfigurationObserver;
 import com.sim_backend.websockets.observers.GetConfigurationObserver;
@@ -68,7 +70,7 @@ public class Charger {
    * machine, electrical transition, WebSocket client, and transaction handler. It also starts the
    * charger loop in a separate thread
    */
-  public void Boot() {
+  public void boot() {
     // If another Boot/Reboot is in progress, do nothing
     if (!bootRebootLock.tryLock()) {
       return;
@@ -108,16 +110,16 @@ public class Charger {
 
   /**
    * Reboots the charger. This method stops any in-progress charging session, shuts down the charger
-   * loop, resets the internal components, and then calls {@link #Boot()} to restart the charger
+   * loop, resets the internal components, and then calls {@link #boot()} to restart the charger
    */
-  public void Reboot() {
+  public void reboot() {
     // If another Boot/Reboot is in progress, do nothing
     if (!bootRebootLock.tryLock()) {
       return;
     }
     try {
       // Stop any current transaction/charging session
-      transactionHandler.StopCharging(null);
+      transactionHandler.forceStopCharging(Reason.REBOOT);
       stateMachine.transition(ChargerState.PoweredOff);
 
       // Signal the charger loop to stop and interrupt its thread
@@ -144,9 +146,27 @@ public class Charger {
 
       // Restart the charger by calling Boot(). As ReentrantLock is reentrant,
       // the current thread can acquire the lock again
-      Boot();
+      boot();
     } finally {
       bootRebootLock.unlock();
     }
+  }
+
+  /**
+   * Puts the charger in a faulted state. A POST to /api/{chargerId}/charger/clear-fault, a call to
+   * ClearFault() or a Reboot is required to return to normal operation.
+   *
+   * @param error the error code that caused a fault
+   */
+  public void fault(ChargePointErrorCode error) {
+    transactionHandler.forceStopCharging(Reason.OTHER);
+    if (stateMachine.getCurrentState() != ChargerState.Faulted) {
+      stateMachine.transition(ChargerState.Faulted);
+    }
+  }
+
+  /** Returns the charger from a Faulted state to an Available state. */
+  public boolean clearFault() {
+    return stateMachine.checkAndTransition(ChargerState.Faulted, ChargerState.Available);
   }
 }

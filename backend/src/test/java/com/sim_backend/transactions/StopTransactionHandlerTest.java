@@ -1,7 +1,6 @@
 package com.sim_backend.transactions;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.sim_backend.electrical.ElectricalTransition;
@@ -10,13 +9,15 @@ import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
-import com.sim_backend.websockets.events.OnOCPPMessage;
-import com.sim_backend.websockets.events.OnOCPPMessageListener;
-import com.sim_backend.websockets.messages.*;
+import com.sim_backend.websockets.enums.Reason;
+import com.sim_backend.websockets.messages.StopTransaction;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -32,32 +33,126 @@ public class StopTransactionHandlerTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
-    when(elec.getEnergyActiveImportRegister()).thenReturn(0.0f);
+    when(elec.getEnergyActiveImportRegister()).thenReturn(5.0f);
     when(client.getScheduler()).thenReturn(scheduler);
     when(scheduler.getTime()).thenReturn(ocppTime);
     when(ocppTime.getSynchronizedTime()).thenReturn(ZonedDateTime.parse("2025-01-19T00:00:00Z"));
+    when(client.pushMessage(any(StopTransaction.class))).thenReturn(true);
     handler = new StopTransactionHandler(stateMachine, client);
   }
 
+  /**
+   * Helper method to verify the StopTransaction message and post-invocation state.
+   *
+   * @param expectedTxnId expected transaction id in the StopTransaction message.
+   * @param expectedIdTag expected idTag (null if not provided).
+   * @param expectedReason expected reason (null if not provided).
+   * @param transactionId the AtomicInteger used for transactionId (should be reset to -1).
+   * @param stopInProgress the AtomicBoolean used to indicate progress (should be reset to false).
+   */
+  private void verifyStopTransactionMessage(
+      int expectedTxnId,
+      String expectedIdTag,
+      Reason expectedReason,
+      AtomicInteger transactionId,
+      AtomicBoolean stopInProgress) {
+
+    ArgumentCaptor<StopTransaction> captor = ArgumentCaptor.forClass(StopTransaction.class);
+    verify(client).pushMessage(captor.capture());
+    StopTransaction message = captor.getValue();
+
+    assertEquals(expectedTxnId, message.getTransactionId());
+    assertEquals(5000, message.getMeterStop());
+    String expectedTimestamp =
+        ZonedDateTime.parse("2025-01-19T00:00:00Z")
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
+    assertEquals(expectedTimestamp, message.getTimestamp());
+    if (expectedIdTag == null) {
+      assertNull(message.getIdTag());
+    } else {
+      assertEquals(expectedIdTag, message.getIdTag());
+    }
+    assertEquals(expectedReason, message.getReason());
+
+    // Verify that the transaction id and stopInProgress flag were reset
+    assertEquals(-1, transactionId.get());
+    assertFalse(stopInProgress.get());
+  }
+
   @Test
-  void initiateStopTransactiontest() {
+  void initiateStopTransaction_ReasonNotNull_IdTagNull_Test() {
+    // Test when a reason is provided and idTag is null
     when(stateMachine.getCurrentState()).thenReturn(ChargerState.Charging);
-    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
+    when(stateMachine.checkAndTransition(ChargerState.Charging, ChargerState.Available))
+        .thenReturn(true);
+    AtomicInteger transactionId = new AtomicInteger(1);
+    AtomicBoolean stopInProgress = new AtomicBoolean(true);
+    Reason reason = Reason.LOCAL;
 
-    doAnswer(
-            invocation -> {
-              OnOCPPMessageListener listener = invocation.getArgument(1);
-              OnOCPPMessage message = mock(OnOCPPMessage.class);
-              when(message.getMessage()).thenReturn(stopTransactionResponse);
-              listener.onMessageReceived(message);
-              return null;
-            })
-        .when(client)
-        .onReceiveMessage(eq(StopTransactionResponse.class), any());
+    handler.initiateStopTransaction(null, reason, transactionId, elec, stopInProgress);
 
-    handler.initiateStopTransaction(1, "idTag", elec, new AtomicBoolean());
+    // Verify that checkAndTransition was called
+    verify(stateMachine).checkAndTransition(ChargerState.Charging, ChargerState.Available);
+    // Verify the StopTransaction message and flag resets
+    verifyStopTransactionMessage(1, null, reason, transactionId, stopInProgress);
+  }
 
-    verify(client).pushMessage(any(StopTransaction.class));
-    verify(stateMachine).transition(ChargerState.Available);
+  @Test
+  void initiateStopTransaction_ReasonNull_IdTagNotNull_Test() {
+    // Test when reason is null and an idTag is provided.
+    when(stateMachine.getCurrentState()).thenReturn(ChargerState.Charging);
+    when(stateMachine.checkAndTransition(ChargerState.Charging, ChargerState.Available))
+        .thenReturn(true);
+    AtomicInteger transactionId = new AtomicInteger(2);
+    AtomicBoolean stopInProgress = new AtomicBoolean(true);
+    String idTag = "user123";
+
+    handler.initiateStopTransaction(idTag, null, transactionId, elec, stopInProgress);
+
+    // Verify that checkAndTransition was called
+    verify(stateMachine).checkAndTransition(ChargerState.Charging, ChargerState.Available);
+    // Verify the StopTransaction message and flag resets
+    verifyStopTransactionMessage(2, idTag, null, transactionId, stopInProgress);
+  }
+
+  @Test
+  void initiateStopTransaction_ReasonNotNull_IdTagNotNull_Test() {
+    // Test when both reason and idTag are provided
+    when(stateMachine.getCurrentState()).thenReturn(ChargerState.Charging);
+    when(stateMachine.checkAndTransition(ChargerState.Charging, ChargerState.Available))
+        .thenReturn(true);
+    AtomicInteger transactionId = new AtomicInteger(3);
+    AtomicBoolean stopInProgress = new AtomicBoolean(true);
+    String idTag = "user456";
+    Reason reason = Reason.LOCAL;
+
+    handler.initiateStopTransaction(idTag, reason, transactionId, elec, stopInProgress);
+
+    // Verify that checkAndTransition was called
+    verify(stateMachine).checkAndTransition(ChargerState.Charging, ChargerState.Available);
+    // Verify the StopTransaction message and flag resets
+    verifyStopTransactionMessage(3, idTag, reason, transactionId, stopInProgress);
+  }
+
+  @Test
+  void initiateStopTransaction_FaultedState_Test() {
+    // Test when the current state is Faulted, checkAndTransition returns false so processing is
+    // aborted
+    when(stateMachine.getCurrentState()).thenReturn(ChargerState.Faulted);
+    when(stateMachine.checkAndTransition(ChargerState.Charging, ChargerState.Available))
+        .thenReturn(false);
+    AtomicInteger transactionId = new AtomicInteger(4);
+    AtomicBoolean stopInProgress = new AtomicBoolean(true);
+    String idTag = "user789";
+
+    handler.initiateStopTransaction(idTag, null, transactionId, elec, stopInProgress);
+
+    // Verify that checkAndTransition was called
+    verify(stateMachine).checkAndTransition(ChargerState.Charging, ChargerState.Available);
+    // Verify that pushMessage was never called
+    verify(client, never()).pushMessage(any(StopTransaction.class));
+    // Since processing was aborted, transactionId and stopInProgress should not be changed
+    assertEquals(4, transactionId.get());
+    assertTrue(stopInProgress.get());
   }
 }

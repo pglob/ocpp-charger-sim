@@ -5,9 +5,14 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.enums.ChargePointErrorCode;
+import com.sim_backend.websockets.enums.Reason;
+import java.lang.reflect.Field;
+import java.util.concurrent.locks.ReentrantLock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
@@ -62,7 +67,7 @@ class ChargerTest {
 
     // Start the charger
     Charger charger = new Charger();
-    charger.Boot();
+    charger.boot();
 
     // Verify that the components were created
     assertNotNull(charger.getStateMachine(), "State machine should be initialized");
@@ -123,7 +128,7 @@ class ChargerTest {
 
     // Start the charger
     Charger charger = new Charger();
-    charger.Boot();
+    charger.boot();
 
     // Save references to the current components
     OCPPWebSocketClient oldWsClient = charger.getWsClient();
@@ -132,7 +137,7 @@ class ChargerTest {
     Thread oldThread = charger.getChargerThread();
 
     // Reboot
-    charger.Reboot();
+    charger.reboot();
     Thread.sleep(2100); // Allow time for the reboot to complete
 
     // Verify that new component instances were created
@@ -174,5 +179,90 @@ class ChargerTest {
     charger.getChargerLoop().requestStop();
     charger.getChargerThread().interrupt();
     charger.getChargerThread().join();
+  }
+
+  @Test
+  void testIsRebootInProgress() throws Exception {
+    Charger charger = new Charger();
+    // Ensure the charger is not in reboot mode
+    assertFalse(charger.isRebootInProgress(), "Reboot should not be in progress initially");
+
+    // Obtain the bootRebootLock and lock it
+    Field lockField = Charger.class.getDeclaredField("bootRebootLock");
+    lockField.setAccessible(true);
+    ReentrantLock lock = (ReentrantLock) lockField.get(charger);
+    lock.lock();
+    try {
+      assertTrue(charger.isRebootInProgress(), "Reboot should be in progress when lock is held");
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  @Test
+  void testFault_TransitionToFaulted() throws Exception {
+    // Test fault() when current state is not Faulted
+    Charger charger = new Charger();
+    charger.boot();
+
+    ChargerStateMachine mockStateMachine = mock(ChargerStateMachine.class);
+    TransactionHandler mockTransactionHandler = mock(TransactionHandler.class);
+    setField(charger, "stateMachine", mockStateMachine);
+    setField(charger, "transactionHandler", mockTransactionHandler);
+
+    when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.Available);
+
+    // Call fault() with an error code
+    charger.fault(ChargePointErrorCode.OtherError);
+    // Verify forceStopCharging is called with Reason.OTHER
+    verify(mockTransactionHandler).forceStopCharging(Reason.OTHER);
+    // Verify that transition to Faulted is executed
+    verify(mockStateMachine).transition(ChargerState.Faulted);
+  }
+
+  @Test
+  void testFault_AlreadyFaulted() throws Exception {
+    // Test fault() when current state is already Faulted
+    Charger charger = new Charger();
+    charger.boot();
+
+    ChargerStateMachine mockStateMachine = mock(ChargerStateMachine.class);
+    TransactionHandler mockTransactionHandler = mock(TransactionHandler.class);
+    setField(charger, "stateMachine", mockStateMachine);
+    setField(charger, "transactionHandler", mockTransactionHandler);
+
+    when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.Faulted);
+
+    charger.fault(ChargePointErrorCode.OtherError);
+    verify(mockTransactionHandler).forceStopCharging(Reason.OTHER);
+    // Verify no transition is performed
+    verify(mockStateMachine, never()).transition(ChargerState.Faulted);
+  }
+
+  @Test
+  void testClearFault() throws Exception {
+    // Test that clearFault() transitions the charger state to Available
+    Charger charger = new Charger();
+    charger.boot();
+
+    ChargerStateMachine mockStateMachine = mock(ChargerStateMachine.class);
+    setField(charger, "stateMachine", mockStateMachine);
+
+    charger.clearFault();
+    verify(mockStateMachine).checkAndTransition(ChargerState.Faulted, ChargerState.Available);
+  }
+
+  /**
+   * Helper method to set a private field via reflection.
+   *
+   * @param target the object containing the field.
+   * @param fieldName the name of the field.
+   * @param value the value to set.
+   * @throws Exception if reflection fails.
+   */
+  private void setField(Object target, String fieldName, Object value) throws Exception {
+    Field field = target.getClass().getDeclaredField(fieldName);
+    field.setAccessible(true);
+    field.set(target, value);
   }
 }
