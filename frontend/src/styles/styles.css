@@ -221,6 +221,7 @@ button:active {
   margin-bottom: 20px;
   background-color: var(--background-white);
   box-shadow: 0 4px 8px var(--shadow-color);
+  user-select: text;
 }
 
 /* Header with timestamp, request type, and NumId label */

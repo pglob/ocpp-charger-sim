@@ -1,7 +1,15 @@
 {
-    "BootNotification":{"status":"Accepted", "currentTime":"X", "interval":60},
-    "Heartbeat":{"currentTime":"X"},
-    "Authorize":{"idTagInfo":{"status":"Accepted"}},
-    "StartTransaction":{"idTagInfo":{"status":"Accepted"}, "transactionId":5},
-    "StopTransaction":{"idTagInfo":{"status":"Accepted"}}
+  "BootNotification": {
+    "status": "Accepted",
+    "currentTime": "X",
+    "interval": 60
+  },
+  "Heartbeat": { "currentTime": "X" },
+  "Authorize": { "idTagInfo": { "status": "Accepted" } },
+  "StartTransaction": {
+    "idTagInfo": { "status": "Accepted" },
+    "transactionId": 5
+  },
+  "StopTransaction": { "idTagInfo": { "status": "Accepted" } },
+  "StatusNotification": {}
 }

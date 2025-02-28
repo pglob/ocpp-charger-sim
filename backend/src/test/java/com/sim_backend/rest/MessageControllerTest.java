@@ -17,6 +17,7 @@ import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.StatusNotification;
+import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ class MessageControllerTest {
   @Mock private ChargerStateMachine mockStateMachine;
   @Mock private ElectricalTransition mockElec;
   @Mock private TransactionHandler mockTHandler;
+  @Mock private StatusNotificationObserver mockStatusNotificationObserver;
   @Mock private Context mockContext;
   @Mock private ConfigurationRegistry mockConfig;
 
@@ -51,6 +53,7 @@ class MessageControllerTest {
     when(mockCharger.getElec()).thenReturn(mockElec);
     when(mockCharger.getTransactionHandler()).thenReturn(mockTHandler);
     when(mockCharger.getConfig()).thenReturn(mockConfig);
+    when(mockCharger.getStatusNotificationObserver()).thenReturn(mockStatusNotificationObserver);
 
     // Stub isRebootInProgress() to be false by default
     when(mockCharger.isRebootInProgress()).thenReturn(false);
