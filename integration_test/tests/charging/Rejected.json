@@ -1,0 +1,17 @@
+{
+    "a1":{"status":"Accepted", "currentTime":"X", "interval":1000},
+    "b1":{"currentTime":"X"},
+
+    "c1":{"idTagInfo":{"status":"Invalid"}},
+
+    "d1":{"idTagInfo":{"status":"Accepted"}},
+    "e1":{"idTagInfo":{"status":"Invalid"}, "transactionId":5},
+
+    "f1":{"idTagInfo":{"status":"Accepted"}},
+    "g1":{"idTagInfo":{"status":"Accepted"}, "transactionId":5},
+    "h1":{"idTagInfo":{"status":"Invalid"}},
+
+    "j1":{"idTagInfo":{"status":"Accepted"}},
+    "k1":{"idTagInfo":{"status":"Accepted"}, "transactionId":5},
+    "l1":{"idTagInfo":{"status":"Accepted"}}
+}
