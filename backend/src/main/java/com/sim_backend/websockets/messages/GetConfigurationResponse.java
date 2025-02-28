@@ -13,12 +13,18 @@ import lombok.Setter;
 
 /** Represents an OCPP 1.6 GetConfiguration Request from Central System to a Charge Point */
 @Getter
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "GetConfigurationResponse")
 public class GetConfigurationResponse extends OCPPMessageResponse implements Cloneable {
+  public GetConfigurationResponse(
+      GetConfiguration request, List<Configuration> configurationKeys, List<String> unknownKey) {
+    super(request);
+    this.configurationKey = configurationKeys;
+    this.unknownKey = unknownKey;
+  }
+
   @SerializedName("configurationKey")
   private final List<Configuration> configurationKey;
 

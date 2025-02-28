@@ -16,7 +16,6 @@ import lombok.Setter;
  * status of a Charge Point's idTag.
  */
 @EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
 @Getter
 @Setter
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "AuthorizeResponse")
@@ -35,7 +34,13 @@ public class AuthorizeResponse extends OCPPMessageResponse implements Cloneable 
     private AuthorizationStatus status; // One of: Accepted, Blocked, Expired, Invalid, ConcurrentTx
   }
 
-  public AuthorizeResponse(String status) {
+  public AuthorizeResponse(Authorize request, IdTagInfo info) {
+    super(request);
+    this.idTagInfo = info;
+  }
+
+  public AuthorizeResponse(Authorize request, String status) {
+    super(request);
     this.idTagInfo = new IdTagInfo(AuthorizationStatus.fromString(status));
   }
 

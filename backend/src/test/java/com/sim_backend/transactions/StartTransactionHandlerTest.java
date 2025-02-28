@@ -45,7 +45,8 @@ public class StartTransactionHandlerTest {
   void initiateStartTransactiontest() {
     when(stateMachine.getCurrentState()).thenReturn(ChargerState.Preparing);
 
-    StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
+    StartTransactionResponse startTransactionResponse =
+        new StartTransactionResponse(new StartTransaction(1, "", 1, ""), 1, "Accepted");
 
     doAnswer(
             invocation -> {

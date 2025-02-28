@@ -68,7 +68,8 @@ class BootNotificationObserverTest {
     // Arrange
     BootNotificationResponse response =
         Mockito.spy(
-            new BootNotificationResponse(RegistrationStatus.ACCEPTED, ZonedDateTime.now(), 20));
+            new BootNotificationResponse(
+                new BootNotification(), RegistrationStatus.ACCEPTED, ZonedDateTime.now(), 20));
 
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
     OCPPTime time = mock(OCPPTime.class);
@@ -93,7 +94,8 @@ class BootNotificationObserverTest {
     // Arrange
     BootNotificationResponse response =
         Mockito.spy(
-            new BootNotificationResponse(RegistrationStatus.PENDING, ZonedDateTime.now(), 20));
+            new BootNotificationResponse(
+                new BootNotification(), RegistrationStatus.PENDING, ZonedDateTime.now(), 20));
 
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
     when(webSocketClient.getScheduler()).thenReturn(messageScheduler);
@@ -114,7 +116,8 @@ class BootNotificationObserverTest {
     // Arrange
     BootNotificationResponse response =
         Mockito.spy(
-            new BootNotificationResponse(RegistrationStatus.REJECTED, ZonedDateTime.now(), 240));
+            new BootNotificationResponse(
+                new BootNotification(), RegistrationStatus.REJECTED, ZonedDateTime.now(), 240));
 
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
     when(webSocketClient.getScheduler()).thenReturn(messageScheduler);

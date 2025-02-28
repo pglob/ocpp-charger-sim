@@ -25,7 +25,8 @@ public class SetChargingProfileResponseTest {
   public void testSetChargingProfileResponse_ValidStatus() {
     // Create a valid SetChargingProfileResponse with a non-blank status
     SetChargingProfileResponse response =
-        new SetChargingProfileResponse(ChargingProfileStatus.ACCEPTED);
+        new SetChargingProfileResponse(
+            new SetChargingProfile(1, null), ChargingProfileStatus.ACCEPTED);
 
     // Validate the response object
     var violations = validator.validate(response);
@@ -37,7 +38,8 @@ public class SetChargingProfileResponseTest {
   @Test
   public void testSetChargingProfileResponse_BlankStatus() {
     // Create a SetChargingProfileResponse with a null or blank status (invalid)
-    SetChargingProfileResponse response = new SetChargingProfileResponse(null);
+    SetChargingProfileResponse response =
+        new SetChargingProfileResponse(new SetChargingProfile(1, null), null);
 
     // Validate the response object
     var violations = validator.validate(response);
@@ -55,7 +57,8 @@ public class SetChargingProfileResponseTest {
   public void testSetChargingProfileResponse_ValidChargingProfileStatus() {
     // Create a valid SetChargingProfileResponse with a specific status
     SetChargingProfileResponse response =
-        new SetChargingProfileResponse(ChargingProfileStatus.REJECTED);
+        new SetChargingProfileResponse(
+            new SetChargingProfile(1, null), ChargingProfileStatus.REJECTED);
 
     // Assert that the status is correctly set
     assertEquals(

@@ -38,6 +38,15 @@ public abstract class OCPPMessage implements Cloneable {
   }
 
   /**
+   * The constructor for an OCPP message given a wanted message id.
+   *
+   * @param messageID The wanted message ID.
+   */
+  protected OCPPMessage(String messageID) {
+    this.messageID = messageID;
+  }
+
+  /**
    * Create a JSON element representing the message.
    *
    * @return The generated message JSON.

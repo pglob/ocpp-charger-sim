@@ -5,6 +5,7 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ public class GetConfigurationResponseTest {
     // Create an GetConfigurationResponse with valid and invalid key
     GetConfigurationResponse response =
         new GetConfigurationResponse(
+            new GetConfiguration(List.of("MeterValueSampleInterval")),
             Arrays.asList(
                 new GetConfigurationResponse.Configuration("MeterValueSampleInterval", "22", true),
                 new GetConfigurationResponse.Configuration(

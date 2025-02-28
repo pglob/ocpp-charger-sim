@@ -14,7 +14,7 @@ public class HeartbeatResponseTest {
 
   @Test
   public void testHeartbeatResponse() {
-    HeartbeatResponse response = new HeartbeatResponse();
+    HeartbeatResponse response = new HeartbeatResponse(new Heartbeat());
 
     // Ensure message generation works
     assert response.generateMessage().size() == 3;

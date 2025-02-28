@@ -10,18 +10,20 @@ import com.sim_backend.websockets.enums.ClearProfileStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /** A OCPP Clear Charging Profile Response Message. */
-@AllArgsConstructor
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "ClearChargingProfileResponse")
 public final class ClearChargingProfileResponse extends OCPPMessageResponse {
+  public ClearChargingProfileResponse(ClearChargingProfile request, ClearProfileStatus status) {
+    super(request);
+    this.status = status;
+  }
 
   /** The status of the clear charging profile request. */
   @SerializedName("status")

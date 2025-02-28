@@ -94,7 +94,7 @@ public class OCPPWebSocketClientTest {
     doAnswer(invocation -> null).when(client).send(anyString());
 
     Heartbeat beat = new Heartbeat();
-    HeartbeatResponse beat2 = new HeartbeatResponse();
+    HeartbeatResponse beat2 = new HeartbeatResponse(new Heartbeat());
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -219,7 +219,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testOnReceiveMessageNoMatchingMsg() throws OCPPMessageFailure, InterruptedException {
-    HeartbeatResponse response = new HeartbeatResponse();
+    HeartbeatResponse response = new HeartbeatResponse(new Heartbeat());
 
     OCPPMessageError error = new OCPPMessageError(ErrorCode.FormatViolation, "", new JsonObject());
 
@@ -276,7 +276,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testOnReceiveMessage() throws OCPPMessageFailure, InterruptedException {
-    HeartbeatResponse response = new HeartbeatResponse();
+    HeartbeatResponse response = new HeartbeatResponse(new Heartbeat());
 
     Heartbeat beat = new Heartbeat();
     doAnswer(
@@ -404,7 +404,7 @@ public class OCPPWebSocketClientTest {
               doAnswer(
                       invocation2 -> {
                         this.client.addPreviousMessage(beat);
-                        HeartbeatResponse response = new HeartbeatResponse();
+                        HeartbeatResponse response = new HeartbeatResponse(new Heartbeat());
                         response.setMessageID(beat.getMessageID());
                         client.handleMessage(response.toJsonString());
                         return null;
@@ -491,7 +491,7 @@ public class OCPPWebSocketClientTest {
     doAnswer(invocation -> null).when(client).send(anyString());
 
     Heartbeat beat = new Heartbeat();
-    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
 
     StartTransaction beat2 = new StartTransaction(2, "", 1, "");
@@ -518,7 +518,7 @@ public class OCPPWebSocketClientTest {
     doAnswer(invocation -> null).when(client).send(anyString());
 
     Heartbeat beat = new Heartbeat();
-    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
 
     StartTransaction beat2 = new StartTransaction(2, "", 1, "");
@@ -560,7 +560,7 @@ public class OCPPWebSocketClientTest {
     client.goOffline();
 
     Heartbeat beat = new Heartbeat();
-    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
     client.pushMessage(new Heartbeat());
     client.addPreviousMessage(beat);
@@ -686,7 +686,7 @@ public class OCPPWebSocketClientTest {
     assertThrows(
         OCPPBadCallID.class,
         () -> {
-          client.handleMessage("[5,\"w\", \"Heartbeat\", {}]");
+          client.handleMessage("[5,\"w0\", \"Heartbeat\", {}]");
         });
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
@@ -694,77 +694,80 @@ public class OCPPWebSocketClientTest {
     assertEquals("Provided bad Call ID", error.getErrorDescription());
 
     assertThrows(
-        OCPPUnsupportedMessage.class, () -> client.handleMessage("[2,\"w\", \"Water\", {}]"));
+        OCPPUnsupportedMessage.class, () -> client.handleMessage("[2,\"w1\", \"Water\", {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.NotSupported, error.getErrorCode());
     assertEquals("Unsupported action", error.getErrorDescription());
 
     assertThrows(
-        OCPPBadMessage.class, () -> client.handleMessage("[2,\"w\", \"Heartbeat\", {}, {}]"));
+        OCPPBadMessage.class, () -> client.handleMessage("[2,\"w2\", \"Heartbeat\", {}, {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
     assertEquals("Request provided wrong number of array elements", error.getErrorDescription());
 
     assertThrows(
-        OCPPBadMessage.class, () -> client.handleMessage("[4,\"w\", 2, \"Heartbeat\", {}, {}]"));
+        OCPPBadMessage.class, () -> client.handleMessage("[4,\"w3\", 2, \"Heartbeat\", {}, {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
     assertEquals("Error provided wrong number of array elements", error.getErrorDescription());
 
     assertThrows(
-        OCPPBadMessage.class, () -> client.handleMessage("[3,\"w\", \"Heartbeat\", {}, {}]"));
+        OCPPBadMessage.class, () -> client.handleMessage("[3,\"w4\", \"Heartbeat\", {}, {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
     assertEquals("Response provided wrong number of array elements", error.getErrorDescription());
 
-    assertThrows(OCPPCannotProcessMessage.class, () -> client.handleMessage("[3,\"w\", {}]"));
+    assertThrows(OCPPCannotProcessMessage.class, () -> client.handleMessage("[3,\"w5\", {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.ProtocolError, error.getErrorCode());
     assertEquals("Received Response with an unknown ID", error.getErrorDescription());
 
     assertThrows(
-        OCPPCannotProcessMessage.class, () -> client.handleMessage("[4,\"w\", 2, \"w\", {}]"));
+        OCPPCannotProcessMessage.class, () -> client.handleMessage("[4,\"w6\", 2, \"w\", {}]"));
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.ProtocolError, error.getErrorCode());
     assertEquals("Received Error with an unknown ID", error.getErrorDescription());
 
     Heartbeat beat = new Heartbeat();
-    beat.setMessageID("heartbeat");
+    beat.setMessageID("heartbeat1");
     client.addPreviousMessage(beat);
-    client.handleMessage("[4,\"heartbeat\", 29999, \"w\", {}]");
+    client.handleMessage("[4,\"heartbeat1\", 29999, \"w\", {}]");
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
     assertEquals("Received Unknown Error Code", error.getErrorDescription());
 
+    beat.setMessageID("heartbeat2");
     client.addPreviousMessage(beat);
-    client.handleMessage("[4,\"heartbeat\", -1, \"w\", {}]");
+    client.handleMessage("[4,\"heartbeat2\", -1, \"w\", {}]");
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
     assertEquals("Received Unknown Error Code", error.getErrorDescription());
 
+    beat.setMessageID("heartbeat3");
     client.addPreviousMessage(beat);
-    client.handleMessage("[4,\"heartbeat\", 2, \"w\", a]");
+    client.handleMessage("[4,\"heartbeat3\", 2, \"w\", a]");
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
     assertEquals("Error details was not a json object", error.getErrorDescription());
 
+    beat.setMessageID("heartbeat4");
     client.addPreviousMessage(beat);
-    client.handleMessage("[3,\"heartbeat\", 2]");
+    client.handleMessage("[3,\"heartbeat4\", 2]");
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
     assertEquals("Response details was not a json object", error.getErrorDescription());
 
-    client.handleMessage("[2,\"heartbeat\", \"Heartbeat\", 2]");
+    client.handleMessage("[2,\"heartbeat5\", \"Heartbeat\", 2]");
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
@@ -808,5 +811,19 @@ public class OCPPWebSocketClientTest {
     Field field = org.java_websocket.client.WebSocketClient.class.getDeclaredField("socketFactory");
     field.setAccessible(true);
     return field;
+  }
+
+  @Test
+  public void testUniqueIDs() throws Exception {
+    doAnswer(invocation -> null).when(client).send(anyString());
+    Heartbeat beat = new Heartbeat();
+    client.handleMessage(beat.toJsonString());
+    client.handleMessage(beat.toJsonString());
+
+    OCPPMessageError error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
+    assertEquals("ID was already used", error.getErrorDescription());
+    assertEquals(error.getMessageID(), beat.getMessageID());
   }
 }

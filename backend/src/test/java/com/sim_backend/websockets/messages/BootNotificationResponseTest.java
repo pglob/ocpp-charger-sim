@@ -15,7 +15,8 @@ public class BootNotificationResponseTest {
 
   private static @NotNull BootNotificationResponse getBootNotificationResponse(
       ZonedDateTime dateTime) {
-    BootNotificationResponse response = new BootNotificationResponse("Accepted", dateTime, 5);
+    BootNotificationResponse response =
+        new BootNotificationResponse(new BootNotification(), "Accepted", dateTime, 5);
 
     assert response.getStatus().getValue().equals("Accepted");
     assert response.getStatus() == RegistrationStatus.ACCEPTED;

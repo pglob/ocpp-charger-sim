@@ -7,6 +7,7 @@ import com.sim_backend.websockets.enums.ChargingProfilePurpose;
 import com.sim_backend.websockets.enums.ChargingRateUnit;
 import com.sim_backend.websockets.enums.RecurrencyKind;
 import com.sim_backend.websockets.types.OCPPMessage;
+import com.sim_backend.websockets.types.OCPPMessageRequest;
 import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -17,7 +18,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "SetChargingProfile")
-public class SetChargingProfile {
+public class SetChargingProfile extends OCPPMessageRequest {
 
   /** The ID of the connector to which the profile applies. */
   @NotNull(message = "SetChargingProfile connectorId is required")

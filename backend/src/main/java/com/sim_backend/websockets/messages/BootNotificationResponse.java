@@ -7,7 +7,6 @@ import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
 import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +17,6 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "BootNotificationResponse")
@@ -40,8 +38,21 @@ public class BootNotificationResponse extends OCPPMessageResponse implements Clo
   @SerializedName("interval")
   private int interval;
 
-  public BootNotificationResponse(String status, ZonedDateTime currentTime, int interval) {
+  public BootNotificationResponse(
+      BootNotification request, String status, ZonedDateTime currentTime, int interval) {
+    super(request);
     this.status = RegistrationStatus.fromString(status);
+    this.currentTime = currentTime;
+    this.interval = interval;
+  }
+
+  public BootNotificationResponse(
+      BootNotification request,
+      RegistrationStatus status,
+      ZonedDateTime currentTime,
+      int interval) {
+    super(request);
+    this.status = status;
     this.currentTime = currentTime;
     this.interval = interval;
   }

@@ -9,6 +9,7 @@ import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
+import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.HeartbeatResponse;
 import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.types.OCPPMessageError;
@@ -45,7 +46,8 @@ public class OCPPTimeTest {
   @Test
   public void testOCPPTime() throws InterruptedException, OCPPMessageFailure {
     doNothing().when(client).send(anyString());
-    HeartbeatResponse response = new HeartbeatResponse(ZonedDateTime.now().minusSeconds(24));
+    HeartbeatResponse response =
+        new HeartbeatResponse(new Heartbeat(), ZonedDateTime.now().minusSeconds(24));
 
     ocppTime.setHeartbeatInterval(20L, TimeUnit.SECONDS);
     ocppTime.heartbeat.task.run();
@@ -167,7 +169,8 @@ public class OCPPTimeTest {
     doNothing().when(client).send(anyString());
     OCPPTime spyTime = spy(client.getScheduler().getTime());
 
-    HeartbeatResponse heartbeatResponse = new HeartbeatResponse(ZonedDateTime.now());
+    HeartbeatResponse heartbeatResponse =
+        new HeartbeatResponse(new Heartbeat(), ZonedDateTime.now());
 
     OCPPRepeatingTimedTask heartbeat = ocppTime.setHeartbeatInterval(20L, TimeUnit.SECONDS);
     heartbeatResponse.setMessageID(heartbeat.getMessage().getMessageID());

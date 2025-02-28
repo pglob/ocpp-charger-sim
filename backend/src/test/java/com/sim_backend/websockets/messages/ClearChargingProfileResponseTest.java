@@ -30,7 +30,8 @@ public class ClearChargingProfileResponseTest {
 
     // Create the ClearChargingProfileResponse object
     ClearChargingProfileResponse profile =
-        new ClearChargingProfileResponse(ClearProfileStatus.ACCEPTED);
+        new ClearChargingProfileResponse(
+            new ClearChargingProfile(1, 1, null, 1), ClearProfileStatus.ACCEPTED);
 
     // Assert expected values
     assertSame(ClearProfileStatus.ACCEPTED, profile.getStatus());
@@ -59,7 +60,9 @@ public class ClearChargingProfileResponseTest {
   @Test
   public void testClearChargingProfileResponseWithViolations() {
     // Create the ClearChargingProfileResponse object
-    ClearChargingProfileResponse profile = new ClearChargingProfileResponse(null); // Violation here
+    ClearChargingProfileResponse profile =
+        new ClearChargingProfileResponse(
+            new ClearChargingProfile(1, 1, null, 1), null); // Violation here
 
     // Assert expected values
     assertSame(null, profile.getStatus());
