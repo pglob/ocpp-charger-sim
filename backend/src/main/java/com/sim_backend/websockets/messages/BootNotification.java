@@ -88,7 +88,7 @@ public final class BootNotification extends OCPPMessageRequest implements Clonea
   }
 
   @Override
-  protected Authorize clone() {
-    return (Authorize) super.clone();
+  protected BootNotification clone() {
+    return (BootNotification) super.clone();
   }
 }
