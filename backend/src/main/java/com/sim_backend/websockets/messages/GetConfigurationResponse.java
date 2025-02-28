@@ -18,7 +18,7 @@ import lombok.Setter;
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "GetConfigurationResponse")
-public class GetConfigurationResponse extends OCPPMessageResponse {
+public class GetConfigurationResponse extends OCPPMessageResponse implements Cloneable {
   @SerializedName("configurationKey")
   private final List<Configuration> configurationKey;
 
@@ -41,5 +41,10 @@ public class GetConfigurationResponse extends OCPPMessageResponse {
     @NotNull(message = "GetConfigurationResponse readonly is required")
     @SerializedName("readonly")
     private final boolean readonly;
+  }
+
+  @Override
+  protected GetConfigurationResponse clone() {
+    return (GetConfigurationResponse) super.clone();
   }
 }

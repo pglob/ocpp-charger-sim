@@ -20,7 +20,7 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "BootNotification")
-public final class BootNotification extends OCPPMessageRequest {
+public final class BootNotification extends OCPPMessageRequest implements Cloneable {
 
   /** The Charge Point's Vendor. */
   @NotBlank(message = "BootNotification chargePointVendor is required")
@@ -85,5 +85,10 @@ public final class BootNotification extends OCPPMessageRequest {
     this.imsi = BootNotificationConstants.IMSI;
     this.meterType = BootNotificationConstants.METER_TYPE;
     this.meterSerialNumber = BootNotificationConstants.METER_SERIAL_NUMBER;
+  }
+
+  @Override
+  protected Authorize clone() {
+    return (Authorize) super.clone();
   }
 }

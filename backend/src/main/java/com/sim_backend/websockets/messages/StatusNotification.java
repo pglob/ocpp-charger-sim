@@ -17,7 +17,7 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StatusNotification")
-public final class StatusNotification extends OCPPMessageRequest {
+public final class StatusNotification extends OCPPMessageRequest implements Cloneable {
 
   @NotNull(message = "StatusNotification connectorId is required")
   @SerializedName("connectorId")
@@ -61,5 +61,10 @@ public final class StatusNotification extends OCPPMessageRequest {
     this.timestamp = timestamp;
     this.vendorId = vendorId.isEmpty() ? null : vendorId;
     this.vendorErrorCode = vendorErrorCode.isEmpty() ? null : vendorErrorCode;
+  }
+
+  @Override
+  protected StatusNotification clone() {
+    return (StatusNotification) super.clone();
   }
 }

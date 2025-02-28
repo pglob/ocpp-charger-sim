@@ -1,8 +1,8 @@
 import ButtonBase from './ButtonBase';
 
 class BootButton extends ButtonBase {
-  constructor() {
-    super('Boot', '/api/message/boot'); // Set button name and endpoint
+  constructor(chargerID) {
+    super('Boot', `/api/${chargerID}/message/boot`); // Set button name and endpoint
   }
 
   // Temporarily add console.log and reuse the base class logic

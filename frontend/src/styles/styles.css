@@ -1,3 +1,46 @@
+:root {
+  /* Define color variables */
+  --orange-red: #d8000c;
+  --error-red: #dc3545;
+  --dark-red: #b02a37;
+  --light-red: #e75e5e;
+  --error-bg: #f8d7da;
+  --error-border: #f5c6cb;
+  --error-text: #721c24;
+  --ligt-green: #ddffdd;
+  --medium-green: #b3f4dc;
+  --dark-green: #008000;
+  --response-green: #e8fee8;
+  --response-green2: #28a745;
+  --frame-white: #f9f9f9;
+  --light-grey: #f0f0f0;
+  --neutral-grey: #ccc;
+  --background-white: #fff;
+  --call-white: #e8f0fe;
+  --neutral-dark-grey: #6c757d;
+  --round-container-grey: #333;
+  --config-grey: #4c627a;
+  --border-black: #000;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.2);
+  --background-shadow: rgba(0, 0, 0, 0.5);
+  --button-blue: #72ade4;
+  --call-blue: #007bff;
+}
+
+* {
+  font-family: 'Inter', Arial, sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300; /* Arial fallback rounds up to 400 */
+}
+
+strong {
+  font-weight: 601; /* Arial fallback rounds up to 700 */
+}
+
+h1 {
+  font-weight: 700;
+}
 /* =====================================================
    Upper-level containers
    ===================================================== */
@@ -10,6 +53,10 @@
   padding: 10px;
 }
 
+.charger-container {
+  flex: 1;
+  box-sizing: border-box;
+}
 /* =====================================================
    ChargerFrame Component & Sub-Components Styles
    ===================================================== */
@@ -17,14 +64,14 @@
 /* Style for the ChargerFrame component */
 .charger-frame {
   width: 300px;
-  border: 2px solid #000;
+  border: 2px solid var(--border-black);
   border-radius: 8px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  background-color: #f9f9f9;
+  background-color: var(--frame-white);
   position: relative; /* This allows absolute positioning of child elements */
 }
 
@@ -70,10 +117,18 @@
   width: 200px;
   padding: 10px;
   margin: 10px 0;
-  border: 2px solid #000;
+  border: 1.5px solid var(--border-black);
   border-radius: 8px;
-  background-color: #fff;
+  background-color: var(--background-white);
   cursor: pointer;
+}
+
+button:active {
+  filter: brightness(85%);
+}
+
+.button:hover {
+  background-color: var(--light-grey);
 }
 
 /* A square button variant */
@@ -82,41 +137,60 @@
   height: 80px;
   padding: 10px;
   margin: 10px 0;
-  border: 2px solid #000;
+  border: 1.5px solid var(--border-black);
   border-radius: 8px;
-  background-color: #fff;
+  background-color: var(--background-white);
   cursor: pointer;
 }
 
-/* Darken a button when pressed */
-button:active {
-  filter: brightness(85%);
+.square-button:hover {
+  background-color: var(--light-grey); /* Light gray on hover */
 }
 
 /* Container for the Button component */
 .button-container {
   position: relative;
   flex-direction: row;
+  flex-wrap: wrap;
   display: flex;
+}
+
+.other-buttons {
+  cursor: pointer;
+  border: 1.5px solid var(--border-black);
+  border-radius: 2px;
+  background-color: var(--background-white);
+}
+
+.other-buttons:hover {
+  background-color: var(--light-grey);
 }
 
 /* Style for the dropdown button */
 .dropdown-button {
   margin-bottom: 8px;
   margin-left: 12px;
+  cursor: pointer;
+  border: 1.5px solid var(--border-black);
+  border-radius: 4px;
+  background-color: var(--background-white);
+}
+
+.dropdown-button:hover {
+  background-color: var(--light-grey);
 }
 
 /* Style for the ChargerFrame component */
 .charger-frame {
   width: 300px;
-  border: 2px solid #000;
+  border: 2px solid var(--border-black);
   border-radius: 8px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  background-color: #f9f9f9;
+  background-color: var(--frame-white);
 }
 
 /* Style for the Charger Name */
@@ -141,12 +215,13 @@ button:active {
 /* Main containerfor log message */
 .log-message-container {
   cursor: pointer;
-  border: 1px solid #ccc;
+  border: 1px solid var(--neutral-grey);
   border-radius: 8px;
   padding: 10px;
   margin-bottom: 20px;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--background-white);
+  box-shadow: 0 4px 8px var(--shadow-color);
+  user-select: text;
 }
 
 /* Header with timestamp, request type, and NumId label */
@@ -155,56 +230,56 @@ button:active {
   display: flex;
   align-items: center;
   gap: 10px; /* Space between elements */
-  font-size: 15px;
+  font-size: 13px;
 }
 
 /* NumId label styling */
 .num-id-label {
   border-radius: 4px;
   padding: 5px 10px;
-  font-weight: bold;
+  font-weight: 500;
   text-align: center;
 }
 
 /* Different background colors based on NumId */
 .num-id-call {
-  background-color: #e8f0fe;
-  border: 1px solid #007bff;
-  color: #007bff;
+  background-color: var(--call-white);
+  border: 1px solid var(--call-blue);
+  color: var(--call-blue);
 }
 
 .num-id-result {
-  background-color: #e8fee8;
-  border: 1px solid #28a745;
-  color: #28a745;
+  background-color: var(--response-green);
+  border: 1px solid var(--response-green2);
+  color: var(--response-green2);
 }
 
 .num-id-error {
-  background-color: #fee8e8;
-  border: 1px solid #dc3545;
-  color: #dc3545;
+  background-color: var(--error-bg);
+  border: 1px solid var(--error-red);
+  color: var(--error-red);
 }
 
 .num-id-unknown {
-  background-color: #f0f0f0;
-  border: 1px solid #6c757d;
-  color: #6c757d;
+  background-color: var(--light-grey);
+  border: 1px solid var(--neutral-dark-grey);
+  color: var(--neutral-dark-grey);
 }
 
 /* Message list container */
 .message-list-container {
   margin-top: 7px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-black);
   border-radius: 8px;
   padding: 10px;
   max-height: 150px;
   width: 323px;
   overflow-y: auto;
-  background-color: #f9f9f9;
+  background-color: var(--frame-white);
 }
 
 .message-list {
-  font-size: 14px;
+  font-size: 12px !important;
 }
 
 /* Centered text for empty message list */
@@ -215,13 +290,13 @@ button:active {
 /* Styling for the round rectangle container for the message boxes header */
 .round-rect-container {
   margin-top: 25px;
-  /* margin-bottom: 5px; */
-  background-color: #b3f4dc;
+  background-color: var(--medium-green);
   padding: 10px 20px;
+  border: 1px solid var(--border-black);
   border-radius: 20px;
-  font-weight: bold;
+  font-weight: 400;
   display: inline-block;
-  color: #333;
+  color: var(--round-container-grey);
 }
 
 /* Config button container to position the gear icon */
@@ -239,7 +314,7 @@ button:active {
   right: 10px;
   cursor: pointer;
   font-size: 20px;
-  color: #4c627a;
+  color: var(--config-grey);
 }
 
 /* Modal overlay (background) */
@@ -249,7 +324,7 @@ button:active {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--background-shadow);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -258,11 +333,11 @@ button:active {
 
 /* Modal content box */
 .config-modal-content {
-  background-color: white;
+  background-color: var(--background-white);
   padding: 20px;
   border-radius: 10px;
   width: 300px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px var(--shadow-medium);
 }
 
 /* Style for the input fields inside the modal */
@@ -271,7 +346,7 @@ button:active {
   padding: 8px;
   margin: 10px 0;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--neutral-grey);
   padding-right: 10px;
   box-sizing: border-box;
 }
@@ -285,8 +360,8 @@ button:active {
 /* Style for the update button */
 .config-button-update {
   padding: 10px;
-  background-color: #72ade4;
-  color: white;
+  background-color: var(--button-blue);
+  color: var(--background-white);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -297,8 +372,8 @@ button:active {
 /* Style for the exit button */
 .config-button-exit {
   padding: 10px;
-  background-color: #e75e5e;
-  color: white;
+  background-color: var(--light-red);
+  color: var(--background-white);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -315,9 +390,9 @@ button:active {
 }
 
 .config-message.error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background-color: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
 }
 
 .config-message-close {
@@ -338,9 +413,9 @@ button:active {
 
 /* Button to open the modal */
 .error-menu-container .dropdown-toggle {
-  background-color: #dc3545;
-  color: white;
-  border: none;
+  background-color: var(--error-red);
+  color: var(--background-white);
+  border: 1px solid var(--border-black);
   padding: 10px 15px;
   font-size: 16px;
   cursor: pointer;
@@ -349,7 +424,7 @@ button:active {
 }
 
 .error-menu-container .dropdown-toggle:hover {
-  background-color: #b02a37;
+  background-color: var(--dark-red);
 }
 
 /* Modal overlay */
@@ -359,7 +434,7 @@ button:active {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--background-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -368,12 +443,12 @@ button:active {
 
 /* Modal content */
 .modal-content {
-  background: white;
+  background: var(--background-white);
   padding: 20px;
   border-radius: 8px;
   width: 400px;
   max-width: 90%;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 6px var(--shadow-color);
   position: relative;
   animation: fadeIn 0.3s ease-in-out;
 }
@@ -397,14 +472,14 @@ button:active {
 }
 
 .form-item label {
-  font-weight: bold;
+  font-weight: 400;
   margin-bottom: 5px;
 }
 
 .form-item input,
 .form-item select {
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--neutral-grey);
   border-radius: 4px;
   font-size: 14px;
 }
@@ -419,22 +494,22 @@ button:active {
 }
 
 .feedback.error {
-  background-color: #ffdddd;
-  color: #d8000c;
-  border: 1px solid #d8000c;
+  background-color: var(--error-bg);
+  color: var(--orange-red);
+  border: 1px solid var(--orange-red);
 }
 
 .feedback.success {
-  background-color: #ddffdd;
-  color: #008000;
-  border: 1px solid #008000;
+  background-color: var(--success-bg);
+  color: var(--dark-green);
+  border: 1px solid var(--dark-green);
 }
 
 /* Submit button */
 .submit-button {
   width: 100%;
-  background-color: #28a745;
-  color: white;
+  background-color: var(--response-green2);
+  color: var(--background-white);
   border: none;
   padding: 10px;
   font-size: 16px;
@@ -444,7 +519,7 @@ button:active {
 }
 
 .submit-button:hover {
-  background-color: #218838;
+  background-color: var(--dark-green);
 }
 
 /* Responsive Design */

@@ -23,16 +23,32 @@ import lombok.Getter;
 @Getter
 public class MessageController extends ControllerBase {
 
-  private final Charger charger;
+  private final Charger[] chargers;
 
-  public MessageController(Javalin app, Charger charger) {
+  public MessageController(Javalin app, Charger[] chargers) {
     super(app);
-    this.charger = charger;
+    this.chargers = chargers;
+  }
+
+  private Charger getChargerID(Context ctx) {
+    String chargerIdStr = ctx.pathParam("chargerId");
+    int chargerId;
+    try {
+      chargerId = Integer.parseInt(chargerIdStr);
+    } catch (NumberFormatException e) {
+      ctx.status(400).result("Invalid chargerId");
+      return null;
+    }
+    if (chargerId < 1 || chargerId > chargers.length) {
+      ctx.status(404).result("Charger not found");
+      return null;
+    }
+    return chargers[chargerId - 1];
   }
 
   // Helper methods to check if components are available
 
-  private boolean checkWsClient(Context ctx) {
+  private boolean checkWsClient(Charger charger, Context ctx) {
     if (charger.getWsClient() == null) {
       ctx.status(503).result("Charger is rebooting");
       return false;
@@ -40,7 +56,7 @@ public class MessageController extends ControllerBase {
     return true;
   }
 
-  private boolean checkTransactionHandler(Context ctx) {
+  private boolean checkTransactionHandler(Charger charger, Context ctx) {
     if (charger.getTransactionHandler() == null) {
       ctx.status(503).result("Charger is rebooting");
       return false;
@@ -48,7 +64,7 @@ public class MessageController extends ControllerBase {
     return true;
   }
 
-  private boolean checkStateMachine(Context ctx) {
+  private boolean checkStateMachine(Charger charger, Context ctx) {
     if (charger.getStateMachine() == null) {
       ctx.status(503).result("Charger is rebooting");
       return false;
@@ -56,7 +72,7 @@ public class MessageController extends ControllerBase {
     return true;
   }
 
-  private boolean checkElec(Context ctx) {
+  private boolean checkElec(Charger charger, Context ctx) {
     if (charger.getElec() == null) {
       ctx.status(503).result("Charger is rebooting");
       return false;
@@ -65,7 +81,9 @@ public class MessageController extends ControllerBase {
   }
 
   public void authorize(Context ctx) {
-    if (!checkWsClient(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
     Authorize msg = new Authorize();
 
     if (!MessageValidator.isValid(msg)) {
@@ -77,7 +95,9 @@ public class MessageController extends ControllerBase {
   }
 
   public void boot(Context ctx) {
-    if (!checkWsClient(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
     BootNotification msg =
         new BootNotification(
             "CP Vendor",
@@ -99,7 +119,9 @@ public class MessageController extends ControllerBase {
   }
 
   public void heartbeat(Context ctx) {
-    if (!checkWsClient(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
     Heartbeat msg = new Heartbeat();
 
     if (!MessageValidator.isValid(msg)) {
@@ -111,9 +133,10 @@ public class MessageController extends ControllerBase {
   }
 
   public void state(Context ctx) {
-    if (!checkWsClient(ctx)) return;
-    if (!checkStateMachine(ctx)) return;
-
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
+    if (!checkStateMachine(charger, ctx)) return;
     ChargerStateMachine stateMachine = charger.getStateMachine();
     if (stateMachine == null) {
       ctx.result("PoweredOff");
@@ -125,34 +148,42 @@ public class MessageController extends ControllerBase {
   }
 
   public void reboot(Context ctx) {
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
     if (charger.isRebootInProgress()) {
       ctx.status(503).result("Reboot already in progress");
       return;
     }
 
-    if (!checkWsClient(ctx)) return;
-    if (!checkElec(ctx)) return;
-    if (!checkTransactionHandler(ctx)) return;
+    if (!checkWsClient(charger, ctx)) return;
+    if (!checkElec(charger, ctx)) return;
+    if (!checkTransactionHandler(charger, ctx)) return;
     charger.Reboot();
     ctx.result("OK");
   }
 
   public void online(Context ctx) {
-    if (!checkWsClient(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
 
     charger.getWsClient().goOnline();
     ctx.result("OK");
   }
 
   public void offline(Context ctx) {
-    if (!checkWsClient(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
 
     charger.getWsClient().goOffline();
     ctx.result("OK");
   }
 
   public void status(Context ctx) {
-    if (!checkWsClient(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
 
     String requestBody = ctx.body();
     JsonObject json = JsonParser.parseString(requestBody).getAsJsonObject();
@@ -204,44 +235,60 @@ public class MessageController extends ControllerBase {
   }
 
   public void getSentMessages(Context ctx) {
-    if (!checkWsClient(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
     ctx.json(charger.getWsClient().getSentMessages()); // Return sent messages as JSON
   }
 
   public void getReceivedMessages(Context ctx) {
-    if (!checkWsClient(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkWsClient(charger, ctx)) return;
     ctx.json(charger.getWsClient().getReceivedMessages()); // Return received messages as JSON
   }
 
   public void startCharge(Context ctx) {
-    if (!checkTransactionHandler(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkTransactionHandler(charger, ctx)) return;
     charger.getTransactionHandler().StartCharging(1, charger.getConfig().getIdTag());
     ctx.result("OK");
   }
 
   public void stopCharge(Context ctx) {
-    if (!checkTransactionHandler(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkTransactionHandler(charger, ctx)) return;
     charger.getTransactionHandler().StopCharging(charger.getConfig().getIdTag());
     ctx.result("OK");
   }
 
   public void meterValue(Context ctx) {
-    if (!checkElec(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkElec(charger, ctx)) return;
     // Display only 4 significant digits
     ctx.result(String.format("%.4g", charger.getElec().getEnergyActiveImportRegister()));
   }
 
   public void maxCurrent(Context ctx) {
-    if (!checkElec(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkElec(charger, ctx)) return;
     ctx.result(String.valueOf(charger.getElec().getMaxCurrent()));
   }
 
   public void currentImport(Context ctx) {
-    if (!checkElec(ctx)) return;
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
+    if (!checkElec(charger, ctx)) return;
     ctx.result(String.valueOf(charger.getElec().getCurrentImport()));
   }
 
   public void getIdTagCSurl(Context ctx) {
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
     String idTag = charger.getConfig().getIdTag();
     String centralSystemUrl = charger.getConfig().getCentralSystemUrl();
     String configString =
@@ -250,6 +297,8 @@ public class MessageController extends ControllerBase {
   }
 
   public void updateIdTagCSurl(Context ctx) {
+    Charger charger = getChargerID(ctx);
+    if (charger == null) return;
     String requestBody = ctx.body();
     JsonObject json = JsonParser.parseString(requestBody).getAsJsonObject();
 
@@ -282,29 +331,29 @@ public class MessageController extends ControllerBase {
 
   @Override
   public void registerRoutes(Javalin app) {
-    app.post("/api/message/authorize", this::authorize);
-    app.post("/api/message/boot", this::boot);
-    app.post("/api/message/heartbeat", this::heartbeat);
+    app.post("/api/{chargerId}/message/authorize", this::authorize);
+    app.post("/api/{chargerId}/message/boot", this::boot);
+    app.post("/api/{chargerId}/message/heartbeat", this::heartbeat);
 
-    app.get("/api/state", this::state);
+    app.get("/api/{chargerId}/state", this::state);
 
-    app.post("/api/charger/reboot", this::reboot);
+    app.post("/api/{chargerId}/charger/reboot", this::reboot);
 
-    app.post("/api/state/online", this::online);
-    app.post("/api/state/offline", this::offline);
-    app.post("/api/state/status", this::status);
+    app.post("/api/{chargerId}/state/online", this::online);
+    app.post("/api/{chargerId}/state/offline", this::offline);
+    app.post("/api/{chargerId}/state/status", this::status);
 
-    app.get("/api/log/sentmessage", this::getSentMessages);
-    app.get("/api/log/receivedmessage", this::getReceivedMessages);
+    app.get("/api/{chargerId}/log/sentmessage", this::getSentMessages);
+    app.get("/api/{chargerId}/log/receivedmessage", this::getReceivedMessages);
 
-    app.post("/api/transaction/start-charge", this::startCharge);
-    app.post("/api/transaction/stop-charge", this::stopCharge);
+    app.post("/api/{chargerId}/transaction/start-charge", this::startCharge);
+    app.post("/api/{chargerId}/transaction/stop-charge", this::stopCharge);
 
-    app.get("/api/electrical/meter-value", this::meterValue);
-    app.get("/api/electrical/max-current", this::maxCurrent);
-    app.get("/api/electrical/current-import", this::currentImport);
+    app.get("/api/{chargerId}/electrical/meter-value", this::meterValue);
+    app.get("/api/{chargerId}/electrical/max-current", this::maxCurrent);
+    app.get("/api/{chargerId}/electrical/current-import", this::currentImport);
 
-    app.get("/api/get-idtag-csurl", this::getIdTagCSurl);
-    app.post("/api/update-idtag-csurl", this::updateIdTagCSurl);
+    app.get("/api/{chargerId}/get-idtag-csurl", this::getIdTagCSurl);
+    app.post("/api/{chargerId}/update-idtag-csurl", this::updateIdTagCSurl);
   }
 }

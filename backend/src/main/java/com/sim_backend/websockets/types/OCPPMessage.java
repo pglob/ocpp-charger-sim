@@ -8,15 +8,15 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import java.util.Set;
 import java.util.UUID;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 /** An OCPP message. */
+@Slf4j
 @EqualsAndHashCode(exclude = "messageID", callSuper = false)
-public abstract class OCPPMessage {
+public abstract class OCPPMessage implements Cloneable {
   /** The call ID for a request. */
   public static final int CALL_ID_REQUEST = 2;
 
@@ -76,9 +76,11 @@ public abstract class OCPPMessage {
     return UUID.randomUUID().toString();
   }
 
-  /** Refreshes a message, resetting its message ID to something new. */
-  public void refreshMessage() {
-    this.messageID = generateMessageID();
+  /** Clones a message and changes its ID. */
+  public OCPPMessage cloneMessage() {
+    OCPPMessage message = this.clone();
+    message.messageID = generateMessageID();
+    return message;
   }
 
   /**
@@ -124,5 +126,15 @@ public abstract class OCPPMessage {
   @Override
   public String toString() {
     return String.format("%s = %s", this.getClass(), this.toJsonString());
+  }
+
+  @Override
+  protected OCPPMessage clone() {
+    try {
+      return (OCPPMessage) super.clone();
+    } catch (CloneNotSupportedException e) {
+      log.error("Failed clone", e);
+      throw new AssertionError();
+    }
   }
 }

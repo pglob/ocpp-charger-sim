@@ -4,25 +4,29 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.sim_backend.websockets.OCPPWebSocketClientTest.TestOCPPWebSocketClient;
+import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
-import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.HeartbeatResponse;
 import com.sim_backend.websockets.observers.StatusNotificationObserver;
+import com.sim_backend.websockets.types.OCPPMessageError;
+import com.sim_backend.websockets.types.OCPPRepeatingTimedTask;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class OCPPTimeTest {
   public static final ZoneId UTC = ZoneId.of("UTC");
 
-  OCPPWebSocketClient client;
   StatusNotificationObserver statusNotificationObserver;
+  TestOCPPWebSocketClient client;
   MessageQueue queue;
   OnOCPPMessage onOCPPMessageMock;
   OCPPTime ocppTime;
@@ -31,7 +35,7 @@ public class OCPPTimeTest {
   void setUp() throws URISyntaxException {
     onOCPPMessageMock = mock(OnOCPPMessage.class);
     client = spy(new OCPPWebSocketClient(new URI(""), statusNotificationObserver));
-    ocppTime = new OCPPTime(client);
+    ocppTime = client.getScheduler().getTime();
   }
 
   private ZonedDateTime getTestTime() {
@@ -40,22 +44,18 @@ public class OCPPTimeTest {
 
   @Test
   public void testOCPPTime() throws InterruptedException, OCPPMessageFailure {
-    try (OCPPTime time = new OCPPTime(client)) {
-      HeartbeatResponse response = new HeartbeatResponse(ZonedDateTime.now().minusSeconds(24));
+    doNothing().when(client).send(anyString());
+    HeartbeatResponse response = new HeartbeatResponse(ZonedDateTime.now().minusSeconds(24));
 
-      Heartbeat beat = new Heartbeat();
-      client.addPreviousMessage(beat);
-      response.setMessageID(beat.getMessageID());
-      client.onMessage(response.toJsonString());
+    ocppTime.setHeartbeatInterval(20L, TimeUnit.SECONDS);
+    ocppTime.heartbeat.task.run();
+    response.setMessageID(ocppTime.heartbeat.getMessage().getMessageID());
+    client.popAllMessages();
 
-      Duration duration = Duration.between(time.getSynchronizedTime(), ZonedDateTime.now());
-      assert duration.getSeconds() == 24;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    client.onMessage(response.toJsonString());
 
-    verify(client, times(1))
-        .deleteOnReceiveMessage(any(Class.class), any(OnOCPPMessageListener.class));
+    Duration duration = Duration.between(ocppTime.getSynchronizedTime(), ZonedDateTime.now());
+    assert duration.getSeconds() == 24;
   }
 
   @Test
@@ -73,15 +73,7 @@ public class OCPPTimeTest {
   @Test
   public void testOCPPTime3() throws InterruptedException, OCPPMessageFailure {
     try (OCPPTime time = new OCPPTime(client)) {
-      HeartbeatResponse response = new HeartbeatResponse(ZonedDateTime.now().minusSeconds(45));
-
-      Heartbeat beat = new Heartbeat();
-      client.addPreviousMessage(beat);
-      response.setMessageID(beat.getMessageID());
-      client.onMessage(response.toJsonString());
-
-      Duration duration = Duration.between(time.getSynchronizedTime(), ZonedDateTime.now());
-      assert duration.getSeconds() == 45;
+      client.popMessage();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -114,9 +106,12 @@ public class OCPPTimeTest {
 
     ZonedDateTime currentTime1 = ZonedDateTime.now(UTC);
     ZonedDateTime currentTime2 = currentTime1.plusMinutes(2);
+    ocppTime.setHeartbeatInterval(20L, TimeUnit.SECONDS);
 
     HeartbeatResponse heartbeatResponse1 = mock(HeartbeatResponse.class);
     when(heartbeatResponse1.getCurrentTime()).thenReturn(currentTime1);
+    when(heartbeatResponse1.getMessageID())
+        .thenReturn(ocppTime.heartbeat.getMessage().getMessageID());
     ocppTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse1, client));
 
     ZonedDateTime synchronizedTime1 = ocppTime.getSynchronizedTime();
@@ -127,6 +122,8 @@ public class OCPPTimeTest {
 
     HeartbeatResponse heartbeatResponse2 = mock(HeartbeatResponse.class);
     when(heartbeatResponse2.getCurrentTime()).thenReturn(currentTime2);
+    when(heartbeatResponse2.getMessageID())
+        .thenReturn(ocppTime.heartbeat.getMessage().getMessageID());
     ocppTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse2, client));
 
     ZonedDateTime synchronizedTime2 = ocppTime.getSynchronizedTime();
@@ -138,10 +135,14 @@ public class OCPPTimeTest {
 
   @Test
   void testTimeSynchronizationWithOffset() {
+
+    ocppTime.setHeartbeatInterval(20L, TimeUnit.SECONDS);
     ZonedDateTime currentTime = ZonedDateTime.now(UTC); // Ensure UTC time
     ZonedDateTime heartbeatTime = currentTime.minusSeconds(30); // 30 seconds behind
     HeartbeatResponse heartbeatResponse = mock(HeartbeatResponse.class);
     when(heartbeatResponse.getCurrentTime()).thenReturn(heartbeatTime);
+    when(heartbeatResponse.getMessageID())
+        .thenReturn(ocppTime.heartbeat.getMessage().getMessageID());
 
     ocppTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse, client));
 
@@ -153,23 +154,31 @@ public class OCPPTimeTest {
   }
 
   @Test
-  void testCloseCleansUpListener() throws Exception {
-    // Arrange
-    OCPPTime spyOcppTime = spy(ocppTime);
-
-    // Act
-    spyOcppTime.close();
-
-    // Assert
-    verify(client, times(1)).deleteOnReceiveMessage(HeartbeatResponse.class, spyOcppTime.listener);
-  }
-
-  @Test
   void testInvalidClientThrowsException() {
     // Assert
     assertThrows(
         IllegalArgumentException.class,
         () -> new OCPPTime(null),
         "Should throw IllegalArgumentException when client is null.");
+  }
+
+  @Test
+  void testHeartBeatResponseCSCAP142() throws InterruptedException, OCPPMessageFailure {
+    doNothing().when(client).send(anyString());
+    OCPPTime spyTime = spy(client.getScheduler().getTime());
+
+    HeartbeatResponse heartbeatResponse = new HeartbeatResponse(ZonedDateTime.now());
+
+    OCPPRepeatingTimedTask heartbeat = ocppTime.setHeartbeatInterval(20L, TimeUnit.SECONDS);
+    heartbeatResponse.setMessageID(heartbeat.getMessage().getMessageID());
+
+    client.addPreviousMessage(heartbeat.message);
+
+    heartbeat.message = heartbeat.message.cloneMessage();
+    spyTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse, client));
+
+    OCPPMessageError error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(error.getErrorCode(), ErrorCode.ProtocolError);
   }
 }

@@ -2,8 +2,8 @@
 import ButtonBase from './ButtonBase';
 
 class AuthorizeButton extends ButtonBase {
-  constructor() {
-    super('Authorize', '/api/message/authorize'); // Set button name and endpoint
+  constructor(chargerID) {
+    super('Authorize', `/api/${chargerID}/message/authorize`); // Set button name and endpoint
   }
 
   // Custom logic for Authorize button

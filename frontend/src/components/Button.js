@@ -6,13 +6,17 @@ import ButtonBase from './buttons/ButtonBase';
 import '../styles/styles.css';
 
 // Implementation of the button component, which includes a drop-down menu and an online/offline button
-function Button({ isOnline, isActive }) {
+function Button({ chargerID, isOnline, isActive }) {
   // Create instances of each button class
-  const buttons = [new AuthorizeButton(), new HeartbeatButton()];
-
+  const buttons = [
+    new AuthorizeButton(chargerID),
+    new HeartbeatButton(chargerID),
+  ];
   // Handle Bring Online/Take Offline button click behavior
   const handleOnlineOffline = async () => {
-    const endpoint = isOnline ? '/api/state/offline' : '/api/state/online';
+    const endpoint = isOnline
+      ? `/api/${chargerID}/state/offline`
+      : `/api/${chargerID}/state/online`;
     const buttonName = isOnline ? 'Take Offline' : 'Bring Online';
 
     // Use the base class for online/offline behavior
@@ -35,6 +39,7 @@ function Button({ isOnline, isActive }) {
               <button
                 key={button.name}
                 onClick={() => button.postRequest()} // Trigger specific button's postRequest
+                className="other-buttons"
               >
                 {button.name}
               </button>
@@ -53,6 +58,7 @@ function Button({ isOnline, isActive }) {
 }
 
 Button.propTypes = {
+  chargerID: PropTypes.number.isRequired, // 'chargerID' should be a number
   isOnline: PropTypes.bool.isRequired, // 'isOnline' should be a boolean
   isActive: PropTypes.bool.isRequired, // 'isActive' should be a boolean
 };

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { fetchSentMessages, fetchReceivedMessages } from './RetrieveLogMessage';
+import PropTypes from 'prop-types';
 import '../styles/styles.css';
 
-const ShowLogMessages = () => {
+const ShowLogMessages = ({ chargerID }) => {
   const [sentMessages, setSentMessages] = useState([]);
   const [receivedMessages, setReceivedMessages] = useState([]);
 
@@ -11,6 +12,18 @@ const ShowLogMessages = () => {
   const [expandedReceivedMessages, setExpandedReceivedMessages] = useState(
     new Set()
   );
+
+  // Track whether the user is selecting text
+  const [isSelectingText, setIsSelectingText] = useState(false);
+
+  // Function to handle mouseup event to check for text selection
+  const handleMouseUp = () => {
+    if (window.getSelection().toString().length > 0) {
+      setIsSelectingText(true); // Text is being selected
+    } else {
+      setIsSelectingText(false); // No text is selected
+    }
+  };
 
   // Helper function for mapping NumId to labels
   const getNumIdLabel = (NumId) => {
@@ -39,26 +52,28 @@ const ShowLogMessages = () => {
 
   // Helper function to toggle message details
   const handleToggleDetails = (userId, type) => {
-    if (type === 'sent') {
-      setExpandedSentMessages((prevExpanded) => {
-        const updated = new Set(prevExpanded);
-        if (updated.has(userId)) {
-          updated.delete(userId);
-        } else {
-          updated.add(userId);
-        }
-        return updated;
-      });
-    } else if (type === 'received') {
-      setExpandedReceivedMessages((prevExpanded) => {
-        const updated = new Set(prevExpanded);
-        if (updated.has(userId)) {
-          updated.delete(userId);
-        } else {
-          updated.add(userId);
-        }
-        return updated;
-      });
+    if (!isSelectingText) {
+      if (type === 'sent') {
+        setExpandedSentMessages((prevExpanded) => {
+          const updated = new Set(prevExpanded);
+          if (updated.has(userId)) {
+            updated.delete(userId);
+          } else {
+            updated.add(userId);
+          }
+          return updated;
+        });
+      } else if (type === 'received') {
+        setExpandedReceivedMessages((prevExpanded) => {
+          const updated = new Set(prevExpanded);
+          if (updated.has(userId)) {
+            updated.delete(userId);
+          } else {
+            updated.add(userId);
+          }
+          return updated;
+        });
+      }
     }
   };
 
@@ -198,8 +213,8 @@ const ShowLogMessages = () => {
   // Polling function to fetch data
   const pollMessages = () => {
     const fetchData = async () => {
-      const sentData = await fetchSentMessages();
-      const receivedData = await fetchReceivedMessages();
+      const sentData = await fetchSentMessages(chargerID);
+      const receivedData = await fetchReceivedMessages(chargerID);
       setSentMessages(sentData);
       setReceivedMessages(receivedData);
     };
@@ -217,9 +232,15 @@ const ShowLogMessages = () => {
   useEffect(() => {
     const interval = pollMessages();
 
+    // Add event listener for mouseup to detect text selection
+    document.addEventListener('mouseup', handleMouseUp);
+
     // Clear the interval when the component unmounts to avoid memory leaks
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [chargerID]);
 
   // Sort sent and received messages by timestamp, descending (most recent first)
   const sortedSentMessages = sentMessages.sort((a, b) => {
@@ -263,4 +284,7 @@ const ShowLogMessages = () => {
   );
 };
 
+ShowLogMessages.propTypes = {
+  chargerID: PropTypes.number.isRequired,
+};
 export default ShowLogMessages;

@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "ChangeConfiguration")
-public class ChangeConfiguration extends OCPPMessageRequest {
+public class ChangeConfiguration extends OCPPMessageRequest implements Cloneable {
   @Size(max = 50, message = "ChangeConfiguration key must not exceed 50 characters")
   @NotBlank(message = "ChangeConfiguration key is required")
   @SerializedName("key")
@@ -30,5 +30,10 @@ public class ChangeConfiguration extends OCPPMessageRequest {
   public ChangeConfiguration(String key, String value) {
     this.key = key;
     this.value = value;
+  }
+
+  @Override
+  protected ChangeConfiguration clone() {
+    return (ChangeConfiguration) super.clone();
   }
 }

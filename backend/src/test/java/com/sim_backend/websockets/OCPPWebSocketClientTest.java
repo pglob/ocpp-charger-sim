@@ -20,12 +20,32 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.net.SocketFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class OCPPWebSocketClientTest {
 
-  OCPPWebSocketClient client;
+  public static class TestOCPPWebSocketClient extends OCPPWebSocketClient {
+    public TestOCPPWebSocketClient(URI serverUri) {
+      super(serverUri);
+    }
+
+    @Override
+    public void startConnectionLostTimer() {}
+
+    @Override
+    public boolean connectBlocking() throws InterruptedException {
+      return true;
+    }
+
+    @Override
+    public boolean reconnectBlocking() throws InterruptedException {
+      return true;
+    }
+  }
+
+  TestOCPPWebSocketClient client;
   StatusNotificationObserver statusNotificationObserver;
   MessageQueue queue;
   OnOCPPMessage onOCPPMessageMock;
@@ -33,7 +53,7 @@ public class OCPPWebSocketClientTest {
   @BeforeEach
   void setUp() throws URISyntaxException {
     onOCPPMessageMock = mock(OnOCPPMessage.class);
-    client = spy(new OCPPWebSocketClient(new URI(""), statusNotificationObserver));
+    client = spy(new TestOCPPWebSocketClient(new URI(""), statusNotificationObserver));
     queue = mock(MessageQueue.class);
   }
 
@@ -324,8 +344,8 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testAllThrowsException() throws OCPPMessageFailure {
-
+  public void testAllThrowsException() throws OCPPMessageFailure, InterruptedException {
+    doAnswer(invocation -> false).when(client).reconnectBlocking();
     Heartbeat beat = new Heartbeat();
 
     client.pushMessage(beat);
@@ -345,8 +365,8 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testThrowsException() throws OCPPMessageFailure {
-
+  public void testThrowsException() throws OCPPMessageFailure, InterruptedException {
+    doAnswer(invocation -> false).when(client).reconnectBlocking();
     Heartbeat beat = new Heartbeat();
 
     client.pushMessage(beat);
@@ -366,6 +386,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testRetryAfterFirstAttempt() throws Exception {
+    doAnswer(invocation -> false).when(client).reconnectBlocking();
     Heartbeat beat = new Heartbeat();
 
     client.pushMessage(beat);
@@ -612,8 +633,8 @@ public class OCPPWebSocketClientTest {
     heartbeat.setMessageID(testMsgId);
 
     // Get the MessageQueue from our client
-    OCPPWebSocketClient client =
-        new OCPPWebSocketClient(new java.net.URI("ws://dummy"), statusNotificationObserver);
+    TestOCPPWebSocketClient client =
+        new TestOCPPWebSocketClient(new java.net.URI("ws://dummy"), statusNotificationObserver);
 
     // Access previousMessages
     Field previousMessagesField = MessageQueue.class.getDeclaredField("previousMessages");
@@ -642,5 +663,148 @@ public class OCPPWebSocketClientTest {
     assertFalse(
         previousMessages.containsKey(testMsgId),
         "Timed-out message should be removed from previousMessages");
+  }
+
+  @Test
+  void testInvalidJSONCallError() throws Exception {
+    doAnswer(invocation -> null).when(client).send(anyString());
+    client.handleMessage("[1,");
+    OCPPMessageError error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.FormatViolation, error.getErrorCode());
+    assertEquals(
+        "java.io.EOFException: End of input at line 1 column 4 path $[1]",
+        error.getErrorDescription());
+
+    client.handleMessage("");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.FormatViolation, error.getErrorCode());
+    assertEquals("Provided empty string", error.getErrorDescription());
+
+    assertThrows(
+        OCPPBadCallID.class,
+        () -> {
+          client.handleMessage("[5,\"w\", \"Heartbeat\", {}]");
+        });
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Provided bad Call ID", error.getErrorDescription());
+
+    assertThrows(
+        OCPPUnsupportedMessage.class, () -> client.handleMessage("[2,\"w\", \"Water\", {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.NotSupported, error.getErrorCode());
+    assertEquals("Unsupported action", error.getErrorDescription());
+
+    assertThrows(
+        OCPPBadMessage.class, () -> client.handleMessage("[2,\"w\", \"Heartbeat\", {}, {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
+    assertEquals("Request provided wrong number of array elements", error.getErrorDescription());
+
+    assertThrows(
+        OCPPBadMessage.class, () -> client.handleMessage("[4,\"w\", 2, \"Heartbeat\", {}, {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
+    assertEquals("Error provided wrong number of array elements", error.getErrorDescription());
+
+    assertThrows(
+        OCPPBadMessage.class, () -> client.handleMessage("[3,\"w\", \"Heartbeat\", {}, {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
+    assertEquals("Response provided wrong number of array elements", error.getErrorDescription());
+
+    assertThrows(OCPPCannotProcessMessage.class, () -> client.handleMessage("[3,\"w\", {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.ProtocolError, error.getErrorCode());
+    assertEquals("Received Response with an unknown ID", error.getErrorDescription());
+
+    assertThrows(
+        OCPPCannotProcessMessage.class, () -> client.handleMessage("[4,\"w\", 2, \"w\", {}]"));
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.ProtocolError, error.getErrorCode());
+    assertEquals("Received Error with an unknown ID", error.getErrorDescription());
+
+    Heartbeat beat = new Heartbeat();
+    beat.setMessageID("heartbeat");
+    client.addPreviousMessage(beat);
+    client.handleMessage("[4,\"heartbeat\", 29999, \"w\", {}]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Received Unknown Error Code", error.getErrorDescription());
+
+    client.addPreviousMessage(beat);
+    client.handleMessage("[4,\"heartbeat\", -1, \"w\", {}]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Received Unknown Error Code", error.getErrorDescription());
+
+    client.addPreviousMessage(beat);
+    client.handleMessage("[4,\"heartbeat\", 2, \"w\", a]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Error details was not a json object", error.getErrorDescription());
+
+    client.addPreviousMessage(beat);
+    client.handleMessage("[3,\"heartbeat\", 2]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Response details was not a json object", error.getErrorDescription());
+
+    client.handleMessage("[2,\"heartbeat\", \"Heartbeat\", 2]");
+    error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.PropertyConstraintViolation, error.getErrorCode());
+    assertEquals("Request details was not a json object", error.getErrorDescription());
+  }
+
+  @Test
+  void testWssSchemeSetsSniSSLSocketFactory()
+      throws URISyntaxException, NoSuchFieldException, IllegalAccessException {
+    // Given a "wss" URI
+    URI wssUri = new URI("wss://example.com:12345");
+
+    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(wssUri);
+
+    // Verify the WebSocketClient's 'socketFactory' is SniSSLSocketFactory
+    Field socketFactoryField = getSocketFactoryField();
+    SocketFactory actualFactory = (SocketFactory) socketFactoryField.get(client);
+    assertNotNull(actualFactory, "Expected socketFactory to be initialized for wss");
+    assertTrue(
+        actualFactory instanceof SniSSLSocketFactory,
+        "Expected a SniSSLSocketFactory when using a wss:// URI");
+  }
+
+  @Test
+  void testNonWssSchemeDoesNotSetSniSSLSocketFactory()
+      throws URISyntaxException, NoSuchFieldException, IllegalAccessException {
+    // Given a "ws" URI
+    URI wsUri = new URI("ws://example.com:12345");
+
+    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(wsUri);
+
+    // Verify the WebSocketClient's 'socketFactory' is not SniSSLSocketFactory
+    Field socketFactoryField = getSocketFactoryField();
+    SocketFactory actualFactory = (SocketFactory) socketFactoryField.get(client);
+    assertNull(actualFactory, "Expected socketFactory to be uninitialized for ws");
+  }
+
+  /** Helper to get the `socketFactory` field from the parent WebSocketClient class. */
+  private Field getSocketFactoryField() throws NoSuchFieldException {
+    Field field = org.java_websocket.client.WebSocketClient.class.getDeclaredField("socketFactory");
+    field.setAccessible(true);
+    return field;
   }
 }

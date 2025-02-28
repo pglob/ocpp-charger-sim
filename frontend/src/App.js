@@ -37,10 +37,12 @@ function App() {
         </b>
       )}
       <div className="charger-frames-container">
-        <div>
-          <ChargerFrame />
-          <ShowLogMessages />
-        </div>
+        {[1, 2, 3].map((id) => (
+          <div key={id} className="charger-container">
+            <ChargerFrame chargerID={id} />
+            <ShowLogMessages chargerID={id} />
+          </div>
+        ))}
       </div>
     </div>
   );

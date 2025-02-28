@@ -11,11 +11,16 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "Heartbeat")
-public final class Heartbeat extends OCPPMessageRequest {
+public final class Heartbeat extends OCPPMessageRequest implements Cloneable {
   /***
    * A Heartbeat Message.
    */
   public Heartbeat() {
     super();
+  }
+
+  @Override
+  protected Heartbeat clone() {
+    return (Heartbeat) super.clone();
   }
 }

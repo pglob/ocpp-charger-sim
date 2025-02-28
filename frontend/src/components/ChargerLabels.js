@@ -2,28 +2,28 @@
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 
-export const chargerLabels = [
+export const chargerLabels = (chargerID) => [
   {
     label: 'State',
-    endpoint: `${API_BASE_URL}/state`,
+    endpoint: `${API_BASE_URL}/${chargerID}/state`,
     transform: (text) => text.trim(),
     defaultValue: 'Unknown',
   },
   {
     label: 'Meter Value',
-    endpoint: `${API_BASE_URL}/electrical/meter-value`,
+    endpoint: `${API_BASE_URL}/${chargerID}/electrical/meter-value`,
     transform: (text) => `${text.trim()} KWh`,
     defaultValue: 'N/A KWh',
   },
   {
     label: 'Max Current',
-    endpoint: `${API_BASE_URL}/electrical/max-current`,
+    endpoint: `${API_BASE_URL}/${chargerID}/electrical/max-current`,
     transform: (text) => `${text.trim()}A`,
     defaultValue: 'N/A A',
   },
   {
     label: 'Current Flow',
-    endpoint: `${API_BASE_URL}/electrical/current-import`,
+    endpoint: `${API_BASE_URL}/${chargerID}/electrical/current-import`,
     transform: (text) => `${text.trim()}A`,
     defaultValue: 'N/A A',
   },
@@ -33,16 +33,18 @@ export const chargerLabels = [
  * Polls charger endpoints.
  */
 export const pollChargerData = (
-  callback,
+  chargerID,
+  callback = () => {},
   defaultInterval = 5000,
   stateInterval = 1000
 ) => {
+  const labels = chargerLabels(chargerID);
   // This object holds the latest value for each label
   const results = {};
 
   // Call the callback with the current results
   const updateAndCallback = () => {
-    const output = chargerLabels.map((item) => ({
+    const output = labels.map((item) => ({
       label: item.label,
       value: results[item.label],
     }));
@@ -66,7 +68,7 @@ export const pollChargerData = (
   };
 
   // For each endpoint, set a polling interval
-  const intervalIds = chargerLabels.map((item) => {
+  const intervalIds = labels.map((item) => {
     const interval = item.label === 'State' ? stateInterval : defaultInterval;
     // Poll immediately on start
     pollItem(item);
