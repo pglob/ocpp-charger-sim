@@ -28,6 +28,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.net.ssl.SSLContext;
@@ -93,6 +94,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
   /** List to store received messages. */
   private final List<String> rxMessages = new CopyOnWriteArrayList<>();
+
+  /** List of already received IDs. */
+  public final Set<String> receivedIDs = ConcurrentHashMap.newKeySet();
 
   /**
    * Record a transmitted message.
@@ -226,6 +230,14 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
       JsonArray array = element.getAsJsonArray();
       String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
+
+      if (this.receivedIDs.contains(msgId)) {
+        this.pushCallError(ErrorCode.OccurenceConstraintViolation, "ID was already used", msgId);
+        log.error("Received duplicate ID {}", msgId);
+        return;
+      }
+
+      this.receivedIDs.add(msgId);
 
       ParseResults results;
 
