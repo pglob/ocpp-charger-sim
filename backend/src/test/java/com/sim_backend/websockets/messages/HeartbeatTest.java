@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 import com.google.gson.JsonElement;
 import com.networknt.schema.*;
 import com.sim_backend.websockets.GsonUtilities;
-import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.OCPPWebSocketClientTest.TestOCPPWebSocketClient;
 import com.sim_backend.websockets.types.OCPPMessage;
 import java.io.InputStream;
@@ -23,11 +22,10 @@ public class HeartbeatTest {
 
 
   TestOCPPWebSocketClient client;
-  StatusNotificationObserver statusNotificationObserver;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
-    client = spy(new TestOCPPWebSocketClient(new URI(""), statusNotificationObserver));
+    client = spy(new TestOCPPWebSocketClient(new URI("")));
   }
 
   @Test

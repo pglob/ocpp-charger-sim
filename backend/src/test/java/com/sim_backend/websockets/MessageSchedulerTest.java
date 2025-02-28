@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import com.sim_backend.websockets.OCPPWebSocketClientTest.TestOCPPWebSocketClient;
 import com.sim_backend.websockets.messages.Heartbeat;
-import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPRepeatingTimedTask;
 import com.sim_backend.websockets.types.OCPPTimedTask;
@@ -31,8 +30,6 @@ public class MessageSchedulerTest {
 
   @Mock private OCPPMessage message;
 
-  @Mock private StatusNotificationObserver statusNotificationObserver;
-
   private MessageScheduler scheduler;
 
   public MessageSchedulerTest() throws URISyntaxException {}
@@ -44,8 +41,8 @@ public class MessageSchedulerTest {
 
     client =
         spy(
-            new OCPPWebSocketClient(
-                new URI("ws://localhost:8080/sim_backend"), statusNotificationObserver));
+            new TestOCPPWebSocketClient(
+                new URI("ws://localhost:8080/sim_backend")));
     
     scheduler =
         new MessageScheduler(client) {
