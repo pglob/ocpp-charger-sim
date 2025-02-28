@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import '../styles/styles.css';
 
 const errorCodes = [
@@ -20,18 +21,6 @@ const errorCodes = [
   'WeakSignal',
 ];
 
-const statusOptions = [
-  'Available',
-  'Preparing',
-  'Charging',
-  'SuspendedEVSE',
-  'SuspendedEV',
-  'Finishing',
-  'Faulted',
-  'Unavailable',
-  'Reserved',
-];
-
 const ErrorMenu = ({ chargerID }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -42,7 +31,6 @@ const ErrorMenu = ({ chargerID }) => {
   const [connectorId, setConnectorId] = useState('1');
   const [errorCode, setErrorCode] = useState('');
   const [info, setInfo] = useState('');
-  const [status, setStatus] = useState('');
   const [vendorId, setVendorId] = useState('');
   const [vendorErrorCode, setVendorErrorCode] = useState('');
 
@@ -61,7 +49,6 @@ const ErrorMenu = ({ chargerID }) => {
     setConnectorId('1');
     setErrorCode('');
     setInfo('');
-    setStatus('');
     setVendorId('');
     setVendorErrorCode('');
     setUseCurrentTimestamp(false);
@@ -79,7 +66,6 @@ const ErrorMenu = ({ chargerID }) => {
     let payload = {
       connectorId,
       errorCode,
-      status,
     };
 
     // Conditionally add optional fields
@@ -178,21 +164,6 @@ const ErrorMenu = ({ chargerID }) => {
               </div>
 
               <div className="form-item">
-                <label>Status (required):</label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="">select a status </option>
-                  {statusOptions.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-item">
                 <label>
                   <input
                     type="checkbox"
@@ -237,6 +208,10 @@ const ErrorMenu = ({ chargerID }) => {
       )}
     </div>
   );
+};
+
+ErrorMenu.propTypes = {
+  chargerID: PropTypes.number.isRequired, // 'chargerID' should be a number
 };
 
 export default ErrorMenu;

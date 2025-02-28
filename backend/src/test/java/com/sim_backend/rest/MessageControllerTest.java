@@ -126,13 +126,13 @@ class MessageControllerTest {
   @Test
   void testRebootNormal() {
     // Arrange
-    doNothing().when(mockCharger).Reboot();
+    doNothing().when(mockCharger).reboot();
 
     // Act
     messageController.reboot(mockContext);
 
     // Assert
-    verify(mockCharger).Reboot();
+    verify(mockCharger).reboot();
     verify(mockContext).result("OK");
   }
 
@@ -147,7 +147,7 @@ class MessageControllerTest {
     // Assert
     verify(mockContext).status(503);
     verify(mockContext).result("Reboot already in progress");
-    verify(mockCharger, never()).Reboot();
+    verify(mockCharger, never()).reboot();
   }
 
   @Test
@@ -171,13 +171,13 @@ class MessageControllerTest {
   @Test
   void testStatus() {
     // Arrange
+    when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.Available);
     doReturn(true).when(mockWsClient).pushMessage(any(StatusNotification.class));
     String jsonRequest =
         "{"
             + "\"connectorId\": \"1\","
             + "\"errorCode\": \"NoError\","
             + "\"info\": \"\","
-            + "\"status\": \"Available\","
             + "\"vendorId\": \"\","
             + "\"vendorErrorCode\": \"\""
             + "}";
@@ -191,6 +191,15 @@ class MessageControllerTest {
   }
 
   @Test
+  void testClearFault() {
+    // Act
+    messageController.clearFault(mockContext);
+
+    // Assert
+    verify(mockCharger).clearFault();
+  }
+
+  @Test
   void testStartCharge() {
     // Arrange
     when(mockConfig.getIdTag()).thenReturn("testIdTag");
@@ -199,7 +208,7 @@ class MessageControllerTest {
     messageController.startCharge(mockContext);
 
     // Assert
-    verify(mockTHandler).StartCharging(eq(1), eq("testIdTag"));
+    verify(mockTHandler).startCharging(eq(1), eq("testIdTag"));
     verify(mockContext).result("OK");
   }
 
@@ -212,7 +221,7 @@ class MessageControllerTest {
     messageController.stopCharge(mockContext);
 
     // Assert
-    verify(mockTHandler).StopCharging(eq("testIdTag"));
+    verify(mockTHandler).stopCharging(eq("testIdTag"), eq(null));
     verify(mockContext).result("OK");
   }
 
@@ -265,6 +274,7 @@ class MessageControllerTest {
     verify(mockApp).post(eq("/api/{chargerId}/message/heartbeat"), any());
     verify(mockApp).get(eq("/api/{chargerId}/state"), any());
     verify(mockApp).post(eq("/api/{chargerId}/charger/reboot"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/charger/clear-fault"), any());
     verify(mockApp).post(eq("/api/{chargerId}/state/online"), any());
     verify(mockApp).post(eq("/api/{chargerId}/state/offline"), any());
     verify(mockApp).post(eq("/api/{chargerId}/state/status"), any());

@@ -5,10 +5,12 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.enums.Reason;
 import com.sim_backend.websockets.messages.StopTransaction;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 
 /*
@@ -29,14 +31,19 @@ public class StopTransactionHandler {
   /**
    * Initiate StopTransaction, handles StopTransaction requests, responses and charger status.
    *
-   * @param transactionId transactionId from StartTransaction
-   * @param idTag id of user
-   * @param elec ElectricalTransition for retrieving meter values
+   * @param idTag id of user.
+   * @param reason the reason for stopping the transaction.
+   * @param transactionId transactionId from StartTransaction.
+   * @param elec ElectricalTransition for retrieving meter values.
    * @param stopInProgress AtomicBoolean to prevent initiateStopTransaction from running more than
-   *     once
+   *     once.
    */
   public void initiateStopTransaction(
-      int transactionId, String idTag, ElectricalTransition elec, AtomicBoolean stopInProgress) {
+      String idTag,
+      Reason reason,
+      AtomicInteger transactionId,
+      ElectricalTransition elec,
+      AtomicBoolean stopInProgress) {
 
     // Convert from KWh to Wh
     int meterStop = (int) (elec.getEnergyActiveImportRegister() * 1000.0f);
@@ -45,13 +52,27 @@ public class StopTransactionHandler {
     ZonedDateTime zonetime = ocppTime.getSynchronizedTime();
     String timestamp = zonetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
 
-    StopTransaction stopTransactionMessage =
-        new StopTransaction(idTag, transactionId, meterStop, timestamp);
+    StopTransaction stopTransactionMessage;
+
+    if (!stateMachine.checkAndTransition(ChargerState.Charging, ChargerState.Available)) {
+      return;
+    }
+
+    if (reason != null && idTag == null) {
+      stopTransactionMessage =
+          new StopTransaction(transactionId.get(), meterStop, timestamp, reason);
+    } else if (reason == null && idTag != null) {
+      stopTransactionMessage =
+          new StopTransaction(idTag, transactionId.get(), meterStop, timestamp);
+    } else {
+      stopTransactionMessage =
+          new StopTransaction(idTag, transactionId.get(), meterStop, timestamp, reason);
+    }
     client.pushMessage(stopTransactionMessage);
 
     // No listener is used here since a Central System cannot prevent a transaction from stopping
     System.out.println("Stop Transaction Completed...");
-    stateMachine.transition(ChargerState.Available);
+    transactionId.set(-1);
     stopInProgress.set(false);
   }
 }

@@ -76,10 +76,10 @@ public class StartTransactionHandler {
               transactionId.set(response.getTransactionId());
               System.out.println(
                   "Start Transaction Completed... Transaction Id : " + response.getTransactionId());
-              stateMachine.transition(ChargerState.Charging);
+              stateMachine.checkAndTransition(ChargerState.Preparing, ChargerState.Charging);
             } else {
               System.err.println("Transaction Failed to Start...");
-              stateMachine.transition(ChargerState.Available);
+              stateMachine.checkAndTransition(ChargerState.Preparing, ChargerState.Available);
             }
             startInProgress.set(false);
           }
@@ -89,7 +89,7 @@ public class StartTransactionHandler {
             client.deleteOnReceiveMessage(StartTransactionResponse.class, this);
             System.err.println("Start Transaction timeout. Resetting transaction state.");
             startInProgress.set(false);
-            stateMachine.transition(ChargerState.Available);
+            stateMachine.checkAndTransition(ChargerState.Preparing, ChargerState.Available);
           }
         };
 

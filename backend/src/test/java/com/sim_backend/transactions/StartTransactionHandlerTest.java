@@ -62,7 +62,7 @@ public class StartTransactionHandlerTest {
     handler.initiateStartTransaction(1, "Accepted", new AtomicInteger(), elec, new AtomicBoolean());
 
     verify(client).pushMessage(any(StartTransaction.class));
-    verify(stateMachine).transition(ChargerState.Charging);
+    verify(stateMachine).checkAndTransition(ChargerState.Preparing, ChargerState.Charging);
   }
 
   @Test
@@ -88,7 +88,7 @@ public class StartTransactionHandlerTest {
     verify(client).pushMessage(any(StartTransaction.class));
 
     // Verify that onTimeout() resulted in the state machine transitioning to Available
-    verify(stateMachine).transition(ChargerState.Available);
+    verify(stateMachine).checkAndTransition(ChargerState.Preparing, ChargerState.Available);
 
     // Verify that the startInProgress flag is set to false after the timeout
     assertFalse(startInProgress.get(), "startInProgress should be false after a timeout");

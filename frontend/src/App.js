@@ -29,13 +29,15 @@ function App() {
 
   return (
     <div>
-      <h1>OCPP Charger Simulator</h1>
-      {status === 'failure' && (
-        <b data-testid="message">
-          ERROR: Backend at {process.env.REACT_APP_BACKEND_URL} was not
-          reachable
-        </b>
-      )}
+      <div className="header-container">
+        <h1>OCPP Charger Simulator</h1>
+        {status === 'failure' && (
+          <b data-testid="message">
+            ERROR: Backend at {process.env.REACT_APP_BACKEND_URL} was not
+            reachable
+          </b>
+        )}
+      </div>
       <div className="charger-frames-container">
         {[1, 2, 3].map((id) => (
           <div key={id} className="charger-container">
