@@ -815,15 +815,15 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testUniqueIDs() throws Exception {
-      doAnswer(invocation -> null).when(client).send(anyString());
-      Heartbeat beat = new Heartbeat();
-      client.handleMessage(beat.toJsonString());
-      client.handleMessage(beat.toJsonString());
+    doAnswer(invocation -> null).when(client).send(anyString());
+    Heartbeat beat = new Heartbeat();
+    client.handleMessage(beat.toJsonString());
+    client.handleMessage(beat.toJsonString());
 
-      OCPPMessageError error = (OCPPMessageError) client.popMessage();
-      assertNotNull(error);
-      assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
-      assertEquals("ID was already used", error.getErrorDescription());
-      assertEquals(error.getMessageID(), beat.getMessageID());
+    OCPPMessageError error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
+    assertEquals("ID was already used", error.getErrorDescription());
+    assertEquals(error.getMessageID(), beat.getMessageID());
   }
 }
