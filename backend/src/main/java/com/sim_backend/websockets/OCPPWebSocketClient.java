@@ -18,6 +18,7 @@ import com.sim_backend.websockets.exceptions.OCPPCannotProcessMessage;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedProtocol;
+import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import java.net.URI;
@@ -94,6 +95,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** List to store received messages. */
   private final List<String> rxMessages = new CopyOnWriteArrayList<>();
 
+  /** StatusNotification Observer */
+  private final StatusNotificationObserver statusNotificationObserver;
+
   /**
    * Record a transmitted message.
    *
@@ -146,7 +150,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
    *
    * @param serverUri The Websocket Address.
    */
-  public OCPPWebSocketClient(final URI serverUri) {
+  public OCPPWebSocketClient(
+      final URI serverUri, StatusNotificationObserver statusNotificationObserver) {
     super(serverUri, new Draft_6455(), headers, CONNECT_TIMEOUT);
     scheduler = new MessageScheduler(this);
 
@@ -172,6 +177,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
     this.setConnectionLostTimeout(CONNECTION_LOST_TIMER);
     this.startConnectionLostTimer();
+
+    this.statusNotificationObserver = statusNotificationObserver;
   }
 
   @Override
@@ -595,6 +602,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
   /** Take our websocket client back online */
   public void goOnline() {
+    statusNotificationObserver.onClientGoOnline();
     this.startConnectionLostTimer();
     this.Online = true;
   }

@@ -222,11 +222,11 @@ public class MessageController extends ControllerBase {
           json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString().trim() : null;
       if (vendorErrorCode != null && vendorErrorCode.isEmpty()) vendorErrorCode = null;
 
-      StatusNotification msg =
-          new StatusNotification(
+      charger
+          .getStatusNotificationObserver()
+          .sendStatusNotification(
               connectorId, errorCode, info, status, timestamp, vendorId, vendorErrorCode);
 
-      charger.getWsClient().pushMessage(msg);
       ctx.result("OK");
 
     } catch (Exception e) {

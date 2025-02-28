@@ -10,6 +10,7 @@ import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.messages.HeartbeatResponse;
+import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.types.OCPPMessageError;
 import com.sim_backend.websockets.types.OCPPRepeatingTimedTask;
 import java.net.URI;
@@ -27,12 +28,13 @@ public class OCPPTimeTest {
   TestOCPPWebSocketClient client;
   MessageQueue queue;
   OnOCPPMessage onOCPPMessageMock;
+  StatusNotificationObserver statusNotificationObserver;
   OCPPTime ocppTime;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
     onOCPPMessageMock = mock(OnOCPPMessage.class);
-    client = spy(new TestOCPPWebSocketClient(new URI("")));
+    client = spy(new TestOCPPWebSocketClient(new URI(""), statusNotificationObserver));
     ocppTime = client.getScheduler().getTime();
   }
 
