@@ -43,7 +43,7 @@ public abstract class OCPPMessage implements Cloneable {
    * @param messageID The wanted message ID.
    */
   protected OCPPMessage(String messageID) {
-    this.messageID = generateMessageID();
+    this.messageID = messageID;
   }
 
   /**
