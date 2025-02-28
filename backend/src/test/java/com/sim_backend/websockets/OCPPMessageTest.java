@@ -33,7 +33,7 @@ public class OCPPMessageTest {
 
   @Test
   void testClone() {
-    HeartbeatResponse res1 = new HeartbeatResponse(ZonedDateTime.now());
+    HeartbeatResponse res1 = new HeartbeatResponse(new Heartbeat(), ZonedDateTime.now());
     HeartbeatResponse res2 = (HeartbeatResponse) res1.cloneMessage();
     assertEquals(res1.getCurrentTime(), res2.getCurrentTime());
 
@@ -44,7 +44,8 @@ public class OCPPMessageTest {
     assertEquals(3, stopTrans2.getMeterStop());
     assertEquals("Whe", stopTrans2.getTimestamp());
 
-    StopTransactionResponse stopTransRes1 = new StopTransactionResponse("Accepted");
+    StopTransactionResponse stopTransRes1 =
+        new StopTransactionResponse(new StopTransaction("b", 1, 1, "a"), "Accepted");
     StopTransactionResponse stopTransRes2 = (StopTransactionResponse) stopTransRes1.cloneMessage();
     assertEquals(AuthorizationStatus.ACCEPTED, stopTransRes2.getIdTagInfo().getStatus());
   }

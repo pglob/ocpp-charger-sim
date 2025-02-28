@@ -30,7 +30,7 @@ public class HeartbeatTest {
   @Test
   public void testHeartbeatConstructor() {
     ZonedDateTime time = ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC"));
-    HeartbeatResponse heartBeat = new HeartbeatResponse(time);
+    HeartbeatResponse heartBeat = new HeartbeatResponse(new Heartbeat(), time);
     assert heartBeat.getCurrentTime() == time;
   }
 
@@ -53,7 +53,7 @@ public class HeartbeatTest {
 
   @Test
   public void testResponseJSON() {
-    HeartbeatResponse heartBeat = new HeartbeatResponse();
+    HeartbeatResponse heartBeat = new HeartbeatResponse(new Heartbeat());
     JsonSchema jsonSchema = JsonSchemaHelper.getJsonSchema("schemas/HeartbeatResponse.json");
     JsonElement jsonElement = heartBeat.generateMessage().get(2);
     Set<ValidationMessage> errors =
@@ -66,12 +66,14 @@ public class HeartbeatTest {
     assert errors.isEmpty();
 
     heartBeat =
-        new HeartbeatResponse(ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC")));
+        new HeartbeatResponse(
+            new Heartbeat(), ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC")));
     String json = GsonUtilities.toString(heartBeat.generateMessage().get(2));
     assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001Z\"");
 
     heartBeat =
-        new HeartbeatResponse(ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC-7")));
+        new HeartbeatResponse(
+            new Heartbeat(), ZonedDateTime.of(2004, 10, 10, 10, 2, 10, 10, ZoneId.of("UTC-7")));
     json = GsonUtilities.toString(heartBeat.generateMessage().get(2));
     assert json.contains("\"currentTime\":\"2004-10-10T10:02:10.00000001-07:00\"");
   }

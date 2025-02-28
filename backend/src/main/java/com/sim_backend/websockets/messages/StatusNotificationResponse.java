@@ -15,6 +15,9 @@ import lombok.EqualsAndHashCode;
     messageName = "StatusNotificationResponse")
 public class StatusNotificationResponse extends OCPPMessageResponse implements Cloneable {
   // No fields are defined as per the protocol specification
+  public StatusNotificationResponse(StatusNotification request) {
+    super(request);
+  }
 
   @Override
   protected StatusNotificationResponse clone() {

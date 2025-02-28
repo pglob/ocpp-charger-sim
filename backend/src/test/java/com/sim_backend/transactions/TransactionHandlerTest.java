@@ -51,7 +51,8 @@ public class TransactionHandlerTest {
         .thenReturn(ChargerState.Preparing);
 
     AuthorizeResponse authorizeResponse =
-        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
+        new AuthorizeResponse(
+            new Authorize(), new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
 
     doAnswer(
             invocation -> {
@@ -64,7 +65,8 @@ public class TransactionHandlerTest {
         .when(transactionHandler.getStartHandler().getClient())
         .onReceiveMessage(eq(AuthorizeResponse.class), any());
 
-    StartTransactionResponse startTransactionResponse = new StartTransactionResponse(1, "Accepted");
+    StartTransactionResponse startTransactionResponse =
+        new StartTransactionResponse(new StartTransaction(1, "", 1, ""), 1, "Accepted");
 
     doAnswer(
             invocation -> {
@@ -92,7 +94,8 @@ public class TransactionHandlerTest {
         .thenReturn(ChargerState.Charging);
 
     AuthorizeResponse authorizeResponse =
-        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
+        new AuthorizeResponse(
+            new Authorize(), new AuthorizeResponse.IdTagInfo(AuthorizationStatus.ACCEPTED));
 
     doAnswer(
             invocation -> {
@@ -105,7 +108,8 @@ public class TransactionHandlerTest {
         .when(transactionHandler.getStartHandler().getClient())
         .onReceiveMessage(eq(AuthorizeResponse.class), any());
 
-    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
+    StopTransactionResponse stopTransactionResponse =
+        new StopTransactionResponse(new StopTransaction("", 1, 1, ""), "Accepted");
 
     doAnswer(
             invocation -> {
@@ -130,7 +134,8 @@ public class TransactionHandlerTest {
   void PreAuthorizeDeniedtest() {
 
     AuthorizeResponse authorizeResponse =
-        new AuthorizeResponse(new AuthorizeResponse.IdTagInfo(AuthorizationStatus.BLOCKED));
+        new AuthorizeResponse(
+            new Authorize(), new AuthorizeResponse.IdTagInfo(AuthorizationStatus.BLOCKED));
 
     doAnswer(
             invocation -> {

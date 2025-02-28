@@ -12,7 +12,8 @@ import org.junit.jupiter.api.Test;
 public class ChangeConfigurationResponseTest {
   private static @NotNull ChangeConfigurationResponse getChangeConfigurationResponse() {
     // Create an ChangeConfigurationResponse with an Accepted status
-    ChangeConfigurationResponse response = new ChangeConfigurationResponse("Accepted");
+    ChangeConfigurationResponse response =
+        new ChangeConfigurationResponse(new ChangeConfiguration("k", "v"), "Accepted");
 
     // Verify the ChangeConfiguration request is created correctly
     assert response.getStatus().getValue().equals("Accepted");

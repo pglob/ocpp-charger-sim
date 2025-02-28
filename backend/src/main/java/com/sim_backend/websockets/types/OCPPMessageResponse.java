@@ -10,6 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
 public class OCPPMessageResponse extends OCPPMessage implements Cloneable {
+
+  public OCPPMessageResponse(OCPPMessageRequest request) {
+    super(request.getMessageID());
+  }
+
   /**
    * Define the structure for a request message.
    *

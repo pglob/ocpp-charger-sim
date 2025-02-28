@@ -91,7 +91,7 @@ public class OCPPWebSocketClientTest {
     doAnswer(invocation -> null).when(client).send(anyString());
 
     Heartbeat beat = new Heartbeat();
-    HeartbeatResponse beat2 = new HeartbeatResponse();
+    HeartbeatResponse beat2 = new HeartbeatResponse(new Heartbeat());
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -216,7 +216,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testOnReceiveMessageNoMatchingMsg() throws OCPPMessageFailure, InterruptedException {
-    HeartbeatResponse response = new HeartbeatResponse();
+    HeartbeatResponse response = new HeartbeatResponse(new Heartbeat());
 
     OCPPMessageError error = new OCPPMessageError(ErrorCode.FormatViolation, "", new JsonObject());
 
@@ -273,7 +273,7 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testOnReceiveMessage() throws OCPPMessageFailure, InterruptedException {
-    HeartbeatResponse response = new HeartbeatResponse();
+    HeartbeatResponse response = new HeartbeatResponse(new Heartbeat());
 
     Heartbeat beat = new Heartbeat();
     doAnswer(
@@ -401,7 +401,7 @@ public class OCPPWebSocketClientTest {
               doAnswer(
                       invocation2 -> {
                         this.client.addPreviousMessage(beat);
-                        HeartbeatResponse response = new HeartbeatResponse();
+                        HeartbeatResponse response = new HeartbeatResponse(new Heartbeat());
                         response.setMessageID(beat.getMessageID());
                         client.handleMessage(response.toJsonString());
                         return null;
@@ -488,7 +488,7 @@ public class OCPPWebSocketClientTest {
     doAnswer(invocation -> null).when(client).send(anyString());
 
     Heartbeat beat = new Heartbeat();
-    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
 
     StartTransaction beat2 = new StartTransaction(2, "", 1, "");
@@ -515,7 +515,7 @@ public class OCPPWebSocketClientTest {
     doAnswer(invocation -> null).when(client).send(anyString());
 
     Heartbeat beat = new Heartbeat();
-    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
 
     StartTransaction beat2 = new StartTransaction(2, "", 1, "");
@@ -557,7 +557,7 @@ public class OCPPWebSocketClientTest {
     client.goOffline();
 
     Heartbeat beat = new Heartbeat();
-    HeartbeatResponse beatResponse = new HeartbeatResponse();
+    HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
     client.pushMessage(new Heartbeat());
     client.addPreviousMessage(beat);

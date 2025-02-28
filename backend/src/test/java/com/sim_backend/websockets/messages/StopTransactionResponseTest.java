@@ -12,7 +12,8 @@ import org.junit.jupiter.api.Test;
 public class StopTransactionResponseTest {
   private static @NotNull StopTransactionResponse getStopTransactionResponse() {
     // Create an StopTransaction response
-    StopTransactionResponse response = new StopTransactionResponse("Accepted");
+    StopTransactionResponse response =
+        new StopTransactionResponse(new StopTransaction("", 1, 1, ""), "Accepted");
 
     // Verify the StopTransaction Request is created correctly
     assert response.getIdTagInfo().getStatus() == AuthorizationStatus.ACCEPTED;

@@ -12,7 +12,8 @@ import org.junit.jupiter.api.Test;
 public class StartTransactionResponseTest {
   private static @NotNull StartTransactionResponse getStartTransactionResponse() {
     // Create an StartTransaction response
-    StartTransactionResponse response = new StartTransactionResponse(1, "Accepted");
+    StartTransactionResponse response =
+        new StartTransactionResponse(new StartTransaction(1, "", 1, ""), 1, "Accepted");
 
     // Verify the StartTransaction Request is created correctly
     assert response.getTransactionId() == 1;

@@ -36,7 +36,8 @@ public class StopTransactionResponse extends OCPPMessageResponse implements Clon
   }
 
   // Constructor
-  public StopTransactionResponse(String idTagInfo) {
+  public StopTransactionResponse(StopTransaction request, String idTagInfo) {
+    super(request);
     this.idTagInfo = new idTagInfo(AuthorizationStatus.fromString(idTagInfo));
   }
 

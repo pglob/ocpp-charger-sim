@@ -39,7 +39,8 @@ public class StartTransactionResponse extends OCPPMessageResponse implements Clo
   }
 
   // Constructor
-  public StartTransactionResponse(int transactionId, String idTagInfo) {
+  public StartTransactionResponse(StartTransaction request, int transactionId, String idTagInfo) {
+    super(request);
     this.transactionId = transactionId;
     this.idTagInfo = new idTagInfo(AuthorizationStatus.fromString(idTagInfo));
   }

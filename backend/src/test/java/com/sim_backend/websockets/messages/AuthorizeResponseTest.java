@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 public class AuthorizeResponseTest {
   private static @NotNull AuthorizeResponse getAuthorizeResponse() {
     // Create an Authorize response with an Accepted status
-    AuthorizeResponse response = new AuthorizeResponse("Accepted");
+    AuthorizeResponse response = new AuthorizeResponse(new Authorize(), "Accepted");
 
     // Verify the authorization request is created correctly
     assert response.getIdTagInfo().getStatus().getValue().equals("Accepted");

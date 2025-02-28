@@ -42,7 +42,8 @@ public class StopTransactionHandlerTest {
   @Test
   void initiateStopTransactiontest() {
     when(stateMachine.getCurrentState()).thenReturn(ChargerState.Charging);
-    StopTransactionResponse stopTransactionResponse = new StopTransactionResponse("Accepted");
+    StopTransactionResponse stopTransactionResponse =
+        new StopTransactionResponse(new StopTransaction("", 1, 1, ""), "Accepted");
 
     doAnswer(
             invocation -> {

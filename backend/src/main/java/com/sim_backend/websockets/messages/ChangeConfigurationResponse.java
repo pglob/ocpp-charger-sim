@@ -6,7 +6,6 @@ import com.sim_backend.websockets.enums.ConfigurationStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +14,6 @@ import lombok.Setter;
  * Represents an OCPP 1.6 ChangeConfiguration Response from a Charge Point to the Central System to
  * confirm the key
  */
-@AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
@@ -27,7 +25,8 @@ public class ChangeConfigurationResponse extends OCPPMessageResponse implements 
   @SerializedName("status")
   private ConfigurationStatus status; // Accepted, NotSupported, Rejected
 
-  public ChangeConfigurationResponse(String status) {
+  public ChangeConfigurationResponse(ChangeConfiguration request, String status) {
+    super(request);
     this.status = ConfigurationStatus.fromString(status);
   }
 
