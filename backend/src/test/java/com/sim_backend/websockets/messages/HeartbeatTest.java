@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.networknt.schema.*;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.OCPPWebSocketClientTest.TestOCPPWebSocketClient;
+import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.types.OCPPMessage;
 import java.io.InputStream;
 import java.net.URI;
@@ -20,12 +21,12 @@ import org.junit.jupiter.api.Test;
 
 public class HeartbeatTest {
 
-
   TestOCPPWebSocketClient client;
+  StatusNotificationObserver statusNotificationObserver;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
-    client = spy(new TestOCPPWebSocketClient(new URI("")));
+    client = spy(new TestOCPPWebSocketClient(new URI(""), statusNotificationObserver));
   }
 
   @Test

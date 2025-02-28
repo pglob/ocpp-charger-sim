@@ -27,8 +27,9 @@ import org.junit.jupiter.api.Test;
 public class OCPPWebSocketClientTest {
 
   public static class TestOCPPWebSocketClient extends OCPPWebSocketClient {
-    public TestOCPPWebSocketClient(URI serverUri) {
-      super(serverUri);
+    public TestOCPPWebSocketClient(
+        URI serverUri, StatusNotificationObserver statusNotificationObserver) {
+      super(serverUri, statusNotificationObserver);
     }
 
     @Override
@@ -46,9 +47,9 @@ public class OCPPWebSocketClientTest {
   }
 
   TestOCPPWebSocketClient client;
-  StatusNotificationObserver statusNotificationObserver;
   MessageQueue queue;
   OnOCPPMessage onOCPPMessageMock;
+  StatusNotificationObserver statusNotificationObserver;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
@@ -776,7 +777,8 @@ public class OCPPWebSocketClientTest {
     // Given a "wss" URI
     URI wssUri = new URI("wss://example.com:12345");
 
-    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(wssUri);
+    TestOCPPWebSocketClient client =
+        new TestOCPPWebSocketClient(wssUri, statusNotificationObserver);
 
     // Verify the WebSocketClient's 'socketFactory' is SniSSLSocketFactory
     Field socketFactoryField = getSocketFactoryField();
@@ -793,7 +795,7 @@ public class OCPPWebSocketClientTest {
     // Given a "ws" URI
     URI wsUri = new URI("ws://example.com:12345");
 
-    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(wsUri);
+    TestOCPPWebSocketClient client = new TestOCPPWebSocketClient(wsUri, statusNotificationObserver);
 
     // Verify the WebSocketClient's 'socketFactory' is not SniSSLSocketFactory
     Field socketFactoryField = getSocketFactoryField();

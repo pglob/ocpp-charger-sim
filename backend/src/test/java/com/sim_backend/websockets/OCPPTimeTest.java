@@ -25,16 +25,16 @@ import org.junit.jupiter.api.Test;
 public class OCPPTimeTest {
   public static final ZoneId UTC = ZoneId.of("UTC");
 
-  StatusNotificationObserver statusNotificationObserver;
   TestOCPPWebSocketClient client;
   MessageQueue queue;
   OnOCPPMessage onOCPPMessageMock;
+  StatusNotificationObserver statusNotificationObserver;
   OCPPTime ocppTime;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
     onOCPPMessageMock = mock(OnOCPPMessage.class);
-    client = spy(new OCPPWebSocketClient(new URI(""), statusNotificationObserver));
+    client = spy(new TestOCPPWebSocketClient(new URI(""), statusNotificationObserver));
     ocppTime = client.getScheduler().getTime();
   }
 
