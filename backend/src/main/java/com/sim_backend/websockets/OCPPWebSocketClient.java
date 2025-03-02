@@ -284,11 +284,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
       message.setMessageID(msgId);
 
       if (!MessageValidator.isValid(message)) {
-        this.pushCallError(ErrorCode.FormatViolation, MessageValidator.log_message(message));
-      } else {
-        this.handleReceivedMessage(messageClass, message);
+        this.pushCallError(ErrorCode.FormatViolation, MessageValidator.log_message(message), msgId);
+        return;
       }
 
+      this.handleReceivedMessage(messageClass, message);
     } catch (JsonSyntaxException exception) {
       this.pushCallError(ErrorCode.FormatViolation, exception.getLocalizedMessage());
     }
@@ -414,7 +414,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
       error.setErroredMessage(prevMessage);
 
       if (!MessageValidator.isValid(error)) {
-        this.pushCallError(ErrorCode.FormatViolation, MessageValidator.log_message(error));
+        this.pushCallError(ErrorCode.FormatViolation, MessageValidator.log_message(error), msgId);
         return;
       }
 
