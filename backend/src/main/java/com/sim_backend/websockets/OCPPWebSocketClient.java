@@ -404,7 +404,15 @@ public class OCPPWebSocketClient extends WebSocketClient {
         return;
       }
 
+      Class<?> complementClass = prevMessage.getClass();
       this.queue.clearPreviousMessage(prevMessage);
+      prevMessage.setErrored(true);
+      if (this.onReceiveMessage.containsKey(complementClass)) {
+        for (var listener : this.onReceiveMessage.get(complementClass)) {
+          listener.onTimeout();
+        }
+      }
+
       OCPPMessageError error =
           new OCPPMessageError(
               ErrorCode.valueOf(array.get(OCPPMessageError.CODE_INDEX).getAsString()),
@@ -420,6 +428,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
       this.handleReceivedMessage(OCPPMessageError.class, error);
       log.warn("Received OCPPError {}", error);
+
       OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
       this.recordRxMessage(json, info.messageName());
 

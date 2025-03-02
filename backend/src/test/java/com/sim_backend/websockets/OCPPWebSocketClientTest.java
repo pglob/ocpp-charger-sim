@@ -826,4 +826,27 @@ public class OCPPWebSocketClientTest {
     assertEquals("ID was already used", error.getErrorDescription());
     assertEquals(error.getMessageID(), beat.getMessageID());
   }
+
+  @Test
+  public void testTimeoutOnError() throws Exception {
+    Heartbeat beat = new Heartbeat();
+    OCPPMessageError error = new OCPPMessageError(ErrorCode.ProtocolError, "", new JsonObject());
+    error.setMessageID(beat.getMessageID());
+    client.addPreviousMessage(beat);
+
+    doAnswer(invocation -> null).when(client).send(anyString());
+
+    OnOCPPMessageListener listener =
+        spy(
+            new OnOCPPMessageListener() {
+              @Override
+              public void onMessageReceived(OnOCPPMessage message) {}
+            });
+
+    client.onReceiveMessage(Heartbeat.class, listener);
+
+    client.handleMessage(error.toJsonString());
+    verify(listener, times(1)).onTimeout();
+    assertTrue(beat.isErrored());
+  }
 }
