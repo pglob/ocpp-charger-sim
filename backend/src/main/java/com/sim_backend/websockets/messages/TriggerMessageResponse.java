@@ -4,7 +4,6 @@ import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.TriggerMessageStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
-import com.sim_backend.websockets.types.OCPPMessageRequest;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -16,8 +15,8 @@ import lombok.Getter;
 public class TriggerMessageResponse extends OCPPMessageResponse implements Cloneable {
   private TriggerMessageStatus status;
 
-  public TriggerMessageResponse(OCPPMessageRequest request, TriggerMessageStatus status) {
-    super(request);
+  public TriggerMessageResponse(TriggerMessageStatus status) {
+    super();
     this.status = status;
   }
 
