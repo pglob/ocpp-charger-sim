@@ -8,10 +8,7 @@ import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.Reason;
-import com.sim_backend.websockets.observers.BootNotificationObserver;
-import com.sim_backend.websockets.observers.ChangeConfigurationObserver;
-import com.sim_backend.websockets.observers.GetConfigurationObserver;
-import com.sim_backend.websockets.observers.StatusNotificationObserver;
+import com.sim_backend.websockets.observers.*;
 import java.net.URI;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.Getter;
@@ -91,6 +88,8 @@ public class Charger {
           new ChangeConfigurationObserver(wsClient, config);
       GetConfigurationObserver getConfigurationObserver =
           new GetConfigurationObserver(wsClient, config);
+      ChangeAvailabilityObserver changeAvailabilityObserver =
+          new ChangeAvailabilityObserver(wsClient);
       statusNotificationObserver.setClient(wsClient);
 
       // Add Observers
