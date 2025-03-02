@@ -14,15 +14,18 @@ import org.junit.jupiter.api.Test;
 public class TriggerMessageResponseTest {
 
   private static @NotNull TriggerMessageResponse getTriggerMessageResponseAccepted() {
-    return new TriggerMessageResponse(TriggerMessageStatus.Accepted);
+    TriggerMessage dummyRequest = new TriggerMessage(MessageTrigger.Heartbeat);
+    return new TriggerMessageResponse(dummyRequest, TriggerMessageStatus.Accepted);
   }
 
   private static @NotNull TriggerMessageResponse getTriggerMessageResponseRejected() {
-    return new TriggerMessageResponse(TriggerMessageStatus.Rejected);
+    TriggerMessage dummyRequest = new TriggerMessage(MessageTrigger.Heartbeat);
+    return new TriggerMessageResponse(dummyRequest, TriggerMessageStatus.Rejected);
   }
 
   private static @NotNull TriggerMessageResponse getTriggerMessageResponseNotImplemented() {
-    return new TriggerMessageResponse(TriggerMessageStatus.NotImplemented);
+    TriggerMessage dummyRequest = new TriggerMessage(MessageTrigger.Heartbeat);
+    return new TriggerMessageResponse(dummyRequest, TriggerMessageStatus.NotImplemented);
   }
 
   @Test
