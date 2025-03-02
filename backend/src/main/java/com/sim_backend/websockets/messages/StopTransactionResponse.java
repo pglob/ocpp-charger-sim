@@ -5,7 +5,7 @@ import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.AuthorizationStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -30,7 +30,7 @@ public class StopTransactionResponse extends OCPPMessageResponse implements Clon
   @AllArgsConstructor
   public static class idTagInfo {
 
-    @NotBlank(message = "StopTransactionResponse status is required")
+    @NotNull(message = "StopTransactionResponse status is required")
     @SerializedName("status")
     private AuthorizationStatus status; // Status of the idTag (e.g., Accepted, Blocked, etc.).
   }
