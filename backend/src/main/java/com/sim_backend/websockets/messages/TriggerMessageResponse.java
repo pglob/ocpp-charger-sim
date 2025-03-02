@@ -15,7 +15,8 @@ import lombok.Getter;
 public class TriggerMessageResponse extends OCPPMessageResponse implements Cloneable {
   private TriggerMessageStatus status;
 
-  public TriggerMessageResponse(TriggerMessageStatus status) {
+  public TriggerMessageResponse(OCPPMessageRequest request, TriggerMessageStatus status) {
+    super(request);
     this.status = status;
   }
 
