@@ -82,7 +82,7 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
         break;
     }
 
-    TriggerMessageResponse response = new TriggerMessageResponse(responseStatus);
+    TriggerMessageResponse response = new TriggerMessageResponse(triggerMessage, responseStatus);
     message.getClient().pushMessage(response);
 
     if (triggeredAction != null) {
