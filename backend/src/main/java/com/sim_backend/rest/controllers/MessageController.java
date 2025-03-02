@@ -86,10 +86,6 @@ public class MessageController extends ControllerBase {
     if (!checkWsClient(charger, ctx)) return;
     Authorize msg = new Authorize();
 
-    if (!MessageValidator.isValid(msg)) {
-      throw new IllegalArgumentException(MessageValidator.log_message(msg));
-    }
-
     charger.getWsClient().pushMessage(msg);
     ctx.result("OK");
   }
@@ -110,10 +106,6 @@ public class MessageController extends ControllerBase {
             "Meter Type",
             "Meter S/N");
 
-    if (!MessageValidator.isValid(msg)) {
-      throw new IllegalArgumentException(MessageValidator.log_message(msg));
-    }
-
     charger.getWsClient().pushMessage(msg);
     ctx.result("OK");
   }
@@ -123,10 +115,6 @@ public class MessageController extends ControllerBase {
     if (charger == null) return;
     if (!checkWsClient(charger, ctx)) return;
     Heartbeat msg = new Heartbeat();
-
-    if (!MessageValidator.isValid(msg)) {
-      throw new IllegalArgumentException(MessageValidator.log_message(msg));
-    }
 
     charger.getWsClient().pushMessage(msg);
     ctx.result("OK");

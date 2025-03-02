@@ -18,6 +18,7 @@ import com.sim_backend.websockets.exceptions.OCPPCannotProcessMessage;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedMessage;
 import com.sim_backend.websockets.exceptions.OCPPUnsupportedProtocol;
+import com.sim_backend.websockets.messages.MessageValidator;
 import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageError;
@@ -170,7 +171,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
             new SniSSLSocketFactory(sslContext.getSocketFactory(), serverUri.getHost(), port);
         this.setSocketFactory(sniFactory);
       } catch (NoSuchAlgorithmException | KeyManagementException e) {
-        e.printStackTrace();
+        log.error("Failed SSL Creation: ", e);
       }
     }
 
@@ -281,6 +282,12 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
       OCPPMessage message = (OCPPMessage) gson.fromJson(results.getData(), messageClass);
       message.setMessageID(msgId);
+
+      if (!MessageValidator.isValid(message)) {
+        this.pushCallError(ErrorCode.FormatViolation, MessageValidator.log_message(message), msgId);
+        return;
+      }
+
       this.handleReceivedMessage(messageClass, message);
     } catch (JsonSyntaxException exception) {
       this.pushCallError(ErrorCode.FormatViolation, exception.getLocalizedMessage());
@@ -289,13 +296,12 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
   @Override
   public void onClose(int i, String s, boolean b) {
-    String connectionCloser = "Connection closed by " + (b ? "remote" : "local");
-    log.info(connectionCloser + ": " + i + " " + s);
+    log.info("Connection closed by {}: {} {}", (b ? "remote" : "local"), i, s);
   }
 
   @Override
   public void onError(Exception e) {
-    e.printStackTrace();
+    log.error("WebsocketClient Errored: ", e);
   }
 
   /**
@@ -415,11 +421,17 @@ public class OCPPWebSocketClient extends WebSocketClient {
       error.setMessageID(msgId);
       error.setErroredMessage(prevMessage);
 
+      if (!MessageValidator.isValid(error)) {
+        this.pushCallError(ErrorCode.FormatViolation, MessageValidator.log_message(error), msgId);
+        return;
+      }
+
       this.handleReceivedMessage(OCPPMessageError.class, error);
       log.warn("Received OCPPError {}", error);
 
       OCPPMessageInfo info = prevMessage.getClass().getAnnotation(OCPPMessageInfo.class);
       this.recordRxMessage(json, info.messageName());
+
     } catch (IllegalArgumentException exception) {
       this.pushCallError(
           ErrorCode.PropertyConstraintViolation, "Received Unknown Error Code", msgId);
@@ -537,6 +549,10 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message the message to be sent.
    */
   public boolean pushMessage(final OCPPMessage message) {
+    if (!MessageValidator.isValid(message)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(message));
+    }
+
     recordTxMessage(message.toJsonString()); // Record transmitted message
     return queue.pushMessage(message);
   }

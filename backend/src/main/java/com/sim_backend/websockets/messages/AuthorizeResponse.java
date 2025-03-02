@@ -5,7 +5,7 @@ import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.AuthorizationStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,7 +29,7 @@ public class AuthorizeResponse extends OCPPMessageResponse implements Cloneable 
   @AllArgsConstructor
   public static class IdTagInfo {
 
-    @NotBlank(message = "AuthorizeResponse status is required and cannot be blank")
+    @NotNull(message = "AuthorizeResponse status is required and cannot be blank")
     @SerializedName("status")
     private AuthorizationStatus status; // One of: Accepted, Blocked, Expired, Invalid, ConcurrentTx
   }

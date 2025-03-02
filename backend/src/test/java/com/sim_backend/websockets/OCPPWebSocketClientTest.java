@@ -494,7 +494,7 @@ public class OCPPWebSocketClientTest {
     HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
 
-    StartTransaction beat2 = new StartTransaction(2, "", 1, "");
+    StartTransaction beat2 = new StartTransaction(2, "abc", 1, "123");
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -521,7 +521,7 @@ public class OCPPWebSocketClientTest {
     HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
 
-    StartTransaction beat2 = new StartTransaction(2, "", 1, "");
+    StartTransaction beat2 = new StartTransaction(2, "abc", 1, "123");
 
     client.pushMessage(beat);
     assert client.size() == 1;
