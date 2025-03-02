@@ -7,6 +7,7 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.MessageTrigger;
+import com.sim_backend.websockets.messages.TriggerMessage;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
