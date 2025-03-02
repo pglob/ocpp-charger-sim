@@ -8,7 +8,6 @@ import com.sim_backend.websockets.types.OCPPMessageRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)

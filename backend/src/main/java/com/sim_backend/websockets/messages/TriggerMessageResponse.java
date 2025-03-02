@@ -11,9 +11,7 @@ import lombok.Getter;
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
-    messageName = "TriggerMessageResponse"
-)
-
+    messageName = "TriggerMessageResponse")
 public class TriggerMessageResponse extends OCPPMessageResponse implements Cloneable {
   private TriggerMessageStatus status;
 
