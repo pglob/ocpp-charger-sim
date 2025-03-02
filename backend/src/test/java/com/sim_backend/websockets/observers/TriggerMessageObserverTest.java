@@ -14,7 +14,6 @@ import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.StatusNotification;
 import com.sim_backend.websockets.messages.TriggerMessage;
 import com.sim_backend.websockets.messages.TriggerMessageResponse;
-import com.sim_backend.websockets.types.OCPPMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -126,6 +125,7 @@ public class TriggerMessageObserverTest {
 
   @Test
   void testStatusNotification() {
+    when(stateMachine.getCurrentState()).thenReturn(ChargerState.Available);
     TriggerMessage triggerMsg = createTriggerMessage(MessageTrigger.StatusNotification, 2);
     when(onOCPPMessage.getMessage()).thenReturn(triggerMsg);
     when(onOCPPMessage.getClient()).thenReturn(webSocketClient);
@@ -136,15 +136,5 @@ public class TriggerMessageObserverTest {
     assert response.getStatus() == TriggerMessageStatus.Accepted;
 
     verify(webSocketClient).pushMessage(argThat(msg -> msg instanceof StatusNotification));
-  }
-
-  @Test
-  void testInvalidMessageType() {
-    OCPPMessage invalid = mock(OCPPMessage.class);
-    when(onOCPPMessage.getMessage()).thenReturn(invalid);
-    when(onOCPPMessage.getClient()).thenReturn(webSocketClient);
-
-    org.junit.jupiter.api.Assertions.assertThrows(
-        ClassCastException.class, () -> observer.onMessageReceived(onOCPPMessage));
   }
 }

@@ -3,8 +3,8 @@ package com.sim_backend.websockets.messages;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.TriggerMessageStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
-import com.sim_backend.websockets.types.OCPPMessageResponse;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
+import com.sim_backend.websockets.types.OCPPMessageResponse;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
