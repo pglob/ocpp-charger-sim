@@ -4,10 +4,9 @@ import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
+import jakarta.validation.constraints.NotNull;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-
-import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
