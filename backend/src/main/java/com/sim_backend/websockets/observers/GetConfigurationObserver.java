@@ -6,7 +6,6 @@ import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.GetConfiguration;
 import com.sim_backend.websockets.messages.GetConfigurationResponse;
-import com.sim_backend.websockets.messages.MessageValidator;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -37,10 +36,6 @@ public class GetConfigurationObserver implements OnOCPPMessageListener {
   public void onMessageReceived(OnOCPPMessage message) {
     if (!(message.getMessage() instanceof GetConfiguration request)) {
       throw new ClassCastException("Message is not an GetConfiguration Request");
-    }
-
-    if (!MessageValidator.isValid(request)) {
-      throw new IllegalArgumentException(MessageValidator.log_message(request));
     }
 
     List<GetConfigurationResponse.Configuration> configurationInfo = new ArrayList<>();
@@ -87,10 +82,6 @@ public class GetConfigurationObserver implements OnOCPPMessageListener {
     GetConfigurationResponse response =
         new GetConfigurationResponse(request, configurationInfo, unknownKeys);
 
-    if (!MessageValidator.isValid(response)) {
-      throw new IllegalArgumentException(MessageValidator.log_message(response));
-    } else {
-      client.pushMessage(response);
-    }
+    client.pushMessage(response);
   }
 }

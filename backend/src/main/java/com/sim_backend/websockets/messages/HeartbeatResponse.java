@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import lombok.EqualsAndHashCode;
@@ -20,7 +20,7 @@ import lombok.Getter;
 public final class HeartbeatResponse extends OCPPMessageResponse implements Cloneable {
 
   /** The Heartbeat's time. */
-  @NotBlank(message = "HeartbeatResponse current time is required")
+  @NotNull(message = "HeartbeatResponse current time is required")
   @SerializedName("currentTime")
   private final ZonedDateTime currentTime;
 

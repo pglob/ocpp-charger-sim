@@ -7,7 +7,6 @@ import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.ChangeConfiguration;
 import com.sim_backend.websockets.messages.ChangeConfigurationResponse;
-import com.sim_backend.websockets.messages.MessageValidator;
 import lombok.Getter;
 
 /** Observer that handles ConfigurationRegistry Change Request and Response */
@@ -36,10 +35,6 @@ public class ChangeConfigurationObserver implements OnOCPPMessageListener {
   public void onMessageReceived(OnOCPPMessage message) {
     if (!(message.getMessage() instanceof ChangeConfiguration request)) {
       throw new ClassCastException("Message is not an ChangeConfiguration Request");
-    }
-
-    if (!MessageValidator.isValid(request)) {
-      throw new IllegalArgumentException(MessageValidator.log_message(request));
     }
 
     String status = null;
@@ -79,10 +74,6 @@ public class ChangeConfigurationObserver implements OnOCPPMessageListener {
     }
 
     ChangeConfigurationResponse response = new ChangeConfigurationResponse(request, status);
-    if (!MessageValidator.isValid(response)) {
-      throw new IllegalArgumentException(MessageValidator.log_message(response));
-    } else {
-      client.pushMessage(response);
-    }
+    client.pushMessage(response);
   }
 }

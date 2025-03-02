@@ -494,7 +494,7 @@ public class OCPPWebSocketClientTest {
     HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
 
-    StartTransaction beat2 = new StartTransaction(2, "", 1, "");
+    StartTransaction beat2 = new StartTransaction(2, "abc", 1, "123");
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -521,7 +521,7 @@ public class OCPPWebSocketClientTest {
     HeartbeatResponse beatResponse = new HeartbeatResponse(new Heartbeat());
     beatResponse.setMessageID(beat.getMessageID());
 
-    StartTransaction beat2 = new StartTransaction(2, "", 1, "");
+    StartTransaction beat2 = new StartTransaction(2, "abc", 1, "123");
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -825,5 +825,28 @@ public class OCPPWebSocketClientTest {
     assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
     assertEquals("ID was already used", error.getErrorDescription());
     assertEquals(error.getMessageID(), beat.getMessageID());
+  }
+
+  @Test
+  public void testTimeoutOnError() throws Exception {
+    Heartbeat beat = new Heartbeat();
+    OCPPMessageError error = new OCPPMessageError(ErrorCode.ProtocolError, "", new JsonObject());
+    error.setMessageID(beat.getMessageID());
+    client.addPreviousMessage(beat);
+
+    doAnswer(invocation -> null).when(client).send(anyString());
+
+    OnOCPPMessageListener listener =
+        spy(
+            new OnOCPPMessageListener() {
+              @Override
+              public void onMessageReceived(OnOCPPMessage message) {}
+            });
+
+    client.onReceiveMessage(Heartbeat.class, listener);
+
+    client.handleMessage(error.toJsonString());
+    verify(listener, times(1)).onTimeout();
+    assertTrue(beat.isErrored());
   }
 }

@@ -6,7 +6,6 @@ import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.ZonedDateTime;
@@ -23,7 +22,7 @@ public final class StatusNotification extends OCPPMessageRequest implements Clon
   @SerializedName("connectorId")
   private int connectorId;
 
-  @NotBlank(message = "Status Notification Error code is required and cannot be blank")
+  @NotNull(message = "Status Notification Error code is required and cannot be blank")
   @SerializedName("errorCode")
   private ChargePointErrorCode errorCode;
 
@@ -31,7 +30,7 @@ public final class StatusNotification extends OCPPMessageRequest implements Clon
   @SerializedName("info")
   private String info;
 
-  @NotBlank(message = "StatusNotification Status is required and cannot be blank")
+  @NotNull(message = "StatusNotification Status is required and cannot be blank")
   @SerializedName("status")
   private ChargePointStatus status;
 
