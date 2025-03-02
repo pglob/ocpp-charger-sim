@@ -15,9 +15,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 /** A class for handling an OCPP Message Queue. */
+@Slf4j
 public class MessageQueue {
   @Getter
   @AllArgsConstructor
@@ -209,13 +211,19 @@ public class MessageQueue {
       TimedMessage timedMessage = entry.getValue();
       Duration duration = Duration.between(timedMessage.timestamp, now);
 
+      // Not needed but there might be a rare chance we receive an error while iterating.
+      if (timedMessage.message.isErrored()) {
+        iterator.remove();
+        continue;
+      }
+
       if (duration.getSeconds() > RESPONSE_TIME_OUT) {
         // Map the timed-out message to its complementary message.
         Class<?> complementClass;
         try {
           complementClass = getComplementMessageClass(timedMessage.message.getClass());
         } catch (ClassNotFoundException e) {
-          e.printStackTrace();
+          log.error("Handled Exception: ", e);
           continue;
         }
 
