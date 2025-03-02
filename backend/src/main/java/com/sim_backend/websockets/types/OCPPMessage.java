@@ -29,6 +29,9 @@ public abstract class OCPPMessage implements Cloneable {
   /** Number of attempts to send this message. */
   private transient int tries = 0;
 
+  /** Flag if this message has received an error */
+  @Getter @Setter private transient boolean errored;
+
   /** The Message ID we send this message with. */
   @Getter @Setter protected transient String messageID;
 
