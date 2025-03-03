@@ -44,8 +44,12 @@ public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateO
     ChargerState expectedState =
         newState == ChargerState.Unavailable ? ChargerState.Available : ChargerState.Unavailable;
 
-    charger.setAvailable(newState == ChargerState.Available);
-    return stateMachine.checkAndTransition(expectedState, newState);
+    if (stateMachine.checkAndTransition(expectedState, newState)) {
+      charger.setAvailable(newState == ChargerState.Available);
+      return true;
+    }
+
+    return false;
   }
 
   /**
