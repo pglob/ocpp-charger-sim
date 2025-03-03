@@ -112,6 +112,7 @@ public class ChargerStateMachine {
   }
 
   public boolean inTransaction() {
-    return currentState.equals(ChargerState.Charging) || currentState.equals(ChargerState.Preparing);
+    return currentState.equals(ChargerState.Charging)
+        || currentState.equals(ChargerState.Preparing);
   }
 }
