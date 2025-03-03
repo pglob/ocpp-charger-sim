@@ -4,11 +4,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
-import com.sim_backend.websockets.MessageScheduler;
-import com.sim_backend.websockets.OCPPTime;
-import java.time.ZonedDateTime;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
+import com.sim_backend.websockets.MessageScheduler;
+import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.MessageTrigger;
 import com.sim_backend.websockets.enums.TriggerMessageStatus;
@@ -17,6 +16,7 @@ import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.StatusNotification;
 import com.sim_backend.websockets.messages.TriggerMessage;
 import com.sim_backend.websockets.messages.TriggerMessageResponse;
+import java.time.ZonedDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -128,7 +128,7 @@ public class TriggerMessageObserverTest {
 
   @Test
   void testStatusNotification() {
-     when(stateMachine.getCurrentState()).thenReturn(ChargerState.Available);
+    when(stateMachine.getCurrentState()).thenReturn(ChargerState.Available);
     MessageScheduler mockScheduler = mock(MessageScheduler.class);
     OCPPTime mockTime = mock(OCPPTime.class);
     when(webSocketClient.getScheduler()).thenReturn(mockScheduler);
