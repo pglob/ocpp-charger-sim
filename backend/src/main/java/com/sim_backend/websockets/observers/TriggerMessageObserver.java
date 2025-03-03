@@ -54,10 +54,11 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
           if (currentState != ChargerState.BootingUp) {
             responseStatus = TriggerMessageStatus.Rejected;
           } else {
-            triggeredAction = () -> {
-              new BootNotificationObserver(webSocketClient, stateMachine)
-                  .handleBootNotificationRequest();
-            };
+            triggeredAction =
+                () -> {
+                  new BootNotificationObserver(webSocketClient, stateMachine)
+                      .handleBootNotificationRequest();
+                };
           }
           break;
 
@@ -79,11 +80,12 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
           break;
 
         case StatusNotification:
-          triggeredAction = () -> {
-            StatusNotification statusNotification =
-                createStatusNotification(connectorId == null ? 0 : connectorId);
-            webSocketClient.pushMessage(statusNotification);
-          };
+          triggeredAction =
+              () -> {
+                StatusNotification statusNotification =
+                    createStatusNotification(connectorId == null ? 0 : connectorId);
+                webSocketClient.pushMessage(statusNotification);
+              };
           break;
 
         default:

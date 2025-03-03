@@ -5,6 +5,7 @@ import com.sim_backend.websockets.enums.TriggerMessageStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import com.sim_backend.websockets.types.OCPPMessageResponse;
+import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -14,7 +15,7 @@ import lombok.Getter;
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "TriggerMessageResponse")
 public class TriggerMessageResponse extends OCPPMessageResponse implements Cloneable {
-  
+
   @NotNull(message = "TriggerMessageResponse status is required")
   private TriggerMessageStatus status;
 
