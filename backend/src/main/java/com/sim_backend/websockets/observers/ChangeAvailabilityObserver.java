@@ -17,8 +17,8 @@ import com.sim_backend.websockets.messages.StatusNotification;
 public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateObserver {
   private final OCPPWebSocketClient client;
   private final ChargerStateMachine stateMachine;
-  private int wantedConnectorId;
   private ChargerState wantedState = null;
+  private ChargerState lastState = null;
 
   public ChangeAvailabilityObserver(OCPPWebSocketClient client, ChargerStateMachine state) {
     this.client = client;
@@ -27,7 +27,7 @@ public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateO
     stateMachine.addObserver(this);
   }
 
-  private void changeAvailability(int connectorId, ChargerState newState) {
+  private void changeAvailability(ChargerState newState) {
     ChargePointStatus chargePointStatus =
         newState == ChargerState.Unavailable
             ? ChargePointStatus.Unavailable
@@ -35,7 +35,7 @@ public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateO
 
     StatusNotification statusNotification =
         new StatusNotification(
-            connectorId,
+            1,
             ChargePointErrorCode.NoError,
             "Availability changed",
             chargePointStatus,
@@ -44,6 +44,7 @@ public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateO
             "");
     client.pushMessage(statusNotification);
     stateMachine.transition(newState);
+    lastState = newState;
   }
 
   @Override
@@ -60,11 +61,10 @@ public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateO
       responseStatus = AvailabilityStatus.ACCEPTED;
     } else if (stateMachine.inTransaction() && newState == ChargerState.Unavailable) {
       responseStatus = AvailabilityStatus.SCHEDULED;
-      wantedConnectorId = availability.getConnectorID();
       wantedState = newState;
     } else {
       responseStatus = AvailabilityStatus.ACCEPTED;
-      changeAvailability(availability.getConnectorID(), newState);
+      changeAvailability(newState);
     }
 
     client.pushMessage(new ChangeAvailabilityResponse(availability, responseStatus));
@@ -72,8 +72,10 @@ public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateO
 
   @Override
   public void onStateChanged(ChargerState newState) {
-    if (newState == ChargerState.Available && wantedState != null) {
-      changeAvailability(wantedConnectorId, wantedState);
+    if (newState == ChargerState.BootingUp && lastState == ChargerState.Unavailable) {
+      wantedState = ChargerState.Unavailable;
+    } else if (newState == ChargerState.Available && wantedState == ChargerState.Unavailable) {
+      changeAvailability(wantedState);
       wantedState = null;
     }
   }

@@ -20,11 +20,7 @@ public class ChargerStateMachine {
           ChargerState.Available,
           Set.of(ChargerState.Preparing, ChargerState.Faulted, ChargerState.Unavailable),
           ChargerState.Preparing,
-          Set.of(
-              ChargerState.Charging,
-              ChargerState.Available,
-              ChargerState.Faulted,
-              ChargerState.Unavailable),
+          Set.of(ChargerState.Charging, ChargerState.Available, ChargerState.Faulted),
           ChargerState.Charging,
           Set.of(ChargerState.Available, ChargerState.Faulted),
           ChargerState.Faulted,
