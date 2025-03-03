@@ -125,16 +125,20 @@ public class TriggerMessageObserverTest {
 
   @Test
   void testStatusNotification() {
-    when(stateMachine.getCurrentState()).thenReturn(ChargerState.Available);
+     when(stateMachine.getCurrentState()).thenReturn(ChargerState.Available);
+    MessageScheduler mockScheduler = mock(MessageScheduler.class);
+    OCPPTime mockTime = mock(OCPPTime.class);
+    when(webSocketClient.getScheduler()).thenReturn(mockScheduler);
+    when(mockScheduler.getTime()).thenReturn(mockTime);
+    when(mockTime.getSynchronizedTime()).thenReturn(ZonedDateTime.now());
     TriggerMessage triggerMsg = createTriggerMessage(MessageTrigger.StatusNotification, 1);
+
     when(onOCPPMessage.getMessage()).thenReturn(triggerMsg);
     when(onOCPPMessage.getClient()).thenReturn(webSocketClient);
 
     observer.onMessageReceived(onOCPPMessage);
-
     TriggerMessageResponse response = captureTriggerMessageResponse();
     assert response.getStatus() == TriggerMessageStatus.Accepted;
-
     verify(webSocketClient).pushMessage(argThat(msg -> msg instanceof StatusNotification));
   }
 }
