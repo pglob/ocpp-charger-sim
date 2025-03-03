@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum AvailabilityStatus {
   ACCEPTED("Accepted"),
   REJECTED("Rejected"),
-  Scheduled("Scheduled");
+  SCHEDULED("Scheduled");
 
   private final String value;
 

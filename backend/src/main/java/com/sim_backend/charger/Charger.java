@@ -2,7 +2,6 @@ package com.sim_backend.charger;
 
 import com.sim_backend.config.ConfigurationRegistry;
 import com.sim_backend.electrical.ElectricalTransition;
-import com.sim_backend.state.ChargerAvailabilityState;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.transactions.TransactionHandler;
@@ -47,9 +46,6 @@ public class Charger {
 
   private StatusNotificationObserver statusNotificationObserver;
 
-  /** Our charger availability state. */
-  private final ChargerAvailabilityState availabilityState = new ChargerAvailabilityState();
-
   /** Constructs a new Charger instance */
   public Charger() {
     // TODO: Get central system URI from frontend or command line
@@ -93,7 +89,7 @@ public class Charger {
       GetConfigurationObserver getConfigurationObserver =
           new GetConfigurationObserver(wsClient, config);
       ChangeAvailabilityObserver changeAvailabilityObserver =
-          new ChangeAvailabilityObserver(wsClient, availabilityState);
+          new ChangeAvailabilityObserver(wsClient, stateMachine);
       statusNotificationObserver.setClient(wsClient);
 
       // Add Observers

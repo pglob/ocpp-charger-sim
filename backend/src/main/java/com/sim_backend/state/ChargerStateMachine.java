@@ -13,13 +13,24 @@ public class ChargerStateMachine {
   private List<StateObserver> observers = new ArrayList<>();
   private Map<ChargerState, Set<ChargerState>> validTransitions =
       Map.of(
-          ChargerState.PoweredOff, Set.of(ChargerState.BootingUp),
-          ChargerState.BootingUp, Set.of(ChargerState.Available, ChargerState.Faulted),
-          ChargerState.Available, Set.of(ChargerState.Preparing, ChargerState.Faulted),
+          ChargerState.PoweredOff,
+          Set.of(ChargerState.BootingUp),
+          ChargerState.BootingUp,
+          Set.of(ChargerState.Available, ChargerState.Faulted, ChargerState.Unavailable),
+          ChargerState.Available,
+          Set.of(ChargerState.Preparing, ChargerState.Faulted, ChargerState.Unavailable),
           ChargerState.Preparing,
-              Set.of(ChargerState.Charging, ChargerState.Available, ChargerState.Faulted),
-          ChargerState.Charging, Set.of(ChargerState.Available, ChargerState.Faulted),
-          ChargerState.Faulted, Set.of(ChargerState.Available));
+          Set.of(
+              ChargerState.Charging,
+              ChargerState.Available,
+              ChargerState.Faulted,
+              ChargerState.Unavailable),
+          ChargerState.Charging,
+          Set.of(ChargerState.Available, ChargerState.Faulted),
+          ChargerState.Faulted,
+          Set.of(ChargerState.Available),
+          ChargerState.Unavailable,
+          Set.of(ChargerState.Available));
 
   /** Initializes the state machine in the PoweredOff state. */
   public ChargerStateMachine() {
@@ -98,5 +109,9 @@ public class ChargerStateMachine {
     for (StateObserver observer : observers) {
       observer.onStateChanged(currentState);
     }
+  }
+
+  public boolean inTransaction() {
+    return currentState.equals(ChargerState.Charging) || currentState.equals(ChargerState.Preparing);
   }
 }

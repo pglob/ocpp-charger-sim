@@ -6,5 +6,6 @@ public enum ChargerState {
   Available,
   Preparing,
   Charging,
-  Faulted
+  Faulted,
+  Unavailable,
 }
