@@ -26,7 +26,7 @@ public class ChargerStateMachine {
           ChargerState.Faulted,
           Set.of(ChargerState.Available),
           ChargerState.Unavailable,
-          Set.of(ChargerState.Available));
+          Set.of(ChargerState.Available, ChargerState.Faulted));
 
   /** Initializes the state machine in the PoweredOff state. */
   public ChargerStateMachine() {
@@ -107,8 +107,23 @@ public class ChargerStateMachine {
     }
   }
 
+  /**
+   * Return if the state machine is in a transaction state.
+   *
+   * @return True if it is.
+   */
   public boolean inTransaction() {
     return currentState.equals(ChargerState.Charging)
         || currentState.equals(ChargerState.Preparing);
+  }
+
+  /**
+   * Checks if our state machine is in a booted state.
+   *
+   * @return True if booted.
+   */
+  public boolean isBooted() {
+    return !(currentState.equals(ChargerState.BootingUp)
+        || currentState.equals(ChargerState.PoweredOff));
   }
 }
