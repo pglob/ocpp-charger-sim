@@ -36,13 +36,12 @@ public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateO
 
   /**
    * Check and change the state of the charger based on the given charger state.
-   * This should only be passed in Unavailable or Available.
    *
-   * @param newState The state to change to.
+   * @param newState The state to change to (accepts only Available or Unavailable).
    * @return True if successful.
    */
   private boolean changeAvailability(ChargerState newState) {
-    if(newState != ChargerState.Available && newState != ChargerState.Unavailable) {
+    if (newState != ChargerState.Available && newState != ChargerState.Unavailable) {
       throw new IllegalArgumentException("Expected Available or Unavailable, got " + newState);
     }
 
