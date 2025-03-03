@@ -76,7 +76,7 @@ public class TriggerMessageObserverTest {
     observer.onMessageReceived(onOCPPMessage);
 
     TriggerMessageResponse response = captureTriggerMessageResponse();
-    assert response.getStatus() == TriggerMessageStatus.Rejected;
+    assert response.getStatus() == TriggerMessageStatus.NotImplemented;
 
     verify(webSocketClient, times(1)).pushMessage(any(TriggerMessageResponse.class));
     verify(webSocketClient, never())
@@ -93,7 +93,7 @@ public class TriggerMessageObserverTest {
     observer.onMessageReceived(onOCPPMessage);
 
     TriggerMessageResponse response = captureTriggerMessageResponse();
-    assert response.getStatus() == TriggerMessageStatus.Rejected;
+    assert response.getStatus() == TriggerMessageStatus.NotImplemented;
   }
 
   @Test
@@ -126,7 +126,7 @@ public class TriggerMessageObserverTest {
   @Test
   void testStatusNotification() {
     when(stateMachine.getCurrentState()).thenReturn(ChargerState.Available);
-    TriggerMessage triggerMsg = createTriggerMessage(MessageTrigger.StatusNotification, 2);
+    TriggerMessage triggerMsg = createTriggerMessage(MessageTrigger.StatusNotification, 1);
     when(onOCPPMessage.getMessage()).thenReturn(triggerMsg);
     when(onOCPPMessage.getClient()).thenReturn(webSocketClient);
 
