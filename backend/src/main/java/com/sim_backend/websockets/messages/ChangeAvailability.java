@@ -8,6 +8,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/*
+ * Represents an OCPP 1.6 ChangeAvailability Request sent to a Charge Point to change the current availability of a charger.
+ */
 @Getter
 @AllArgsConstructor
 public class ChangeAvailability extends OCPPMessageRequest implements Cloneable {
