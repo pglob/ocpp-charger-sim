@@ -39,7 +39,7 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
     MessageTrigger requested = triggerMessage.getRequestedMessage();
 
     ChargerState currentState = stateMachine.getCurrentState();
-    if (currentState == ChargerState.PoweredOff || currentState == ChargerState.BootingUp) {
+    if (currentState == ChargerState.PoweredOff) {
       responseStatus = TriggerMessageStatus.Rejected;
     }
     Integer connectorId = triggerMessage.getConnectorId();
