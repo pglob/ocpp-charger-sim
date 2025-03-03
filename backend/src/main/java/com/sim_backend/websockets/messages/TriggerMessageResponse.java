@@ -14,6 +14,8 @@ import lombok.Getter;
     messageCallID = OCPPMessage.CALL_ID_RESPONSE,
     messageName = "TriggerMessageResponse")
 public class TriggerMessageResponse extends OCPPMessageResponse implements Cloneable {
+  
+  @NotNull(message = "TriggerMessageResponse status is required")
   private TriggerMessageStatus status;
 
   public TriggerMessageResponse(OCPPMessageRequest request, TriggerMessageStatus status) {

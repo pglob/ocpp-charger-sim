@@ -11,7 +11,6 @@ import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.Heartbeat;
-import com.sim_backend.websockets.messages.MessageValidator;
 import com.sim_backend.websockets.messages.StatusNotification;
 import com.sim_backend.websockets.messages.TriggerMessage;
 import com.sim_backend.websockets.messages.TriggerMessageResponse;
@@ -26,7 +25,6 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
       OCPPWebSocketClient webSocketClient, ChargerStateMachine stateMachine) {
     this.webSocketClient = webSocketClient;
     this.stateMachine = stateMachine;
-
     webSocketClient.onReceiveMessage(TriggerMessage.class, this);
   }
 
@@ -36,52 +34,63 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
       throw new ClassCastException("Received message is not a TriggerMessage");
     }
 
-    if (!MessageValidator.isValid(triggerMessage)) {
-      throw new IllegalArgumentException(MessageValidator.log_message(triggerMessage));
-    }
-
     TriggerMessageStatus responseStatus = TriggerMessageStatus.Accepted;
     Runnable triggeredAction = null;
     MessageTrigger requested = triggerMessage.getRequestedMessage();
 
-    switch (requested) {
-      case BootNotification:
-        if (stateMachine.getCurrentState() != ChargerState.BootingUp) {
-          responseStatus = TriggerMessageStatus.Rejected;
-        } else {
-          triggeredAction =
-              () -> {
-                new BootNotificationObserver(webSocketClient, stateMachine)
-                    .handleBootNotificationRequest();
-              };
-        }
-        break;
-      case DiagnosticsStatusNotification:
-        responseStatus = TriggerMessageStatus.Rejected;
-        break;
-      case FirmwareStatusNotification:
-        responseStatus = TriggerMessageStatus.Rejected;
-        break;
-      case Heartbeat:
-        triggeredAction = () -> webSocketClient.pushMessage(new Heartbeat());
-        break;
-      case MeterValues:
-        // TODO implement MeterValues trigger action here
-        responseStatus = TriggerMessageStatus.NotImplemented;
-        break;
-      case StatusNotification:
-        triggeredAction =
-            () -> {
-              StatusNotification statusNotification =
-                  createStatusNotification(triggerMessage.getConnectorId());
-              webSocketClient.pushMessage(statusNotification);
-            };
-        break;
-      default:
-        responseStatus = TriggerMessageStatus.NotImplemented;
-        break;
+    ChargerState currentState = stateMachine.getCurrentState();
+    if (currentState == ChargerState.PoweredOff || currentState == ChargerState.BootingUp) {
+      responseStatus = TriggerMessageStatus.Rejected;
     }
+    Integer connectorId = triggerMessage.getConnectorId();
+    if (responseStatus == TriggerMessageStatus.Accepted) {
+      if (connectorId != null && connectorId != 0 && connectorId != 1) {
+        responseStatus = TriggerMessageStatus.Rejected;
+      }
+    }
+    if (responseStatus == TriggerMessageStatus.Accepted) {
+      switch (requested) {
+        case BootNotification:
+          if (currentState != ChargerState.BootingUp) {
+            responseStatus = TriggerMessageStatus.Rejected;
+          } else {
+            triggeredAction = () -> {
+              new BootNotificationObserver(webSocketClient, stateMachine)
+                  .handleBootNotificationRequest();
+            };
+          }
+          break;
 
+        case DiagnosticsStatusNotification:
+          responseStatus = TriggerMessageStatus.NotImplemented;
+          break;
+
+        case FirmwareStatusNotification:
+          responseStatus = TriggerMessageStatus.NotImplemented;
+          break;
+
+        case Heartbeat:
+          triggeredAction = () -> webSocketClient.pushMessage(new Heartbeat());
+          break;
+
+        case MeterValues:
+          // TODO implement MeterValues trigger action here
+          responseStatus = TriggerMessageStatus.NotImplemented;
+          break;
+
+        case StatusNotification:
+          triggeredAction = () -> {
+            StatusNotification statusNotification =
+                createStatusNotification(connectorId == null ? 0 : connectorId);
+            webSocketClient.pushMessage(statusNotification);
+          };
+          break;
+
+        default:
+          responseStatus = TriggerMessageStatus.NotImplemented;
+          break;
+      }
+    }
     TriggerMessageResponse response = new TriggerMessageResponse(triggerMessage, responseStatus);
     message.getClient().pushMessage(response);
 
@@ -97,7 +106,7 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
     ChargePointErrorCode errorCode = ChargePointErrorCode.NoError;
     String info = "";
     ChargePointStatus status = mapStateToChargePointStatus(stateMachine.getCurrentState());
-    ZonedDateTime timestamp = ZonedDateTime.now();
+    ZonedDateTime timestamp = webSocketClient.getScheduler().getTime().getSynchronizedTime();
     String vendorId = "";
     String vendorErrorCode = "";
     return new StatusNotification(

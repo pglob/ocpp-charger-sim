@@ -18,6 +18,7 @@ public final class TriggerMessage extends OCPPMessageRequest implements Cloneabl
   @SerializedName("requestedMessage")
   private MessageTrigger requestedMessage;
 
+  @Min(value = 0, message = "TriggerMessage connectorId must be a non-negative integer")
   @SerializedName("connectorId")
   private Integer connectorId;
 

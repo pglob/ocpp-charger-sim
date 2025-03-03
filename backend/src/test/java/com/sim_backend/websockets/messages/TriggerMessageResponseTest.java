@@ -70,6 +70,8 @@ public class TriggerMessageResponseTest {
     Set<ValidationMessage> errors = schema.validate(payloadJson, InputFormat.JSON);
     errors.forEach(System.out::println);
     assert errors.isEmpty();
-    assert payloadJson.contains("\"status\":\"NotImplemented\"");
+    String expectedJson = "{\"status\":\"NotImplemented\"}";
+    assert payloadJson.equals(expectedJson)
+        : "JSON mismatch! Expected=" + expectedJson + ", Actual=" + payloadJson;
   }
 }
