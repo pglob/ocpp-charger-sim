@@ -59,7 +59,7 @@ public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateO
 
     if (stateMachine.getCurrentState() == newState) {
       responseStatus = AvailabilityStatus.ACCEPTED;
-    } else if (stateMachine.inTransaction() && newState == ChargerState.Unavailable) {
+    } else if (stateMachine.inTransaction()) {
       responseStatus = AvailabilityStatus.SCHEDULED;
       wantedState = newState;
     } else {
