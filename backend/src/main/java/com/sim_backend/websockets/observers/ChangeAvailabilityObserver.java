@@ -1,5 +1,6 @@
 package com.sim_backend.websockets.observers;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sim_backend.charger.Charger;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
@@ -11,6 +12,8 @@ import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.ChangeAvailability;
 import com.sim_backend.websockets.messages.ChangeAvailabilityResponse;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 /** Observer for handling incoming ChangeAvailability Messages */
 public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateObserver {
@@ -24,6 +27,8 @@ public class ChangeAvailabilityObserver implements OnOCPPMessageListener, StateO
   private final Charger charger;
 
   /** The last wanted state */
+  @Getter(AccessLevel.PACKAGE)
+  @VisibleForTesting
   private ChargerState wantedState = null;
 
   public ChangeAvailabilityObserver(OCPPWebSocketClient client, Charger charger) {

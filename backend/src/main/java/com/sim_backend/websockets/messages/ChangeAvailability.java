@@ -1,7 +1,9 @@
 package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
+import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.AvailabilityType;
+import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -13,6 +15,7 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
+@OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "ChangeAvailability")
 public class ChangeAvailability extends OCPPMessageRequest implements Cloneable {
   @NotNull
   @Min(0)
