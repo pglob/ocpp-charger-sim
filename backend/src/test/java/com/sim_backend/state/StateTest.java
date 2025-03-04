@@ -1,8 +1,6 @@
 package com.sim_backend.state;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -218,5 +216,30 @@ public class StateTest {
     assertTrue(
         exception.getMessage().contains("Invalid state transition"),
         "Expected an exception message indicating an invalid transition");
+  }
+
+  @Test
+  void testStateMachineTransaction() {
+    // From Charging, transitioning to BootingUp is not allowed
+    testStateMachine.transition(ChargerState.BootingUp);
+    testStateMachine.transition(ChargerState.Available);
+    testStateMachine.transition(ChargerState.Preparing);
+    testStateMachine.transition(ChargerState.Charging);
+
+    assertTrue(testStateMachine.inTransaction());
+
+    testStateMachine.transition(ChargerState.Available);
+
+    assertFalse(testStateMachine.inTransaction());
+  }
+
+  @Test
+  void testStateMachineBooted() {
+    // From Charging, transitioning to BootingUp is not allowed
+    testStateMachine.transition(ChargerState.BootingUp);
+    assertFalse(testStateMachine.isBooted());
+
+    testStateMachine.transition(ChargerState.Available);
+    assertTrue(testStateMachine.isBooted());
   }
 }

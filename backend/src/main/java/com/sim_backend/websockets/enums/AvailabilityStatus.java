@@ -24,6 +24,6 @@ public enum AvailabilityStatus {
         return availabilityStatus;
       }
     }
-    throw new IllegalArgumentException("Unexpected AvailabilityStatus value: " + value);
+    throw new IllegalArgumentException("Unexpected AvailabilityStatus: " + value);
   }
 }

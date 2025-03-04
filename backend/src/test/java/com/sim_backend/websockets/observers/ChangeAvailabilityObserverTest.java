@@ -1,5 +1,8 @@
 package com.sim_backend.websockets.observers;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.sim_backend.charger.Charger;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
@@ -15,102 +18,158 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.assertArg;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class ChangeAvailabilityObserverTest {
 
-    @Mock private OCPPWebSocketClient webSocketClient;
-    @Mock private Charger charger;
-    @Mock private ChargerStateMachine chargerStateMachine;
+  @Mock private OCPPWebSocketClient webSocketClient;
+  @Mock private Charger charger;
+  @Mock private ChargerStateMachine chargerStateMachine;
 
-    private ChangeAvailabilityObserver observer;
+  private ChangeAvailabilityObserver observer;
 
-    @BeforeEach
-    void setUp() {
-        when(charger.getStateMachine()).thenReturn(chargerStateMachine);
-        observer = new ChangeAvailabilityObserver(webSocketClient, charger);
-    }
+  @BeforeEach
+  void setUp() {
+    when(charger.getStateMachine()).thenReturn(chargerStateMachine);
+    observer = new ChangeAvailabilityObserver(webSocketClient, charger);
+  }
 
-    @Test
-    void testChangeToUnavailable() {
-        when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Available);
-        when(chargerStateMachine.isBooted()).thenReturn(true);
-        when(chargerStateMachine.inTransaction()).thenReturn(false);
-        doReturn(true).when(chargerStateMachine).checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
+  @Test
+  void testChangeToUnavailable() {
+    when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Available);
+    when(chargerStateMachine.isBooted()).thenReturn(true);
+    when(chargerStateMachine.inTransaction()).thenReturn(false);
+    doReturn(true)
+        .when(chargerStateMachine)
+        .checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
 
-        ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.INOPERATIVE);
-        observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
+    ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.INOPERATIVE);
+    observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
 
-        verify(chargerStateMachine, times(1)).checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
-        verify(charger, times(1)).setAvailable(false);
-        verify(webSocketClient, times(1)).pushMessage(new ChangeAvailabilityResponse(request, AvailabilityStatus.ACCEPTED));
-    }
+    verify(chargerStateMachine, times(1))
+        .checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
+    verify(charger, times(1)).setAvailable(false);
+    verify(webSocketClient, times(1))
+        .pushMessage(new ChangeAvailabilityResponse(request, AvailabilityStatus.ACCEPTED));
+  }
 
-    @Test
-    void testChangeToAvailable() {
-        when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Unavailable);
-        when(chargerStateMachine.isBooted()).thenReturn(true);
-        when(chargerStateMachine.inTransaction()).thenReturn(false);
-        doReturn(true).when(chargerStateMachine).checkAndTransition(ChargerState.Unavailable, ChargerState.Available);
+  @Test
+  void testChangeToAvailable() {
+    when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Unavailable);
+    when(chargerStateMachine.isBooted()).thenReturn(true);
+    when(chargerStateMachine.inTransaction()).thenReturn(false);
+    doReturn(true)
+        .when(chargerStateMachine)
+        .checkAndTransition(ChargerState.Unavailable, ChargerState.Available);
 
-        ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.OPERATIVE);
-        observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
+    ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.OPERATIVE);
+    observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
 
-        verify(chargerStateMachine, times(1)).checkAndTransition(ChargerState.Unavailable, ChargerState.Available);
-        verify(charger, times(1)).setAvailable(true);
-        verify(webSocketClient, times(1)).pushMessage(new ChangeAvailabilityResponse(request, AvailabilityStatus.ACCEPTED));
-    }
+    verify(chargerStateMachine, times(1))
+        .checkAndTransition(ChargerState.Unavailable, ChargerState.Available);
+    verify(charger, times(1)).setAvailable(true);
+    verify(webSocketClient, times(1))
+        .pushMessage(new ChangeAvailabilityResponse(request, AvailabilityStatus.ACCEPTED));
+  }
 
-    @Test
-    void testChangeScheduled() {
-        when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Charging);
-        when(chargerStateMachine.isBooted()).thenReturn(true);
-        when(chargerStateMachine.inTransaction()).thenReturn(true);
-        doReturn(true).when(chargerStateMachine).checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
+  @Test
+  void testChangeSameState() {
+    when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Available);
+    when(chargerStateMachine.isBooted()).thenReturn(true);
 
-        ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.INOPERATIVE);
-        observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
+    ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.OPERATIVE);
+    observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
 
-        verify(chargerStateMachine, times(0)).checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
-        verify(charger, times(0)).setAvailable(false);
+    verify(chargerStateMachine, times(0)).checkAndTransition(any(), any());
+    verify(charger, times(0)).setAvailable(true);
+    verify(webSocketClient, times(1))
+        .pushMessage(new ChangeAvailabilityResponse(request, AvailabilityStatus.ACCEPTED));
+  }
 
-        observer.onStateChanged(ChargerState.Available);
+  @Test
+  void testBadState() {
+    assertFalse(observer.changeAvailability(ChargerState.Available));
 
-        verify(chargerStateMachine, times(1)).checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
-        verify(charger, times(1)).setAvailable(false);
-        verify(webSocketClient, times(1)).pushMessage(new ChangeAvailabilityResponse(request, AvailabilityStatus.SCHEDULED));
-    }
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> observer.changeAvailability(ChargerState.PoweredOff));
 
-    @Test
-    void testAvailabilityOnReboot() {
-        when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Available);
-        when(chargerStateMachine.isBooted()).thenReturn(true);
-        when(chargerStateMachine.inTransaction()).thenReturn(false);
-        doReturn(true).when(chargerStateMachine).checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
+    assertEquals("Expected Available or Unavailable, got PoweredOff", exception.getMessage());
+  }
 
-        ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.INOPERATIVE);
-        observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
+  @Test
+  void testNotBooted() {
+    when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.PoweredOff);
+    when(chargerStateMachine.isBooted()).thenReturn(false);
 
-        observer.onStateChanged(ChargerState.BootingUp);
-        assertEquals(observer.getWantedState(), ChargerState.Unavailable);
+    ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.OPERATIVE);
+    observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
 
-        observer.onStateChanged(ChargerState.Available);
-        verify(chargerStateMachine, times(2)).checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
-        verify(charger, times(2)).setAvailable(false);
-    }
+    verify(chargerStateMachine, times(0))
+        .checkAndTransition(ChargerState.Unavailable, ChargerState.Available);
+    verify(charger, times(0)).setAvailable(true);
+    verify(webSocketClient, times(1))
+        .pushMessage(new ChangeAvailabilityResponse(request, AvailabilityStatus.REJECTED));
+  }
 
-    @Test
-    void testLatestRequestOverridesPending() {
-        when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Charging);
-        when(chargerStateMachine.isBooted()).thenReturn(true);
-        when(chargerStateMachine.inTransaction()).thenReturn(true);
+  @Test
+  void testChangeScheduled() {
+    when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Charging);
+    when(chargerStateMachine.isBooted()).thenReturn(true);
+    when(chargerStateMachine.inTransaction()).thenReturn(true);
+    doReturn(true)
+        .when(chargerStateMachine)
+        .checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
 
-        observer.onMessageReceived(new OnOCPPMessage(new ChangeAvailability(0, AvailabilityType.INOPERATIVE), webSocketClient));
-        assertEquals(observer.getWantedState(), ChargerState.Unavailable);
-        observer.onMessageReceived(new OnOCPPMessage(new ChangeAvailability(1, AvailabilityType.OPERATIVE), webSocketClient));
-        assertEquals(observer.getWantedState(), ChargerState.Available);
-    }
+    ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.INOPERATIVE);
+    observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
+
+    verify(chargerStateMachine, times(0))
+        .checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
+    verify(charger, times(0)).setAvailable(false);
+
+    observer.onStateChanged(ChargerState.Available);
+
+    verify(chargerStateMachine, times(1))
+        .checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
+    verify(charger, times(1)).setAvailable(false);
+    verify(webSocketClient, times(1))
+        .pushMessage(new ChangeAvailabilityResponse(request, AvailabilityStatus.SCHEDULED));
+  }
+
+  @Test
+  void testAvailabilityOnReboot() {
+    when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Available);
+    when(chargerStateMachine.isBooted()).thenReturn(true);
+    when(chargerStateMachine.inTransaction()).thenReturn(false);
+    doReturn(true)
+        .when(chargerStateMachine)
+        .checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
+
+    ChangeAvailability request = new ChangeAvailability(0, AvailabilityType.INOPERATIVE);
+    observer.onMessageReceived(new OnOCPPMessage(request, webSocketClient));
+
+    observer.onStateChanged(ChargerState.BootingUp);
+    assertEquals(observer.getWantedState(), ChargerState.Unavailable);
+
+    observer.onStateChanged(ChargerState.Available);
+    verify(chargerStateMachine, times(2))
+        .checkAndTransition(ChargerState.Available, ChargerState.Unavailable);
+    verify(charger, times(2)).setAvailable(false);
+  }
+
+  @Test
+  void testLatestRequestOverridesPending() {
+    when(chargerStateMachine.getCurrentState()).thenReturn(ChargerState.Charging);
+    when(chargerStateMachine.isBooted()).thenReturn(true);
+    when(chargerStateMachine.inTransaction()).thenReturn(true);
+
+    observer.onMessageReceived(
+        new OnOCPPMessage(
+            new ChangeAvailability(0, AvailabilityType.INOPERATIVE), webSocketClient));
+    assertEquals(observer.getWantedState(), ChargerState.Unavailable);
+    observer.onMessageReceived(
+        new OnOCPPMessage(new ChangeAvailability(1, AvailabilityType.OPERATIVE), webSocketClient));
+    assertEquals(observer.getWantedState(), ChargerState.Available);
+  }
 }

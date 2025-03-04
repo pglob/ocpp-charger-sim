@@ -12,7 +12,9 @@ import lombok.Getter;
  * Represents an OCPP 1.6 ChangeAvailability Response sent from a Charge Point to notify if the availability change was successful.
  */
 @Getter
-@OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_RESPONSE, messageName = "ChangeAvailabilityResponse")
+@OCPPMessageInfo(
+    messageCallID = OCPPMessage.CALL_ID_RESPONSE,
+    messageName = "ChangeAvailabilityResponse")
 public class ChangeAvailabilityResponse extends OCPPMessageResponse implements Cloneable {
   @NotNull
   @SerializedName("status")

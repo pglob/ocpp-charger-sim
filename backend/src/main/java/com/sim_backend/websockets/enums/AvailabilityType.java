@@ -21,6 +21,6 @@ public enum AvailabilityType {
         return availabilityType;
       }
     }
-    throw new IllegalArgumentException("Unexpected AvailabilityType value: " + value);
+    throw new IllegalArgumentException("Unexpected AvailabilityType: " + value);
   }
 }
