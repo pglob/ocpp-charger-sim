@@ -11,9 +11,11 @@ import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.enums.ReadingContext;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.*;
+import com.sim_backend.websockets.observers.MeterValuesObserver;
 import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 public class StartTransactionHandlerTest {
   @Mock private ChargerStateMachine stateMachine;
   @Mock private ElectricalTransition elec;
+  @Mock private MeterValuesObserver meter;
   @Mock private OCPPWebSocketClient client;
   @Mock private OCPPTime ocppTime;
   @Mock private MessageScheduler scheduler;
@@ -38,7 +41,7 @@ public class StartTransactionHandlerTest {
     when(client.getScheduler()).thenReturn(scheduler);
     when(scheduler.getTime()).thenReturn(ocppTime);
     when(ocppTime.getSynchronizedTime()).thenReturn(ZonedDateTime.parse("2025-01-19T00:00:00Z"));
-    handler = new StartTransactionHandler(stateMachine, client);
+    handler = new StartTransactionHandler(stateMachine, client, meter);
   }
 
   @Test
@@ -61,6 +64,7 @@ public class StartTransactionHandlerTest {
 
     handler.initiateStartTransaction(1, "Accepted", new AtomicInteger(), elec, new AtomicBoolean());
 
+    verify(meter, times(1)).sendMeterValues(ReadingContext.TRANSACTION_BEGIN);
     verify(client).pushMessage(any(StartTransaction.class));
     verify(stateMachine).checkAndTransition(ChargerState.Preparing, ChargerState.Charging);
   }
@@ -86,6 +90,9 @@ public class StartTransactionHandlerTest {
 
     // Verify that a StartTransaction message was pushed
     verify(client).pushMessage(any(StartTransaction.class));
+
+    // Verify that a MeterValues message was triggered
+    verify(meter, times(1)).sendMeterValues(ReadingContext.TRANSACTION_BEGIN);
 
     // Verify that onTimeout() resulted in the state machine transitioning to Available
     verify(stateMachine).checkAndTransition(ChargerState.Preparing, ChargerState.Available);

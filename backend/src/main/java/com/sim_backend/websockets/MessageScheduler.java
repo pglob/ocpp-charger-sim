@@ -71,6 +71,34 @@ public class MessageScheduler {
   }
 
   /**
+   * Create a periodic function job.
+   *
+   * @param initialDelay The initial delay before the first execution.
+   * @param delay The delay between subsequent executions.
+   * @param timeUnit The time units for the delays.
+   * @param task The Runnable function to execute.
+   * @return A RepeatingTimedTask representing the scheduled function.
+   */
+  public RepeatingTimedTask periodicFunctionJob(
+      long initialDelay, long delay, TimeUnit timeUnit, Runnable task) {
+    if (task == null) {
+      throw new IllegalArgumentException("Task must not be null");
+    }
+    if (initialDelay < 0 || delay <= 0) {
+      throw new IllegalArgumentException("Initial delay and delay must be positive");
+    }
+
+    RepeatingTimedTask repeatingTask =
+        new RepeatingTimedTask(
+            getTime().getSynchronizedTime().plus(initialDelay, timeUnit.toChronoUnit()),
+            delay,
+            timeUnit.toChronoUnit(),
+            task);
+    tasks.add(repeatingTask);
+    return repeatingTask;
+  }
+
+  /**
    * Register a job at a set time.
    *
    * @param delay The delay at which to send the message.
@@ -115,6 +143,9 @@ public class MessageScheduler {
    * @param task the job to kill.
    */
   public void killJob(TimedTask task) {
+    if (task instanceof RepeatingTimedTask repeatingTask) {
+      repeatingTask.cancel();
+    }
     tasks.remove(task);
   }
 
@@ -136,9 +167,16 @@ public class MessageScheduler {
     tasks.removeAll(toExecute);
 
     for (TimedTask task : toExecute) {
+      // Skip execution if this repeating task has been cancelled
+      if (task instanceof RepeatingTimedTask repeatingTask && repeatingTask.isCancelled()) {
+        continue;
+      }
       task.task.run();
       if (task instanceof RepeatingTask repeatingTask) {
-        tasks.add(((RepeatingTask) task).repeatTask());
+        TimedTask newTask = repeatingTask.repeatTask();
+        if (newTask != null) { // Only add if not cancelled
+          tasks.add(newTask);
+        }
       }
     }
   }

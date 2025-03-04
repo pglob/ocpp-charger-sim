@@ -6,6 +6,7 @@ import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.ZonedDateTime;
@@ -18,7 +19,7 @@ import lombok.Getter;
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StatusNotification")
 public final class StatusNotification extends OCPPMessageRequest implements Cloneable {
 
-  @NotNull(message = "StatusNotification connectorId is required")
+  @Min(value = 0, message = "StatusNotification connectorId must be a non-negative integer")
   @SerializedName("connectorId")
   private int connectorId;
 

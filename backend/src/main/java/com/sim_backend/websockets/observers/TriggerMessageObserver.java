@@ -6,10 +6,10 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.enums.MessageTrigger;
+import com.sim_backend.websockets.enums.ReadingContext;
 import com.sim_backend.websockets.enums.TriggerMessageStatus;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
-import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.StatusNotification;
 import com.sim_backend.websockets.messages.TriggerMessage;
@@ -20,11 +20,15 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
 
   private final OCPPWebSocketClient webSocketClient;
   private final ChargerStateMachine stateMachine;
+  private final MeterValuesObserver meter;
 
   public TriggerMessageObserver(
-      OCPPWebSocketClient webSocketClient, ChargerStateMachine stateMachine) {
+      OCPPWebSocketClient webSocketClient,
+      ChargerStateMachine stateMachine,
+      MeterValuesObserver meter) {
     this.webSocketClient = webSocketClient;
     this.stateMachine = stateMachine;
+    this.meter = meter;
     webSocketClient.onReceiveMessage(TriggerMessage.class, this);
   }
 
@@ -75,8 +79,7 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
           break;
 
         case MeterValues:
-          // TODO implement MeterValues trigger action here
-          responseStatus = TriggerMessageStatus.NotImplemented;
+          triggeredAction = () -> meter.sendMeterValues(ReadingContext.TRIGGER);
           break;
 
         case StatusNotification:

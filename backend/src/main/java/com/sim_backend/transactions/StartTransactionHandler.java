@@ -6,10 +6,12 @@ import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.AuthorizationStatus;
+import com.sim_backend.websockets.enums.ReadingContext;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.StartTransaction;
 import com.sim_backend.websockets.messages.StartTransactionResponse;
+import com.sim_backend.websockets.observers.MeterValuesObserver;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,11 +27,14 @@ public class StartTransactionHandler {
   private ChargerStateMachine stateMachine;
   private OCPPWebSocketClient client;
   private int transactionId;
+  private MeterValuesObserver meter;
 
   // Constructor
-  public StartTransactionHandler(ChargerStateMachine stateMachine, OCPPWebSocketClient client) {
+  public StartTransactionHandler(
+      ChargerStateMachine stateMachine, OCPPWebSocketClient client, MeterValuesObserver meter) {
     this.stateMachine = stateMachine;
     this.client = client;
+    this.meter = meter;
     this.transactionId = -1;
   }
 
@@ -63,6 +68,7 @@ public class StartTransactionHandler {
     StartTransaction startTransactionMessage =
         new StartTransaction(connectorId, idTag, meterStart, timestamp);
     client.pushMessage(startTransactionMessage);
+    meter.sendMeterValues(ReadingContext.TRANSACTION_BEGIN);
 
     final OnOCPPMessageListener listener =
         new OnOCPPMessageListener() {

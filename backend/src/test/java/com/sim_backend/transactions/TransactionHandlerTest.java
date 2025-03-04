@@ -21,6 +21,7 @@ import com.sim_backend.websockets.enums.Reason;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.*;
+import com.sim_backend.websockets.observers.MeterValuesObserver;
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,6 +34,7 @@ public class TransactionHandlerTest {
   @Mock private ChargerStateMachine stateMachine;
   @Mock private Charger charger;
   @Mock private ElectricalTransition elec;
+  @Mock private MeterValuesObserver meter;
   @Mock private OCPPWebSocketClient client;
   @Mock private OCPPTime ocppTime;
   @Mock private MessageScheduler scheduler;
@@ -46,6 +48,7 @@ public class TransactionHandlerTest {
     when(charger.getWsClient()).thenReturn(client);
     when(charger.getStateMachine()).thenReturn(stateMachine);
     when(charger.getElec()).thenReturn(elec);
+    when(charger.getMeterValueObserver()).thenReturn(meter);
     when(client.getScheduler()).thenReturn(scheduler);
     when(scheduler.getTime()).thenReturn(ocppTime);
     when(ocppTime.getSynchronizedTime()).thenReturn(ZonedDateTime.parse("2025-01-19T00:00:00Z"));
