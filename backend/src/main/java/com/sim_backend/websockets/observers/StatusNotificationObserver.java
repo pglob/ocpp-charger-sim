@@ -75,6 +75,7 @@ public class StatusNotificationObserver implements StateObserver {
       case ChargerState.Available -> ChargePointStatus.Available;
       case ChargerState.Preparing -> ChargePointStatus.Preparing;
       case ChargerState.Charging -> ChargePointStatus.Charging;
+      case ChargerState.Unavailable -> ChargePointStatus.Unavailable;
       default -> null;
     };
   }

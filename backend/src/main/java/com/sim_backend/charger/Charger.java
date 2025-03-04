@@ -9,12 +9,14 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.Reason;
 import com.sim_backend.websockets.observers.BootNotificationObserver;
+import com.sim_backend.websockets.observers.ChangeAvailabilityObserver;
 import com.sim_backend.websockets.observers.ChangeConfigurationObserver;
 import com.sim_backend.websockets.observers.GetConfigurationObserver;
 import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import java.net.URI;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Represents a simulated EV charger. The Charger contains a state machine, electrical transition,
@@ -46,6 +48,9 @@ public class Charger {
 
   /** A lock to ensure that only one Boot() or Reboot() operation can run at a time */
   private final ReentrantLock bootRebootLock = new ReentrantLock();
+
+  /** A flag to mark if our charger should be unavailable on reboot */
+  @Getter @Setter private boolean available = true;
 
   private StatusNotificationObserver statusNotificationObserver;
 
@@ -91,6 +96,8 @@ public class Charger {
           new ChangeConfigurationObserver(wsClient, config);
       GetConfigurationObserver getConfigurationObserver =
           new GetConfigurationObserver(wsClient, config);
+      ChangeAvailabilityObserver changeAvailabilityObserver =
+          new ChangeAvailabilityObserver(wsClient, this);
       statusNotificationObserver.setClient(wsClient);
 
       // Add Observers
