@@ -1,6 +1,7 @@
 package com.sim_backend.transactions;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.sim_backend.electrical.ElectricalTransition;
@@ -9,8 +10,10 @@ import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.enums.ReadingContext;
 import com.sim_backend.websockets.enums.Reason;
 import com.sim_backend.websockets.messages.StopTransaction;
+import com.sim_backend.websockets.observers.MeterValuesObserver;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 public class StopTransactionHandlerTest {
   @Mock private ChargerStateMachine stateMachine;
   @Mock private ElectricalTransition elec;
+  @Mock private MeterValuesObserver meter;
   @Mock private OCPPWebSocketClient client;
   @Mock private OCPPTime ocppTime;
   @Mock private MessageScheduler scheduler;
@@ -38,7 +42,7 @@ public class StopTransactionHandlerTest {
     when(scheduler.getTime()).thenReturn(ocppTime);
     when(ocppTime.getSynchronizedTime()).thenReturn(ZonedDateTime.parse("2025-01-19T00:00:00Z"));
     when(client.pushMessage(any(StopTransaction.class))).thenReturn(true);
-    handler = new StopTransactionHandler(stateMachine, client);
+    handler = new StopTransactionHandler(stateMachine, client, meter);
   }
 
   /**
@@ -60,6 +64,8 @@ public class StopTransactionHandlerTest {
     ArgumentCaptor<StopTransaction> captor = ArgumentCaptor.forClass(StopTransaction.class);
     verify(client).pushMessage(captor.capture());
     StopTransaction message = captor.getValue();
+
+    verify(meter, times(1)).sendMeterValues(ReadingContext.TRANSACTION_END);
 
     assertEquals(expectedTxnId, message.getTransactionId());
     assertEquals(5000, message.getMeterStop());

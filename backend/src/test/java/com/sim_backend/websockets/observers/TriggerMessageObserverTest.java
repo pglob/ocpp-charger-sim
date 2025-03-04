@@ -10,6 +10,7 @@ import com.sim_backend.websockets.MessageScheduler;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.MessageTrigger;
+import com.sim_backend.websockets.enums.ReadingContext;
 import com.sim_backend.websockets.enums.TriggerMessageStatus;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.messages.Heartbeat;
@@ -29,12 +30,13 @@ public class TriggerMessageObserverTest {
 
   @Mock private OCPPWebSocketClient webSocketClient;
   @Mock private ChargerStateMachine stateMachine;
+  @Mock private MeterValuesObserver meter;
   @Mock private OnOCPPMessage onOCPPMessage;
   private TriggerMessageObserver observer;
 
   @BeforeEach
   void setUp() {
-    observer = new TriggerMessageObserver(webSocketClient, stateMachine);
+    observer = new TriggerMessageObserver(webSocketClient, stateMachine, meter);
   }
 
   private TriggerMessage createTriggerMessage(MessageTrigger trigger, Integer connectorId) {
@@ -115,15 +117,18 @@ public class TriggerMessageObserverTest {
 
   @Test
   void testMeterValues() {
-    TriggerMessage triggerMsg = createTriggerMessage(MessageTrigger.MeterValues, null);
+    TriggerMessage triggerMsg = createTriggerMessage(MessageTrigger.MeterValues, 1);
     when(onOCPPMessage.getMessage()).thenReturn(triggerMsg);
     when(onOCPPMessage.getClient()).thenReturn(webSocketClient);
+
+    doNothing().when(meter).sendMeterValues(ReadingContext.TRIGGER);
 
     observer.onMessageReceived(onOCPPMessage);
 
     TriggerMessageResponse response = captureTriggerMessageResponse();
-    assert response.getStatus() == TriggerMessageStatus.NotImplemented;
-    verify(webSocketClient, times(1)).pushMessage(any(TriggerMessageResponse.class));
+    assert response.getStatus() == TriggerMessageStatus.Accepted;
+
+    verify(meter, times(1)).sendMeterValues(ReadingContext.TRIGGER);
   }
 
   @Test

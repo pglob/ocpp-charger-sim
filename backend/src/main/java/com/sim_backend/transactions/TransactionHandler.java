@@ -58,8 +58,9 @@ public class TransactionHandler {
     stateMachine = charger.getStateMachine();
     client = charger.getWsClient();
     elec = charger.getElec();
-    startHandler = new StartTransactionHandler(stateMachine, client);
-    stopHandler = new StopTransactionHandler(stateMachine, client);
+    startHandler =
+        new StartTransactionHandler(stateMachine, client, charger.getMeterValueObserver());
+    stopHandler = new StopTransactionHandler(stateMachine, client, charger.getMeterValueObserver());
     idTag = null;
     transactionId = new AtomicInteger(-1);
   }

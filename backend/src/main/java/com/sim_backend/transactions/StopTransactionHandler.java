@@ -5,8 +5,10 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.OCPPTime;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.enums.ReadingContext;
 import com.sim_backend.websockets.enums.Reason;
 import com.sim_backend.websockets.messages.StopTransaction;
+import com.sim_backend.websockets.observers.MeterValuesObserver;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,11 +23,14 @@ import lombok.Getter;
 public class StopTransactionHandler {
   private ChargerStateMachine stateMachine;
   private OCPPWebSocketClient client;
+  private MeterValuesObserver meter;
 
   // Constructor
-  public StopTransactionHandler(ChargerStateMachine stateMachine, OCPPWebSocketClient client) {
+  public StopTransactionHandler(
+      ChargerStateMachine stateMachine, OCPPWebSocketClient client, MeterValuesObserver meter) {
     this.stateMachine = stateMachine;
     this.client = client;
+    this.meter = meter;
   }
 
   /**
@@ -69,6 +74,7 @@ public class StopTransactionHandler {
           new StopTransaction(idTag, transactionId.get(), meterStop, timestamp, reason);
     }
     client.pushMessage(stopTransactionMessage);
+    meter.sendMeterValues(ReadingContext.TRANSACTION_END);
 
     // No listener is used here since a Central System cannot prevent a transaction from stopping
     System.out.println("Stop Transaction Completed...");
