@@ -224,18 +224,21 @@ public class StateTest {
     testStateMachine.transition(ChargerState.BootingUp);
     testStateMachine.transition(ChargerState.Available);
     testStateMachine.transition(ChargerState.Preparing);
-    testStateMachine.transition(ChargerState.Charging);
+    assertTrue(testStateMachine.inTransaction());
 
+    testStateMachine.transition(ChargerState.Charging);
     assertTrue(testStateMachine.inTransaction());
 
     testStateMachine.transition(ChargerState.Available);
-
     assertFalse(testStateMachine.inTransaction());
   }
 
   @Test
   void testStateMachineBooted() {
-    // From Charging, transitioning to BootingUp is not allowed
+
+    testStateMachine.transition(ChargerState.PoweredOff);
+    assertFalse(testStateMachine.isBooted());
+
     testStateMachine.transition(ChargerState.BootingUp);
     assertFalse(testStateMachine.isBooted());
 
