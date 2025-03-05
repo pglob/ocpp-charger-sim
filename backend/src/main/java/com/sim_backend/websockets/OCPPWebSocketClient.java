@@ -11,6 +11,8 @@ import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
+import com.sim_backend.websockets.events.OnPushOCPPMessage;
+import com.sim_backend.websockets.events.OnPushOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPBadCallID;
 import com.sim_backend.websockets.exceptions.OCPPBadClass;
 import com.sim_backend.websockets.exceptions.OCPPBadMessage;
@@ -83,6 +85,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** Subscribe to when we receive an OCPP message. */
   @VisibleForTesting
   public final Map<Class<?>, CopyOnWriteArrayList<OnOCPPMessageListener>> onReceiveMessage =
+      new ConcurrentHashMap<>();
+
+  /** Subscribe to when we receive an OCPP message. */
+  @VisibleForTesting
+  public final Map<Class<?>, CopyOnWriteArrayList<OnPushOCPPMessageListener>> onPushMessage =
       new ConcurrentHashMap<>();
 
   /** Our message scheduler. */
@@ -476,11 +483,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
     Optional.ofNullable(this.onReceiveMessage.get(currClass))
         .ifPresent(
-            listeners -> {
-              for (OnOCPPMessageListener listener : listeners) {
-                listener.onMessageReceived(new OnOCPPMessage(message, this));
-              }
-            });
+            listeners ->
+                listeners.forEach(
+                    listener -> {
+                      listener.onMessageReceived(new OnOCPPMessage(message, this));
+                    }));
   }
 
   /**
@@ -498,6 +505,25 @@ public class OCPPWebSocketClient extends WebSocketClient {
       throw new OCPPBadClass();
     }
     this.onReceiveMessage
+        .computeIfAbsent(currClass, k -> new CopyOnWriteArrayList<>())
+        .add(onReceiveMessageListener);
+  }
+
+  /**
+   * Register a listener for when we push an OCPP Message.
+   *
+   * @param onReceiveMessageListener The Received OCPPMessage.
+   * @param currClass The class we want to set a listener for.
+   * @throws OCPPBadClass Class given was not a OCPPMessage.
+   */
+  public void onPushMessage(
+      final Class<?> currClass, final OnPushOCPPMessageListener onReceiveMessageListener)
+      throws OCPPBadClass {
+    if (!OCPPMessage.class.isAssignableFrom(currClass)) {
+      log.warn("Bad Class given to onReceiveMessage: {}", currClass);
+      throw new OCPPBadClass();
+    }
+    this.onPushMessage
         .computeIfAbsent(currClass, k -> new CopyOnWriteArrayList<>())
         .add(onReceiveMessageListener);
   }
@@ -552,6 +578,14 @@ public class OCPPWebSocketClient extends WebSocketClient {
     if (!MessageValidator.isValid(message)) {
       throw new IllegalArgumentException(MessageValidator.log_message(message));
     }
+
+    Optional.ofNullable(this.onPushMessage.get(message.getClass()))
+        .ifPresent(
+            listeners ->
+                listeners.forEach(
+                    listener -> {
+                      listener.onPush(new OnPushOCPPMessage(message, this));
+                    }));
 
     recordTxMessage(message.toJsonString()); // Record transmitted message
     return queue.pushMessage(message);

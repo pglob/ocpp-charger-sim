@@ -55,6 +55,25 @@ public class OCPPMessageError extends OCPPMessage implements Cloneable {
   }
 
   /**
+   * Creates OCPPMessageError that allows you to supply a message for to copy its id.
+   *
+   * @param message The request
+   * @param errCode ErrorCode
+   * @param errDescription Error Description
+   * @param details Extra details
+   */
+  public OCPPMessageError(
+      OCPPMessage message,
+      final ErrorCode errCode,
+      final String errDescription,
+      final JsonObject details) {
+    this.setMessageID(message.getMessageID());
+    this.errorCode = errCode;
+    this.errorDescription = errDescription;
+    this.errorDetails = details;
+  }
+
+  /**
    * Define the structure for a request message.
    *
    * @return The Generated JsonArray.
