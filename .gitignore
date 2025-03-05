@@ -4,3 +4,4 @@ backend/target/*
 backend/.idea
 backend/ocpp-charger-sim-backend.iml
 node_modules/
+frontend/licenses.json
