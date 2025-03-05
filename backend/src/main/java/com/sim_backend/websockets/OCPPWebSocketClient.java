@@ -138,8 +138,13 @@ public class OCPPWebSocketClient extends WebSocketClient {
     Gson gson = GsonUtilities.getGson();
     JsonArray array = gson.fromJson(message, JsonArray.class);
     String result;
+    String messageName;
     if (array.get(0).getAsInt() == 3) {
-      String messageName = rxRequestNames.get(rxRequestNames.size() - 1);
+      if(rxRequestNames.size() <= 0){
+        log.error("Failed to find the CallRequest Name");
+        return;
+      }
+      messageName = rxRequestNames.get(rxRequestNames.size() - 1);
       JsonElement MsgName = new JsonPrimitive(messageName);
       JsonArray newArray = insertElementAt(array, 2, MsgName);
       result = gson.toJson(newArray);
