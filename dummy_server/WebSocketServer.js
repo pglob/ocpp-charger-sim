@@ -17,6 +17,14 @@ const startWebSocketServer = (port = 9000, receivedMessages) => {
 
   const wss = new WebSocketServer({
     port: port,
+    // Only allow connections whose request URL is '/test'
+    verifyClient: (info, done) => {
+      if (info.req.url === "/test") {
+        done(true);
+      } else {
+        done(false, 403, "Forbidden");
+      }
+    },
     handleProtocols: (protocols, request) => {
       if (protocols.has("ocpp1.6")) {
         return "ocpp1.6";
@@ -71,7 +79,6 @@ const startWebSocketServer = (port = 9000, receivedMessages) => {
       }
     });
     
-
     ws.on("close", () => {
       console.log("WebSocket connection closed");
     });

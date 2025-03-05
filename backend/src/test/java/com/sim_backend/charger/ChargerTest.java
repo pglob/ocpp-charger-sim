@@ -12,6 +12,9 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.Reason;
 import java.lang.reflect.Field;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +37,62 @@ class ChargerTest {
     }
   }
 
-  /** This test verifies that calling Boot() initializes the Charger and its components */
+  /**
+   * This test verifies that the WebSocket client is created with the proper URI. The expected URI
+   * is constructed from the ConfigurationRegistry values.
+   */
+  @Test
+  void testWsClientUri() throws Exception {
+    // Prepare a container to capture the the URI
+    List<Object> wsClientConstructorArgs = new ArrayList<>();
+
+    wsClientConstruction =
+        Mockito.mockConstruction(
+            OCPPWebSocketClient.class,
+            (mock, context) -> {
+              wsClientConstructorArgs.add(context.arguments().get(0));
+              doNothing().when(mock).close(anyInt(), anyString());
+            });
+    chargerLoopConstruction =
+        Mockito.mockConstruction(
+            ChargerLoop.class,
+            (mock, context) -> {
+              doNothing().when(mock).requestStop();
+              doAnswer(
+                      invocation -> {
+                        while (!Thread.currentThread().isInterrupted()) {
+                          try {
+                            Thread.sleep(100);
+                          } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                          }
+                        }
+                        return null;
+                      })
+                  .when(mock)
+                  .run();
+            });
+
+    Charger charger = new Charger();
+    charger.boot();
+
+    // Verify that the WebSocket client was constructed
+    assertNotNull(charger.getWsClient(), "WebSocket client should be initialized");
+    assertEquals(1, wsClientConstructorArgs.size(), "One wsClient should have been constructed");
+
+    Object arg = wsClientConstructorArgs.get(0);
+    assertTrue(arg instanceof URI, "The first constructor argument should be a URI");
+    URI wsUri = (URI) arg;
+    String expectedUri = "ws://host.docker.internal:9000/test";
+    assertEquals(
+        expectedUri, wsUri.toString(), "WebSocket client URI should match the expected value");
+
+    charger.getChargerLoop().requestStop();
+    charger.getChargerThread().interrupt();
+    charger.getChargerThread().join();
+  }
+
+  /** This test verifies that calling boot() initializes the Charger and its components */
   @Test
   void testBoot() throws Exception {
     // Set up mocks for the components that would create network connections
@@ -75,6 +133,16 @@ class ChargerTest {
     assertNotNull(charger.getWsClient(), "WebSocket client should be initialized");
     assertNotNull(charger.getTransactionHandler(), "Transaction handler should be initialized");
 
+    // Check that the configuration is set and default availability is true
+    assertNotNull(charger.getConfig(), "Configuration should be initialized");
+    assertTrue(charger.isAvailable(), "Charger should be available by default");
+
+    // Verify that the state machine is transitioned to BootingUp state
+    assertEquals(
+        ChargerState.BootingUp,
+        charger.getStateMachine().getCurrentState(),
+        "State machine should be in BootingUp state after boot");
+
     // Verify that the charger loop was created
     assertNotNull(charger.getChargerLoop(), "Charger loop should be initialized");
     assertEquals(
@@ -93,7 +161,7 @@ class ChargerTest {
   }
 
   /**
-   * This test confirms that calling Reboot() shuts down the current components and then
+   * This test confirms that calling reboot() shuts down the current components and then
    * reinitializes the Charger
    */
   @Test
@@ -139,6 +207,9 @@ class ChargerTest {
     // Reboot
     charger.reboot();
     Thread.sleep(2100); // Allow time for the reboot to complete
+
+    // Verify that the old wsClient was closed with code 1001 and proper message
+    verify(oldWsClient, atLeastOnce()).close(1001, "Charger rebooting");
 
     // Verify that new component instances were created
     assertNotNull(charger.getWsClient(), "WebSocket client should be reinitialized after reboot");
