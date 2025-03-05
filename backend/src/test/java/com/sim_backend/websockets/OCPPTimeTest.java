@@ -129,7 +129,9 @@ public class OCPPTimeTest {
     when(heartbeatResponse2.getCurrentTime()).thenReturn(currentTime2);
     when(heartbeatResponse2.getMessageID())
         .thenReturn(ocppTime.heartbeat.getMessage().getMessageID());
-    this.client.getScheduler().getTime().heartbeats.add(heartbeatResponse2.getMessageID());
+    ocppTime.heartbeats.add(heartbeatResponse2.getMessageID());
+    ocppTime.lastHeartbeat = heartbeatResponse2.getMessageID();
+
     ocppTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse2, client));
 
     ZonedDateTime synchronizedTime2 = ocppTime.getSynchronizedTime();
@@ -152,6 +154,7 @@ public class OCPPTimeTest {
         .thenReturn(ocppTime.heartbeat.getMessage().getMessageID());
 
     this.ocppTime.heartbeats.add(heartbeatResponse.getMessageID());
+    this.ocppTime.lastHeartbeat = heartbeatResponse.getMessageID();
     ocppTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse, client));
 
     ZonedDateTime synchronizedTime = ocppTime.getSynchronizedTime(currentTime);
