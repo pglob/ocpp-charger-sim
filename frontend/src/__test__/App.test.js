@@ -6,7 +6,11 @@ import App from '../App';
 describe('App component', () => {
   // Ensure the backend URL is defined for testing
   beforeAll(() => {
-    process.env.REACT_APP_BACKEND_URL = 'http://localhost:8080';
+    const backendHost = window.location.hostname === 'localhost' 
+        ? 'http://localhost:8080' 
+        : `http://${window.location.hostname}:8080`;
+
+      process.env.REACT_APP_BACKEND_URL = backendHost;
   });
 
   afterEach(() => {

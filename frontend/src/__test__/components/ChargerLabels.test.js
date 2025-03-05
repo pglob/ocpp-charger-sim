@@ -3,10 +3,14 @@ import { chargerLabels, pollChargerData } from '../../components/ChargerLabels';
 import { waitFor } from '@testing-library/react';
 
 describe('pollChargerData', () => {
-  const REAL_BACKEND_URL = 'http://localhost:3000';
+  
 
   beforeAll(() => {
-    process.env.REACT_APP_BACKEND_URL = REAL_BACKEND_URL;
+    const backendHost = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3000' 
+        : `http://${window.location.hostname}:3000`;
+
+    process.env.REACT_APP_BACKEND_URL = backendHost;
   });
 
   beforeEach(() => {
