@@ -3,6 +3,9 @@ package com.sim_backend.electrical;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.StateObserver;
+import com.sim_backend.websockets.enums.ChargingRateUnit;
+import com.sim_backend.websockets.messages.MessageValidator;
+import com.sim_backend.websockets.messages.SetChargingProfile;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,6 +38,8 @@ public class ElectricalTransition implements StateObserver {
 
   /** Accumulated lifetime energy consumption in kWh across all sessions. */
   private float lifetimeEnergy = 0.0f;
+
+  private SetChargingProfile chargingProfile = null;
 
   /** Constant representing the number of seconds in an hour. Used for energy calculations. */
   private static final long SECONDS_PER_HOUR = 3600;
@@ -133,5 +138,31 @@ public class ElectricalTransition implements StateObserver {
       // Set a new start time for this charging session.
       this.initialChargeTimestamp = System.currentTimeMillis();
     }
+  }
+
+  public void setChargingProfile(SetChargingProfile chargingProfile) {
+    if (!MessageValidator.isValid(chargingProfile)) {
+      throw new IllegalArgumentException(MessageValidator.log_message(chargingProfile));
+    }
+
+    // Ensure charger is active
+    if(this.voltage == 0){
+      throw new IllegalArgumentException("ChargingProfile received but charger is not active");
+    }
+
+    double minChargingRate = chargingProfile.getCsChargingProfiles().getChargingSchedule().getMinChargingRate();
+
+    // Convert given watts value to amps
+    if(chargingProfile.getCsChargingProfiles().getChargingSchedule().getChargingRateUnit() == ChargingRateUnit.WATTS){
+      minChargingRate = minChargingRate/this.voltage;
+    }
+
+    // Ensure min charge rate does not exceed charger's max
+    if(minChargingRate > this.currentOffered){
+      throw new IllegalArgumentException("ChargingProfile minimum charging rate exceeds charger's maximum");
+    }
+
+    this.chargingProfile = chargingProfile;
+
   }
 }
