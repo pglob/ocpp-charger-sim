@@ -140,7 +140,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     String result;
     String messageName;
     if (array.get(0).getAsInt() == 3) {
-      if(rxRequestNames.size() <= 0){
+      if (rxRequestNames.size() <= 0) {
         log.error("Failed to find the CallRequest Name");
         return;
       }
