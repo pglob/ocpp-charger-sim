@@ -12,7 +12,9 @@ import com.sim_backend.websockets.observers.BootNotificationObserver;
 import com.sim_backend.websockets.observers.ChangeAvailabilityObserver;
 import com.sim_backend.websockets.observers.ChangeConfigurationObserver;
 import com.sim_backend.websockets.observers.GetConfigurationObserver;
+import com.sim_backend.websockets.observers.MeterValuesObserver;
 import com.sim_backend.websockets.observers.StatusNotificationObserver;
+import com.sim_backend.websockets.observers.TriggerMessageObserver;
 import java.net.URI;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.Getter;
@@ -52,7 +54,17 @@ public class Charger {
   /** A flag to mark if our charger should be unavailable on reboot */
   @Getter @Setter private boolean available = true;
 
+  /**
+   * The observer for sending Status Notification messages. This is class variable due to circular
+   * dependencies.
+   */
   private StatusNotificationObserver statusNotificationObserver;
+
+  /**
+   * The observer for sending Meter Values messages. This is class variable due to circular
+   * dependencies.
+   */
+  private MeterValuesObserver meterValueObserver;
 
   /** Constructs a new Charger instance */
   public Charger() {
@@ -81,7 +93,10 @@ public class Charger {
       return;
     }
     try {
+      // Create observers with circular dependencies
       statusNotificationObserver = new StatusNotificationObserver();
+      meterValueObserver = new MeterValuesObserver();
+
       // Create the Charger's components
       stateMachine = new ChargerStateMachine();
       elec = new ElectricalTransition(stateMachine);
@@ -98,6 +113,9 @@ public class Charger {
           new GetConfigurationObserver(wsClient, config);
       ChangeAvailabilityObserver changeAvailabilityObserver =
           new ChangeAvailabilityObserver(wsClient, this);
+      TriggerMessageObserver triggerMessageObserver =
+          new TriggerMessageObserver(wsClient, stateMachine, meterValueObserver);
+      meterValueObserver.instantiate(wsClient, stateMachine, transactionHandler, elec, config);
       statusNotificationObserver.setClient(wsClient);
 
       // Add Observers
@@ -144,6 +162,7 @@ public class Charger {
       wsClient = null;
       transactionHandler = null;
       stateMachine = null;
+      elec = null;
 
       // Wait a bit before restarting to simulate power cycling
       try {

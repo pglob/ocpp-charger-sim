@@ -11,5 +11,6 @@
     "transactionId": 5
   },
   "StopTransaction": { "idTagInfo": { "status": "Accepted" } },
-  "StatusNotification": {}
+  "StatusNotification": {},
+  "MeterValues": {}
 }
