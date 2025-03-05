@@ -70,7 +70,7 @@ public class Charger {
   /** Constructs a new Charger instance */
   public Charger() {
     // TODO: Get central system URI from frontend or command line
-    this.config = new ConfigurationRegistry("temptag", "ws://host.docker.internal:9000");
+    this.config = new ConfigurationRegistry("test", "ws://host.docker.internal:9000");
   }
 
   /**
@@ -104,7 +104,8 @@ public class Charger {
 
       wsClient =
           new OCPPWebSocketClient(
-              URI.create(config.getCentralSystemUrl()), statusNotificationObserver);
+              URI.create(config.getCentralSystemUrl() + "/" + config.getIdTag()),
+              statusNotificationObserver);
       transactionHandler = new TransactionHandler(this);
       elec.setChargingProfileHandler(new ChargingProfileHandler(transactionHandler, wsClient));
 
