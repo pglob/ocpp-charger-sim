@@ -43,7 +43,7 @@ public class OCPPTime implements AutoCloseable {
   @VisibleForTesting Set<String> heartbeats = ConcurrentHashMap.newKeySet();
 
   /** Our last sent heartbeat. */
-  String lastHeartbeat = "";
+  @VisibleForTesting String lastHeartbeat = "";
 
   @VisibleForTesting
   final OnPushOCPPMessageListener pushListener =
