@@ -4,19 +4,19 @@ import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.types.OCPPMessage;
 import lombok.Getter;
 
-/** An event for when we receive an OCPP message. */
+/** An event for when we push an OCPP message. */
 @Getter
 public class OnPushOCPPMessage {
-  /** The received ocpp message. */
+  /** The pushed ocpp message. */
   private final OCPPMessage message;
 
-  /** The websocket client we received this message from. */
+  /** The websocket client we pushed this message from. */
   private final OCPPWebSocketClient client;
 
   /**
-   * Create an OCPPMessage event.
+   * Create a OnPushOCPPMessage event.
    *
-   * @param inMessage The received message.
+   * @param inMessage The pushed message.
    * @param inClient The client we received this message on.
    */
   public OnPushOCPPMessage(final OCPPMessage inMessage, final OCPPWebSocketClient inClient) {
