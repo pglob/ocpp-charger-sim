@@ -6,6 +6,9 @@ import com.sim_backend.websockets.enums.ChargingProfileKind;
 import com.sim_backend.websockets.enums.ChargingProfilePurpose;
 import com.sim_backend.websockets.enums.ChargingRateUnit;
 import com.sim_backend.websockets.enums.RecurrencyKind;
+import com.sim_backend.websockets.types.ChargingProfile;
+import com.sim_backend.websockets.types.ChargingSchedule;
+import com.sim_backend.websockets.types.ChargingSchedulePeriod;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -15,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class SetChargingProfileTest {
-
   private Validator validator;
 
   @BeforeEach
@@ -28,12 +30,12 @@ public class SetChargingProfileTest {
   @Test
   public void testSetChargingProfile_ValidData() {
     // Create a valid ChargingSchedulePeriod
-    SetChargingProfile.ChargingSchedulePeriod period =
-        new SetChargingProfile.ChargingSchedulePeriod(0, 5000, 3);
+    ChargingSchedulePeriod period = new ChargingSchedulePeriod(0, 5000, 3);
 
     // Create a valid ChargingSchedule
-    SetChargingProfile.ChargingSchedule schedule =
-        new SetChargingProfile.ChargingSchedule(
+
+    ChargingSchedule schedule =
+        new ChargingSchedule(
             3600, // duration in seconds
             ZonedDateTime.now(),
             ChargingRateUnit.WATTS, // Charging rate in watts
@@ -42,8 +44,9 @@ public class SetChargingProfileTest {
             );
 
     // Create a valid ChargingProfile
-    SetChargingProfile.ChargingProfile profile =
-        new SetChargingProfile.ChargingProfile(
+
+    ChargingProfile profile =
+        new ChargingProfile(
             1, // chargingProfileId
             1234, // transactionId
             0, // stackLevel
@@ -54,17 +57,14 @@ public class SetChargingProfileTest {
             ZonedDateTime.now().plusDays(1), // validTo
             schedule // chargingSchedule
             );
-
     // Create the SetChargingProfile request
     SetChargingProfile setChargingProfile =
         new SetChargingProfile(
             1, // connectorId
             profile // csChargingProfiles
             );
-
     // Validate the SetChargingProfile object
     var violations = validator.validate(setChargingProfile);
-
     // Assert that there are no validation errors
     assertTrue(violations.isEmpty(), "Expected no validation violations");
   }
@@ -77,10 +77,8 @@ public class SetChargingProfileTest {
             1, // connectorId
             null // csChargingProfiles is null (invalid)
             );
-
     // Validate the SetChargingProfile object
     var violations = validator.validate(setChargingProfile);
-
     // Assert that the validation finds the missing charging profile
     assertFalse(
         violations.isEmpty(), "Expected validation violations due to missing csChargingProfiles");
