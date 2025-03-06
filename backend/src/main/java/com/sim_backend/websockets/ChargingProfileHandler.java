@@ -15,6 +15,7 @@ public class ChargingProfileHandler {
   TransactionHandler transactionHandler;
   OCPPWebSocketClient client;
 
+  /** A record representing a charging profile along with its stack level for ordering purposes. */
   public record ChargingTuple(ChargingProfile profile, int stackLevel)
       implements Comparable<ChargingTuple> {
     @Override
@@ -24,6 +25,7 @@ public class ChargingProfileHandler {
     }
   }
 
+  /** A record representing a charging limit and its corresponding stack level. */
   public record StackLimit(double limit, int stackLevel) implements Comparable<StackLimit> {
     @Override
     public int compareTo(@NotNull StackLimit o) {
@@ -32,6 +34,7 @@ public class ChargingProfileHandler {
     }
   }
 
+  // Lists to store charging profiles based on their purpose
   List<ChargingTuple> chargingTuplesMax = new ArrayList<>();
   List<ChargingTuple> chargingTuplesTxDefault = new ArrayList<>();
   List<ChargingTuple> chargingTuplesTx = new ArrayList<>();
@@ -41,10 +44,13 @@ public class ChargingProfileHandler {
     this.client = client;
   }
 
+  /**
+   * Adds a new charging profile to the appropriate list based on its purpose. Ensures profiles with
+   * the same stack level and purpose do not duplicate.
+   */
   public void addChargingProfile(ChargingProfile chargingProfile) {
-
     ChargingProfilePurpose purpose = chargingProfile.getChargingProfilePurpose();
-    List<ChargingTuple> chargingTuples = new ArrayList<>();
+    List<ChargingTuple> chargingTuples;
 
     if (purpose.equals(ChargingProfilePurpose.CHARGE_POINT_MAX_PROFILE)) {
       chargingTuples = chargingTuplesMax;
@@ -54,14 +60,12 @@ public class ChargingProfileHandler {
       chargingTuples = chargingTuplesTx;
     }
 
-    ChargingTuple chargingTuple =
-        new ChargingTuple(chargingProfile, chargingProfile.getStackLevel());
     removeDuplicate(chargingProfile, chargingTuples);
-
     chargingTuples.add(new ChargingTuple(chargingProfile, chargingProfile.getStackLevel()));
     Collections.sort(chargingTuples);
   }
 
+  /** Removes duplicate charging profiles with the same stack level and purpose. */
   public void removeDuplicate(ChargingProfile chargingProfile, List<ChargingTuple> chargingTuples) {
     for (int i = 0; i < chargingTuples.size(); i++) {
       if (chargingTuples
@@ -71,11 +75,12 @@ public class ChargingProfileHandler {
               .equals(chargingProfile.getChargingProfilePurpose())
           && chargingTuples.get(i).stackLevel == chargingProfile.getStackLevel()) {
         chargingTuples.remove(i);
-        i--;
+        i--; // Adjust index after removal
       }
     }
   }
 
+  /** Determines the current charging limit based on active profiles and schedules. */
   private StackLimit getCurrentLimit(
       long initialTimestamp, int voltage, List<ChargingTuple> chargingTuples) {
     ZonedDateTime time = client.getScheduler().getTime().getSynchronizedTime();
@@ -84,12 +89,14 @@ public class ChargingProfileHandler {
     for (int i = 0; i < chargingTuples.size(); i++) {
       ChargingSchedule schedule = chargingTuples.get(i).profile.getChargingSchedule();
 
+      // Remove expired profiles
       if (time.isAfter(chargingTuples.get(i).profile.getValidTo())) {
         chargingTuples.remove(i);
         i--;
         continue;
       }
 
+      // Skip profiles not yet valid
       if (time.isBefore(chargingTuples.get(i).profile.getValidFrom())) {
         continue;
       }
@@ -98,6 +105,7 @@ public class ChargingProfileHandler {
         continue;
       }
 
+      // Ensure the profile belongs to the active transaction
       if (chargingTuples
           .get(i)
           .profile
@@ -114,23 +122,18 @@ public class ChargingProfileHandler {
               ? schedule.getStartSchedule().toInstant().toEpochMilli()
               : initialTimestamp;
       long convertedTime = time.toInstant().toEpochMilli();
+
       if (schedule.getDuration() != null
           && startReference + schedule.getDuration() < convertedTime) {
         continue;
       }
 
+      // Find the current applicable limit
       for (int j = 0; j < schedule.getChargingSchedulePeriod().size(); j++) {
         long startPeriod =
             schedule.getChargingSchedulePeriod().get(j).getStartPeriod() * 1000L + startReference;
         if (startReference + startPeriod < convertedTime) {
-          limit =
-              chargingTuples
-                  .get(i)
-                  .profile
-                  .getChargingSchedule()
-                  .getChargingSchedulePeriod()
-                  .get(j)
-                  .getLimit();
+          limit = schedule.getChargingSchedulePeriod().get(j).getLimit();
         }
 
         if (startReference + startPeriod > convertedTime) {
@@ -138,25 +141,21 @@ public class ChargingProfileHandler {
         }
       }
 
-      if (limit != -1
-          && chargingTuples.get(i).profile.getChargingSchedule().getChargingRateUnit()
-              == ChargingRateUnit.WATTS) {
-        return new StackLimit(limit / voltage, chargingTuples.get(i).profile.getStackLevel());
+      if (limit != -1 && schedule.getChargingRateUnit() == ChargingRateUnit.WATTS) {
+        return new StackLimit(limit / voltage, chargingTuples.get(i).stackLevel);
       }
     }
 
     return new StackLimit(limit, -1);
   }
 
+  /** Computes the lowest applicable charging limit across different profile types. */
   public double getCurrentLimit(long initialTimestamp, int voltage) {
     StackLimit max = getCurrentLimit(initialTimestamp, voltage, chargingTuplesMax);
     StackLimit txDefault = getCurrentLimit(initialTimestamp, voltage, chargingTuplesTxDefault);
     StackLimit txProfile = getCurrentLimit(initialTimestamp, voltage, chargingTuplesTx);
 
-    List<StackLimit> tuples = new ArrayList<>();
-    tuples.add(max);
-    tuples.add(txDefault);
-    tuples.add(txProfile);
+    List<StackLimit> tuples = new ArrayList<>(List.of(max, txDefault, txProfile));
     Collections.sort(tuples);
     List<StackLimit> highestStackTuples = new ArrayList<>();
 
@@ -169,9 +168,9 @@ public class ChargingProfileHandler {
     }
 
     double minimumLimit = -1;
-    for (int i = 0; i < highestStackTuples.size(); i++) {
-      if (highestStackTuples.get(i).limit != -1 && highestStackTuples.get(i).limit < minimumLimit) {
-        minimumLimit = highestStackTuples.get(i).limit;
+    for (StackLimit highestStackTuple : highestStackTuples) {
+      if (highestStackTuple.limit != -1 && highestStackTuple.limit < minimumLimit) {
+        minimumLimit = highestStackTuple.limit;
       }
     }
 
