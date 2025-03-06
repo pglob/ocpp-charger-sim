@@ -3,8 +3,11 @@ package com.sim_backend.electrical;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.StateObserver;
+import com.sim_backend.transactions.TransactionHandler;
+import com.sim_backend.websockets.ChargingProfileHandler;
+import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.messages.SetChargingProfile;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * This class represents the electrical transition of a charging process, including the charging
@@ -12,7 +15,6 @@ import lombok.NoArgsConstructor;
  * power usage and energy consumption in kilowatt-hours (kWh).
  */
 @Getter
-@NoArgsConstructor
 public class ElectricalTransition implements StateObserver {
 
   /** The charger's voltage in volts. */
@@ -20,6 +22,8 @@ public class ElectricalTransition implements StateObserver {
 
   /** The voltage the charger is connected to. 240V assumes a split phase residential circuit. */
   private final int nominalVoltage = 240;
+
+  boolean isCharging = false;
 
   /** The maximum current offered by the charger in amps. */
   private int currentOffered = 0;
@@ -36,6 +40,14 @@ public class ElectricalTransition implements StateObserver {
   /** Accumulated lifetime energy consumption in kWh across all sessions. */
   private float lifetimeEnergy = 0.0f;
 
+  private ChargingProfileHandler chargingProfileHandler;
+
+  private SetChargingProfile chargingProfile;
+
+  private TransactionHandler transactionHandler;
+
+  private OCPPWebSocketClient client;
+
   /** Constant representing the number of seconds in an hour. Used for energy calculations. */
   private static final long SECONDS_PER_HOUR = 3600;
 
@@ -45,8 +57,13 @@ public class ElectricalTransition implements StateObserver {
   /** Constant representing the number of milliseconds in a second. Used for energy calculations. */
   private static final long MILLISECONDS_PER_SECOND = 1000;
 
-  public ElectricalTransition(ChargerStateMachine stateMachine) {
+  public ElectricalTransition(
+      ChargerStateMachine stateMachine,
+      TransactionHandler transactionHandler,
+      OCPPWebSocketClient client) {
     stateMachine.addObserver(this);
+    this.transactionHandler = transactionHandler;
+    chargingProfileHandler = new ChargingProfileHandler(transactionHandler, client);
   }
 
   /**
@@ -55,7 +72,7 @@ public class ElectricalTransition implements StateObserver {
    * @return the maximum power offered in kilowatts (kW).
    */
   public float getPowerOffered() {
-    return (float) (currentOffered * voltage) / 1000;
+    return (float) (getCurrentOffered() * voltage) / 1000;
   }
 
   /**
@@ -64,7 +81,7 @@ public class ElectricalTransition implements StateObserver {
    * @return the actual power consumed in kilowatts (kW).
    */
   public float getPowerActiveImport() {
-    return (float) (currentImport * voltage) / 1000;
+    return (float) (getCurrentImport() * voltage) / 1000;
   }
 
   /**
@@ -102,6 +119,18 @@ public class ElectricalTransition implements StateObserver {
     return lifetimeEnergy + currentSessionEnergy;
   }
 
+  public double getCurrentOffered() {
+    if (isCharging) {
+      double limit = chargingProfileHandler.getCurrentLimit(initialChargeTimestamp, voltage);
+      return limit == -1 ? this.maxCurrent : limit;
+    }
+    return 0;
+  }
+
+  public double getCurrentImport() {
+    return getCurrentOffered();
+  }
+
   /**
    * Updates the electrical values based on the given charger state. When transitioning from
    * Charging to a non-Charging state, the energy consumed in the current session is accumulated
@@ -124,9 +153,12 @@ public class ElectricalTransition implements StateObserver {
       this.currentOffered = 0;
       this.currentImport = 0;
       this.initialChargeTimestamp = 0;
+      isCharging = false;
+
     }
     // State is Charging, proceed to set electrical values for a new session.
     else {
+      isCharging = true;
       this.voltage = this.nominalVoltage;
       this.currentOffered = this.maxCurrent;
       this.currentImport = this.currentOffered;
