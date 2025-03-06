@@ -93,13 +93,13 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public static final Map<String, String> headers = Map.of("Sec-WebSocket-Protocol", "ocpp1.6");
 
   /** List to store transmitted messages. */
-  private final List<String> txMessages = new CopyOnWriteArrayList<>();
+  public final List<String> txMessages = new CopyOnWriteArrayList<>();
 
   /** List to store received messages. */
-  private final List<String> rxMessages = new CopyOnWriteArrayList<>();
+  public final List<String> rxMessages = new CopyOnWriteArrayList<>();
 
   /** List to store Rx CallRequest message names. */
-  private final List<String> rxRequestNames = new CopyOnWriteArrayList<>();
+  public final List<String> rxRequestNames = new CopyOnWriteArrayList<>();
 
   /**
    * Inserts a JsonElement at the specified index in the JsonArray.
@@ -135,8 +135,25 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message The transmitted message.
    */
   public void recordTxMessage(String message) {
+    if (message == null) {
+      this.pushCallError(ErrorCode.FormatViolation, "Sent null message");
+      log.error("Sent null message");
+      return;
+    }
+
     Gson gson = GsonUtilities.getGson();
     JsonArray array = gson.fromJson(message, JsonArray.class);
+    try {
+      if (array == null) {
+        this.pushCallError(ErrorCode.FormatViolation, "Failed to parse message");
+        log.error("Failed to parse message: " + message);
+        return;
+      }
+    } catch (JsonSyntaxException e) {
+      log.error("Invalid JSON syntax in message: " + message, e);
+      return;
+    }
+
     String result;
     String messageName;
     if (array.get(0).getAsInt() == 3) {
@@ -165,8 +182,29 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message The received message.
    */
   public void recordRxMessage(String message, String messageName) {
+    if (message == null) {
+      this.pushCallError(ErrorCode.FormatViolation, "Received null message");
+      log.error("Received null message");
+      return;
+    }
+
+    if (messageName == null) {
+      messageName = "Unknown";
+    }
+
     Gson gson = GsonUtilities.getGson();
     JsonArray array = gson.fromJson(message, JsonArray.class);
+    try {
+      if (array == null) {
+        this.pushCallError(ErrorCode.FormatViolation, "Failed to parse message");
+        log.error("Failed to parse message: " + message);
+        return;
+      }
+    } catch (JsonSyntaxException e) {
+      log.error("Invalid JSON syntax in message: " + message, e);
+      return;
+    }
+
     String result;
     if (array.get(0).getAsInt() == 2) { // remove the extra Message name
       array.remove(NAME_INDEX);

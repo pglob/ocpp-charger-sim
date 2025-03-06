@@ -849,4 +849,52 @@ public class OCPPWebSocketClientTest {
     verify(listener, times(1)).onTimeout();
     assertTrue(beat.isErrored());
   }
+
+  @Test
+  public void testrecordTxMessage() throws Exception {
+    client.rxRequestNames.add("GetConfiguration");
+    String message =
+        "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
+    client.recordTxMessage(message);
+    assertEquals(1, client.txMessages.size());
+    assertTrue(client.txMessages.get(0).contains("GetConfiguration"));
+    assertTrue(client.txMessages.get(0).contains("configurationKey"));
+
+    client.txMessages.clear();
+    doAnswer(invocation -> null).when(client).send(anyString());
+    client.recordTxMessage(null);
+    OCPPMessageError error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.FormatViolation, error.getErrorCode());
+    assertEquals("Sent null message", error.getErrorDescription());
+
+    client.txMessages.clear();
+    client.rxRequestNames.clear();
+    client.recordTxMessage(message);
+    assertEquals(0, client.txMessages.size());
+  }
+
+  @Test
+  public void testrecordRxMessage() throws Exception {
+    String message = "[2,\"12345\",\"GetConfiguration\",{\"key\":[\"MeterValueSampleInterval\"]}]";
+    String messageName = "GetConfiguration";
+
+    client.recordRxMessage(message, messageName);
+    assertEquals(1, client.rxMessages.size());
+    assertTrue(client.rxMessages.get(0).contains("GetConfiguration"));
+    assertTrue(client.rxMessages.get(0).contains("MeterValueSampleInterval"));
+
+    client.rxMessages.clear();
+    doAnswer(invocation -> null).when(client).send(anyString());
+    client.recordRxMessage(null, messageName);
+    OCPPMessageError error = (OCPPMessageError) client.popMessage();
+    assertNotNull(error);
+    assertEquals(ErrorCode.FormatViolation, error.getErrorCode());
+    assertEquals("Received null message", error.getErrorDescription());
+
+    messageName = null;
+    client.rxMessages.clear();
+    client.recordRxMessage(message, messageName);
+    assertEquals(1, client.rxMessages.size());
+  }
 }
