@@ -3,11 +3,11 @@ package com.sim_backend.electrical;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.StateObserver;
-import com.sim_backend.websockets.enums.ChargingRateUnit;
-import com.sim_backend.websockets.messages.MessageValidator;
+import com.sim_backend.transactions.TransactionHandler;
+import com.sim_backend.websockets.ChargingProfileHandler;
+import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.messages.SetChargingProfile;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * This class represents the electrical transition of a charging process, including the charging
@@ -15,20 +15,17 @@ import lombok.NoArgsConstructor;
  * power usage and energy consumption in kilowatt-hours (kWh).
  */
 @Getter
-@NoArgsConstructor
 public class ElectricalTransition implements StateObserver {
 
   /** The charger's voltage in volts. */
   private int voltage = 0;
 
+  boolean isCharging = false;
+
+  ChargingProfileHandler chargingProfileHandler;
+
   /** The voltage the charger is connected to. 240V assumes a split phase residential circuit. */
   private final int nominalVoltage = 240;
-
-  /** The maximum current offered by the charger in amps. */
-  private int currentOffered = 0;
-
-  /** The actual current drawn from the charger by the EV. */
-  private int currentImport = 0;
 
   /** The maximum current the charger is rated for. */
   private final int maxCurrent = 40;
@@ -39,7 +36,11 @@ public class ElectricalTransition implements StateObserver {
   /** Accumulated lifetime energy consumption in kWh across all sessions. */
   private float lifetimeEnergy = 0.0f;
 
-  private SetChargingProfile chargingProfile = null;
+  private SetChargingProfile chargingProfile;
+
+  private TransactionHandler transactionHandler;
+
+  private OCPPWebSocketClient client;
 
   /** Constant representing the number of seconds in an hour. Used for energy calculations. */
   private static final long SECONDS_PER_HOUR = 3600;
@@ -50,8 +51,13 @@ public class ElectricalTransition implements StateObserver {
   /** Constant representing the number of milliseconds in a second. Used for energy calculations. */
   private static final long MILLISECONDS_PER_SECOND = 1000;
 
-  public ElectricalTransition(ChargerStateMachine stateMachine) {
+  public ElectricalTransition(
+      ChargerStateMachine stateMachine,
+      TransactionHandler transactionHandler,
+      OCPPWebSocketClient client) {
     stateMachine.addObserver(this);
+    this.transactionHandler = transactionHandler;
+    chargingProfileHandler = new ChargingProfileHandler(transactionHandler, client);
   }
 
   /**
@@ -60,7 +66,7 @@ public class ElectricalTransition implements StateObserver {
    * @return the maximum power offered in kilowatts (kW).
    */
   public float getPowerOffered() {
-    return (float) (currentOffered * voltage) / 1000;
+    return (float) (getCurrentOffered() * voltage) / 1000;
   }
 
   /**
@@ -69,7 +75,7 @@ public class ElectricalTransition implements StateObserver {
    * @return the actual power consumed in kilowatts (kW).
    */
   public float getPowerActiveImport() {
-    return (float) (currentImport * voltage) / 1000;
+    return (float) (getCurrentImport() * voltage) / 1000;
   }
 
   /**
@@ -126,43 +132,28 @@ public class ElectricalTransition implements StateObserver {
       }
       // Reset the current session values.
       this.voltage = 0;
-      this.currentOffered = 0;
-      this.currentImport = 0;
       this.initialChargeTimestamp = 0;
+      isCharging = false;
     }
     // State is Charging, proceed to set electrical values for a new session.
     else {
+      isCharging = true;
       this.voltage = this.nominalVoltage;
-      this.currentOffered = this.maxCurrent;
-      this.currentImport = this.currentOffered;
       // Set a new start time for this charging session.
       this.initialChargeTimestamp = System.currentTimeMillis();
     }
   }
 
-  public void setChargingProfile(SetChargingProfile chargingProfile) {
-    if (!MessageValidator.isValid(chargingProfile)) {
-      throw new IllegalArgumentException(MessageValidator.log_message(chargingProfile));
+  public double getCurrentOffered() {
+    if (isCharging) {
+      double limit = chargingProfileHandler.getCurrentLimit(initialChargeTimestamp, voltage);
+      return limit == -1 ? this.maxCurrent : limit;
     }
 
-    // Ensure charger is active
-    if(this.voltage == 0){
-      throw new IllegalArgumentException("ChargingProfile received but charger is not active");
-    }
+    return 0;
+  }
 
-    double minChargingRate = chargingProfile.getCsChargingProfiles().getChargingSchedule().getMinChargingRate();
-
-    // Convert given watts value to amps
-    if(chargingProfile.getCsChargingProfiles().getChargingSchedule().getChargingRateUnit() == ChargingRateUnit.WATTS){
-      minChargingRate = minChargingRate/this.voltage;
-    }
-
-    // Ensure min charge rate does not exceed charger's max
-    if(minChargingRate > this.currentOffered){
-      throw new IllegalArgumentException("ChargingProfile minimum charging rate exceeds charger's maximum");
-    }
-
-    this.chargingProfile = chargingProfile;
-
+  public double getCurrentImport() {
+    return getCurrentOffered();
   }
 }

@@ -254,13 +254,13 @@ class MessageControllerTest {
   @Test
   void testCurrentImport() {
     // Arrange
-    when(mockElec.getCurrentImport()).thenReturn(40);
+    when(mockElec.getCurrentImport()).thenReturn(40.0);
 
     // Act
     messageController.currentImport(mockContext);
 
     // Assert
-    verify(mockContext).result("40");
+    verify(mockContext).result("40.0");
   }
 
   @Test

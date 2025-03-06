@@ -6,6 +6,9 @@ import com.sim_backend.websockets.enums.ChargingProfileKind;
 import com.sim_backend.websockets.enums.ChargingProfilePurpose;
 import com.sim_backend.websockets.enums.ChargingRateUnit;
 import com.sim_backend.websockets.enums.RecurrencyKind;
+import com.sim_backend.websockets.types.ChargingProfile;
+import com.sim_backend.websockets.types.ChargingSchedule;
+import com.sim_backend.websockets.types.ChargingSchedulePeriod;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -28,12 +31,11 @@ public class SetChargingProfileTest {
   @Test
   public void testSetChargingProfile_ValidData() {
     // Create a valid ChargingSchedulePeriod
-    SetChargingProfile.ChargingSchedulePeriod period =
-        new SetChargingProfile.ChargingSchedulePeriod(0, 5000, 3);
+    ChargingSchedulePeriod period = new ChargingSchedulePeriod(0, 5000, 3);
 
     // Create a valid ChargingSchedule
-    SetChargingProfile.ChargingSchedule schedule =
-        new SetChargingProfile.ChargingSchedule(
+    ChargingSchedule schedule =
+        new ChargingSchedule(
             3600, // duration in seconds
             ZonedDateTime.now(),
             ChargingRateUnit.WATTS, // Charging rate in watts
@@ -42,8 +44,8 @@ public class SetChargingProfileTest {
             );
 
     // Create a valid ChargingProfile
-    SetChargingProfile.ChargingProfile profile =
-        new SetChargingProfile.ChargingProfile(
+    ChargingProfile profile =
+        new ChargingProfile(
             1, // chargingProfileId
             1234, // transactionId
             0, // stackLevel
