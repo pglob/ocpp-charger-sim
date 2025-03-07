@@ -859,7 +859,6 @@ public class OCPPWebSocketClientTest {
     assertTrue(client.getSentMessages().get(0).contains("GetConfiguration"));
     assertTrue(client.getSentMessages().get(0).contains("configurationKey"));
     assertEquals(1, client.getSentMessages().size());
-
   }
 
   @Test
@@ -870,7 +869,6 @@ public class OCPPWebSocketClientTest {
     client.recordTxMessage(message);
     assertEquals(0, client.getSentMessages().size());
   }
-
 
   @Test
   public void testrecordRxMessage_case_1() throws Exception {

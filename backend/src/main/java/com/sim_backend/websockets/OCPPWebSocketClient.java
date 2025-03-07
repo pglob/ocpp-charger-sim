@@ -236,7 +236,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
     return rxMessages;
   }
 
-
   /**
    * Create an OCPP WebSocket Client.
    *
