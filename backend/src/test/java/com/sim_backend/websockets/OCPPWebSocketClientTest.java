@@ -851,50 +851,43 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testrecordTxMessage() throws Exception {
-    client.rxRequestNames.add("GetConfiguration");
+  public void testrecordTxMessage_case1() throws Exception {
     String message =
         "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
+    client.rxRequestName = "GetConfiguration";
     client.recordTxMessage(message);
-    assertEquals(1, client.txMessages.size());
-    assertTrue(client.txMessages.get(0).contains("GetConfiguration"));
-    assertTrue(client.txMessages.get(0).contains("configurationKey"));
+    assertTrue(client.getSentMessages().get(0).contains("GetConfiguration"));
+    assertTrue(client.getSentMessages().get(0).contains("configurationKey"));
+    assertEquals(1, client.getSentMessages().size());
 
-    client.txMessages.clear();
-    doAnswer(invocation -> null).when(client).send(anyString());
-    client.recordTxMessage(null);
-    OCPPMessageError error = (OCPPMessageError) client.popMessage();
-    assertNotNull(error);
-    assertEquals(ErrorCode.FormatViolation, error.getErrorCode());
-    assertEquals("Sent null message", error.getErrorDescription());
-
-    client.txMessages.clear();
-    client.rxRequestNames.clear();
-    client.recordTxMessage(message);
-    assertEquals(0, client.txMessages.size());
   }
 
   @Test
-  public void testrecordRxMessage() throws Exception {
+  public void testrecordTxMessage_case2() throws Exception {
+    String message =
+        "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
+    client.rxRequestName = null;
+    client.recordTxMessage(message);
+    assertEquals(0, client.getSentMessages().size());
+  }
+
+
+  @Test
+  public void testrecordRxMessage_case_1() throws Exception {
     String message = "[2,\"12345\",\"GetConfiguration\",{\"key\":[\"MeterValueSampleInterval\"]}]";
     String messageName = "GetConfiguration";
 
     client.recordRxMessage(message, messageName);
-    assertEquals(1, client.rxMessages.size());
-    assertTrue(client.rxMessages.get(0).contains("GetConfiguration"));
-    assertTrue(client.rxMessages.get(0).contains("MeterValueSampleInterval"));
+    assertEquals(1, client.getReceivedMessages().size());
+    assertTrue(client.getReceivedMessages().get(0).contains("GetConfiguration"));
+    assertTrue(client.getReceivedMessages().get(0).contains("MeterValueSampleInterval"));
+  }
 
-    client.rxMessages.clear();
-    doAnswer(invocation -> null).when(client).send(anyString());
-    client.recordRxMessage(null, messageName);
-    OCPPMessageError error = (OCPPMessageError) client.popMessage();
-    assertNotNull(error);
-    assertEquals(ErrorCode.FormatViolation, error.getErrorCode());
-    assertEquals("Received null message", error.getErrorDescription());
-
-    messageName = null;
-    client.rxMessages.clear();
+  @Test
+  public void testrecordRxMessage_case2() throws Exception {
+    String message = null;
+    String messageName = "GetConfiguration";
     client.recordRxMessage(message, messageName);
-    assertEquals(1, client.rxMessages.size());
+    assertEquals(0, client.getReceivedMessages().size());
   }
 }
