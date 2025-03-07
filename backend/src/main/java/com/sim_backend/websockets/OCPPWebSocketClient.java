@@ -93,13 +93,13 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public static final Map<String, String> headers = Map.of("Sec-WebSocket-Protocol", "ocpp1.6");
 
   /** List to store transmitted messages. */
-  public final List<String> txMessages = new CopyOnWriteArrayList<>();
+  private final List<String> txMessages = new CopyOnWriteArrayList<>();
 
   /** List to store received messages. */
-  public final List<String> rxMessages = new CopyOnWriteArrayList<>();
+  private final List<String> rxMessages = new CopyOnWriteArrayList<>();
 
-  /** List to store Rx CallRequest message names. */
-  public final List<String> rxRequestNames = new CopyOnWriteArrayList<>();
+  /** Store Rx CallRequest message name. */
+  public String rxRequestName = null;
 
   /**
    * Inserts a JsonElement at the specified index in the JsonArray.
@@ -136,7 +136,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   public void recordTxMessage(String message) {
     if (message == null) {
-      this.pushCallError(ErrorCode.FormatViolation, "Sent null message");
       log.error("Sent null message");
       return;
     }
@@ -145,7 +144,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
     JsonArray array = gson.fromJson(message, JsonArray.class);
     try {
       if (array == null) {
-        this.pushCallError(ErrorCode.FormatViolation, "Failed to parse message");
         log.error("Failed to parse message: " + message);
         return;
       }
@@ -157,11 +155,11 @@ public class OCPPWebSocketClient extends WebSocketClient {
     String result;
     String messageName;
     if (array.get(0).getAsInt() == 3) {
-      if (rxRequestNames.size() <= 0) {
+      if (rxRequestName == null) {
         log.error("Failed to find the CallRequest Name");
         return;
       }
-      messageName = rxRequestNames.get(rxRequestNames.size() - 1);
+      messageName = rxRequestName;
       JsonElement MsgName = new JsonPrimitive(messageName);
       JsonArray newArray = insertElementAt(array, 2, MsgName);
       result = gson.toJson(newArray);
@@ -183,7 +181,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
    */
   public void recordRxMessage(String message, String messageName) {
     if (message == null) {
-      this.pushCallError(ErrorCode.FormatViolation, "Received null message");
       log.error("Received null message");
       return;
     }
@@ -196,7 +193,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
     JsonArray array = gson.fromJson(message, JsonArray.class);
     try {
       if (array == null) {
-        this.pushCallError(ErrorCode.FormatViolation, "Failed to parse message");
         log.error("Failed to parse message: " + message);
         return;
       }
@@ -239,6 +235,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
   public List<String> getReceivedMessages() {
     return rxMessages;
   }
+
 
   /**
    * Create an OCPP WebSocket Client.
@@ -343,7 +340,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
         case OCPPMessage.CALL_ID_REQUEST -> {
           results = this.parseOCPPRequest(json, msgId, array);
           String RequestName = array.get(NAME_INDEX).getAsString();
-          rxRequestNames.add(RequestName);
+          rxRequestName = RequestName;
         }
         case OCPPMessage.CALL_ID_RESPONSE -> results = this.parseOCPPResponse(json, msgId, array);
         case OCPPMessage.CALL_ID_ERROR -> {
