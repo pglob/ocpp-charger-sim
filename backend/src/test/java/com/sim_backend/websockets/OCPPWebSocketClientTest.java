@@ -851,7 +851,7 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testrecordTxMessage_case1() throws Exception {
+  public void testrecordTxMessage() throws Exception {
     String message =
         "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
     client.rxRequestName = "GetConfiguration";
@@ -862,7 +862,7 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testrecordTxMessage_case2() throws Exception {
+  public void testrecordTxMessage_rxRequestName_null() throws Exception {
     String message =
         "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
     client.rxRequestName = null;
@@ -871,7 +871,7 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testrecordRxMessage_case_1() throws Exception {
+  public void testrecordRxMessage() throws Exception {
     String message = "[2,\"12345\",\"GetConfiguration\",{\"key\":[\"MeterValueSampleInterval\"]}]";
     String messageName = "GetConfiguration";
 
@@ -882,7 +882,7 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testrecordRxMessage_case2() throws Exception {
+  public void testrecordRxMessage_WithemptyMsg() throws Exception {
     String message = null;
     String messageName = "GetConfiguration";
     client.recordRxMessage(message, messageName);
