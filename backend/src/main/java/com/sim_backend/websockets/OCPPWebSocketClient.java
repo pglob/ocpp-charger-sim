@@ -142,13 +142,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
     Gson gson = GsonUtilities.getGson();
     JsonArray array = gson.fromJson(message, JsonArray.class);
-    try {
-      if (array == null) {
-        log.error("Failed to parse message: " + message);
-        return;
-      }
-    } catch (JsonSyntaxException e) {
-      log.error("Invalid JSON syntax in message: " + message, e);
+    if (array == null) {
+      log.error("Failed to parse message: " + message);
       return;
     }
 
@@ -191,13 +186,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
     Gson gson = GsonUtilities.getGson();
     JsonArray array = gson.fromJson(message, JsonArray.class);
-    try {
-      if (array == null) {
-        log.error("Failed to parse message: " + message);
-        return;
-      }
-    } catch (JsonSyntaxException e) {
-      log.error("Invalid JSON syntax in message: " + message, e);
+    if (array == null) {
+      log.error("Failed to parse message: " + message);
       return;
     }
 
