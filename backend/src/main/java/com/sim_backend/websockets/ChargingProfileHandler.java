@@ -147,8 +147,7 @@ public class ChargingProfileHandler {
 
       if (limit != -1 && schedule.getChargingRateUnit() == ChargingRateUnit.WATTS) {
         return new StackLimit(limit / voltage, chargingTuples.get(i).stackLevel);
-      }
-      else if(limit != -1 && schedule.getChargingRateUnit() == ChargingRateUnit.AMPS){
+      } else if (limit != -1 && schedule.getChargingRateUnit() == ChargingRateUnit.AMPS) {
         return new StackLimit(limit, chargingTuples.get(i).stackLevel);
       }
     }
