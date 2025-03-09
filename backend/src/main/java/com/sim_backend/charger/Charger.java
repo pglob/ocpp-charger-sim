@@ -13,6 +13,8 @@ import com.sim_backend.websockets.observers.ChangeAvailabilityObserver;
 import com.sim_backend.websockets.observers.ChangeConfigurationObserver;
 import com.sim_backend.websockets.observers.GetConfigurationObserver;
 import com.sim_backend.websockets.observers.MeterValuesObserver;
+import com.sim_backend.websockets.observers.RemoteStartTransactionObserver;
+import com.sim_backend.websockets.observers.RemoteStopTransactionObserver;
 import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.observers.TriggerMessageObserver;
 import java.net.URI;
@@ -115,6 +117,10 @@ public class Charger {
           new ChangeAvailabilityObserver(wsClient, this);
       TriggerMessageObserver triggerMessageObserver =
           new TriggerMessageObserver(wsClient, stateMachine, meterValueObserver);
+      RemoteStartTransactionObserver remoteStartTransactionObserver =
+          new RemoteStartTransactionObserver(wsClient, this);
+      RemoteStopTransactionObserver remoteStopTransactionObserver =
+          new RemoteStopTransactionObserver(wsClient, this);
       meterValueObserver.instantiate(wsClient, stateMachine, transactionHandler, elec, config);
       statusNotificationObserver.setClient(wsClient);
 

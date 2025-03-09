@@ -1,5 +1,6 @@
 package com.sim_backend.websockets.enums;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -7,8 +8,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ChargingProfilePurpose {
+  @SerializedName("ChargePointMaxProfile")
   CHARGE_POINT_MAX_PROFILE("ChargePointMaxProfile"),
+  @SerializedName("TxDefaultProfile")
   TX_DEFAULT_PROFILE("TxDefaultProfile"),
+  @SerializedName("TxProfile")
   TX_PROFILE("TxProfile");
 
   private final String value;

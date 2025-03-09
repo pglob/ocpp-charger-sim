@@ -1,5 +1,6 @@
 package com.sim_backend.websockets.enums;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,9 +10,11 @@ import lombok.RequiredArgsConstructor;
 public enum ChargingRateUnit {
 
   /** Unit for amperes (A). */
+  @SerializedName("A")
   AMPS("A"),
 
   /** Unit for watts (W). */
+  @SerializedName("W")
   WATTS("W");
 
   // String value associated with each enum constant
