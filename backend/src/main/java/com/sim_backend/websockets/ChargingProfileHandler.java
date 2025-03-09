@@ -20,8 +20,7 @@ public class ChargingProfileHandler {
       implements Comparable<ChargingTuple> {
     @Override
     public int compareTo(@NotNull ChargingTuple o) {
-      if (stackLevel < o.stackLevel) return -1;
-      return 1;
+      return Integer.compare(o.stackLevel, this.stackLevel);
     }
   }
 
@@ -29,8 +28,7 @@ public class ChargingProfileHandler {
   public record StackLimit(double limit, int stackLevel) implements Comparable<StackLimit> {
     @Override
     public int compareTo(@NotNull StackLimit o) {
-      if (stackLevel < o.stackLevel) return -1;
-      return 1;
+      return Integer.compare(o.stackLevel, this.stackLevel);
     }
   }
 
@@ -90,15 +88,21 @@ public class ChargingProfileHandler {
       ChargingSchedule schedule = chargingTuples.get(i).profile.getChargingSchedule();
 
       // Remove expired profiles
-      if (time.isAfter(chargingTuples.get(i).profile.getValidTo())) {
-        chargingTuples.remove(i);
-        i--;
-        continue;
+      if (chargingTuples.get(i).profile != null
+          && chargingTuples.get(i).profile.getValidTo() != null) {
+        if (time.isAfter(chargingTuples.get(i).profile.getValidTo())) {
+          chargingTuples.remove(i);
+          i--;
+          continue;
+        }
       }
 
       // Skip profiles not yet valid
-      if (time.isBefore(chargingTuples.get(i).profile.getValidFrom())) {
-        continue;
+      if (chargingTuples.get(i).profile != null
+          && chargingTuples.get(i).profile.getValidFrom() != null) {
+        if (time.isBefore(chargingTuples.get(i).profile.getValidFrom())) {
+          continue;
+        }
       }
 
       if (schedule.getStartSchedule() != null && time.isBefore(schedule.getStartSchedule())) {
@@ -144,6 +148,9 @@ public class ChargingProfileHandler {
       if (limit != -1 && schedule.getChargingRateUnit() == ChargingRateUnit.WATTS) {
         return new StackLimit(limit / voltage, chargingTuples.get(i).stackLevel);
       }
+      else if(limit != -1 && schedule.getChargingRateUnit() == ChargingRateUnit.AMPS){
+        return new StackLimit(limit, chargingTuples.get(i).stackLevel);
+      }
     }
 
     return new StackLimit(limit, -1);
@@ -162,7 +169,7 @@ public class ChargingProfileHandler {
     highestStackTuples.add(tuples.getFirst());
 
     for (int i = 1; i < tuples.size(); i++) {
-      if (tuples.get(i).equals(highestStackTuples.getFirst())) {
+      if (tuples.get(i).stackLevel == highestStackTuples.getFirst().stackLevel) {
         highestStackTuples.add(tuples.get(i));
       }
     }
