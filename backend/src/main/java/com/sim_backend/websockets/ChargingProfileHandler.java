@@ -174,7 +174,7 @@ public class ChargingProfileHandler {
       }
     }
 
-    double minimumLimit = -1;
+    double minimumLimit = Double.MAX_VALUE;
     for (StackLimit highestStackTuple : highestStackTuples) {
       if (highestStackTuple.limit != -1 && highestStackTuple.limit < minimumLimit) {
         minimumLimit = highestStackTuple.limit;
