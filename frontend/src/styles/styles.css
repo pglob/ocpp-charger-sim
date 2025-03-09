@@ -87,7 +87,7 @@ h1 {
 }
 
 /* Adapt Different Screen Sizes*/
-@media (width: 2560px) {
+@media (min-width: 2201px) {
   .charger-frame {
     width: 630px !important;
     height: 500px !important;
@@ -172,7 +172,7 @@ h1 {
   }
 }
 
-@media (width: 1920px) {
+@media (min-width: 1681px) and (max-width: 2200px) {
   .charger-frame {
     width: 450px !important;
     height: 375px !important;
@@ -257,7 +257,7 @@ h1 {
   }
 }
 
-@media (width: 1440px) {
+@media (min-width: 1360px) and (max-width: 1680px) {
   .charger-frame {
     width: 338px !important;
     height: 281px !important;
