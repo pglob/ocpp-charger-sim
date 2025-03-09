@@ -124,7 +124,7 @@ public class ElectricalTransition implements StateObserver {
       double limit = chargingProfileHandler.getCurrentLimit(initialChargeTimestamp, voltage);
 
       // No limit set by Central System
-      if(limit == Double.MAX_VALUE){
+      if (limit == Double.MAX_VALUE) {
         return this.maxCurrent;
       }
 
