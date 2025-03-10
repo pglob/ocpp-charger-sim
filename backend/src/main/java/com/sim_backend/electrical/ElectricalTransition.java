@@ -24,12 +24,6 @@ public class ElectricalTransition implements StateObserver {
 
   boolean isCharging = false;
 
-  /** The maximum current offered by the charger in amps. */
-  private int currentOffered = 0;
-
-  /** The actual current drawn from the charger by the EV. */
-  private int currentImport = 0;
-
   /** The maximum current the charger is rated for. */
   private final int maxCurrent = 40;
 
