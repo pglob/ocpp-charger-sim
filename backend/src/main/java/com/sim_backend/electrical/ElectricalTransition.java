@@ -4,7 +4,6 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.StateObserver;
 import com.sim_backend.transactions.TransactionHandler;
-import com.sim_backend.websockets.ChargingProfileHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.messages.SetChargingProfile;
 import lombok.Getter;
@@ -157,8 +156,6 @@ public class ElectricalTransition implements StateObserver {
       }
       // Reset the current session values.
       this.voltage = 0;
-      this.currentOffered = 0;
-      this.currentImport = 0;
       this.initialChargeTimestamp = 0;
       isCharging = false;
 
@@ -167,8 +164,6 @@ public class ElectricalTransition implements StateObserver {
     else {
       isCharging = true;
       this.voltage = this.nominalVoltage;
-      this.currentOffered = this.maxCurrent;
-      this.currentImport = this.currentOffered;
       // Set a new start time for this charging session.
       this.initialChargeTimestamp = System.currentTimeMillis();
     }

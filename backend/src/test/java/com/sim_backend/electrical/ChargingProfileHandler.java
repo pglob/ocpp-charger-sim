@@ -1,9 +1,10 @@
-package com.sim_backend.websockets;
+package com.sim_backend.electrical;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.sim_backend.charger.Charger;
 import com.sim_backend.transactions.TransactionHandler;
+import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.ChargingProfileKind;
 import com.sim_backend.websockets.enums.ChargingProfilePurpose;
 import com.sim_backend.websockets.enums.ChargingRateUnit;
@@ -59,8 +60,11 @@ class ChargingProfileHandlerTest {
         createChargingProfile(1, 0, ChargingProfilePurpose.TX_PROFILE);
     chargingProfileHandler.addChargingProfile(chargingProfile);
 
-    assertEquals(1, chargingProfileHandler.chargingTuplesTx.size());
-    assertEquals(chargingProfile, chargingProfileHandler.chargingTuplesTx.get(0).profile());
+    assertEquals(1, chargingProfileHandler.getChargingTuplesTx().size());
+    assertEquals(chargingProfile, chargingProfileHandler.getChargingTuplesTx().get(0).profile());
+    assertEquals(
+        40,
+        chargingProfile.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
   }
 
   @Test
@@ -73,8 +77,16 @@ class ChargingProfileHandlerTest {
     chargingProfileHandler.addChargingProfile(chargingProfile1);
     chargingProfileHandler.addChargingProfile(chargingProfile2);
 
-    assertEquals(1, chargingProfileHandler.chargingTuplesTx.size());
-    assertEquals(chargingProfile2, chargingProfileHandler.chargingTuplesTx.get(0).profile());
+    assertEquals(
+        40,
+        chargingProfile1.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
+
+    assertEquals(
+        40,
+        chargingProfile2.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
+
+    assertEquals(1, chargingProfileHandler.getChargingTuplesTx().size());
+    assertEquals(chargingProfile2, chargingProfileHandler.getChargingTuplesTx().get(0).profile());
   }
 
   @Test
@@ -87,7 +99,15 @@ class ChargingProfileHandlerTest {
     chargingProfileHandler.addChargingProfile(chargingProfile1);
     chargingProfileHandler.addChargingProfile(chargingProfile2);
 
-    assertEquals(2, chargingProfileHandler.chargingTuplesTx.size());
+    assertEquals(
+        40,
+        chargingProfile1.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
+
+    assertEquals(
+        40,
+        chargingProfile2.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
+
+    assertEquals(2, chargingProfileHandler.getChargingTuplesTx().size());
   }
 
   @Test
@@ -100,8 +120,16 @@ class ChargingProfileHandlerTest {
     chargingProfileHandler.addChargingProfile(chargingProfile1);
     chargingProfileHandler.addChargingProfile(chargingProfile2);
 
-    assertEquals(1, chargingProfileHandler.chargingTuplesTx.size());
-    assertEquals(1, chargingProfileHandler.chargingTuplesMax.size());
+    assertEquals(
+        40,
+        chargingProfile1.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
+
+    assertEquals(
+        40,
+        chargingProfile2.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
+
+    assertEquals(1, chargingProfileHandler.getChargingTuplesTx().size());
+    assertEquals(1, chargingProfileHandler.getChargingTuplesMax().size());
   }
 
   @Test

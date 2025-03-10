@@ -1,6 +1,7 @@
-package com.sim_backend.websockets;
+package com.sim_backend.electrical;
 
 import com.sim_backend.transactions.TransactionHandler;
+import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.ChargingProfilePurpose;
 import com.sim_backend.websockets.enums.ChargingRateUnit;
 import com.sim_backend.websockets.types.ChargingProfile;
@@ -10,7 +11,9 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import lombok.Getter;
 
+@Getter
 public class ChargingProfileHandler {
   TransactionHandler transactionHandler;
   OCPPWebSocketClient client;
