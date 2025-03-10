@@ -71,7 +71,7 @@ public class MeterValuesObserverTest {
   public void testCreateMeterValue_CurrentOffered() {
     // Sse CURRENT_OFFERED as the sampled data type
     when(config.getMeterValuesSampledData()).thenReturn(MeterValuesSampledData.CURRENT_OFFERED);
-    when(elec.getCurrentOffered()).thenReturn(15);
+    when(elec.getCurrentOffered()).thenReturn(15.0);
 
     MeterValue meterValue = observer.createMeterValue(ReadingContext.SAMPLE_PERIODIC);
 
@@ -82,7 +82,7 @@ public class MeterValuesObserverTest {
     assertEquals(1, meterValue.getSampledValue().size());
 
     SampledValue sampledValue = meterValue.getSampledValue().get(0);
-    assertEquals(String.valueOf(15), sampledValue.getValue());
+    assertEquals(String.valueOf(15.0), sampledValue.getValue());
     assertEquals(ReadingContext.SAMPLE_PERIODIC, sampledValue.getContext());
     assertEquals(MeterValuesSampledData.CURRENT_OFFERED, sampledValue.getMeasurand());
     assertEquals(UnitOfMeasure.A, sampledValue.getUnit());
@@ -92,7 +92,7 @@ public class MeterValuesObserverTest {
   public void testSendMeterValues_WithValidTransactionId() {
     // Sse CURRENT_IMPORT as the sampled data type
     when(config.getMeterValuesSampledData()).thenReturn(MeterValuesSampledData.CURRENT_IMPORT);
-    when(elec.getCurrentImport()).thenReturn(20);
+    when(elec.getCurrentImport()).thenReturn(20.0);
     // Return a valid transaction id (other than -1)
     when(transactionHandler.getTransactionId()).thenReturn(new AtomicInteger(123));
 
@@ -109,7 +109,7 @@ public class MeterValuesObserverTest {
 
     MeterValue meterValue = message.getMeterValue().get(0);
     SampledValue sampledValue = meterValue.getSampledValue().get(0);
-    assertEquals(String.valueOf(20), sampledValue.getValue());
+    assertEquals(String.valueOf(20.0), sampledValue.getValue());
     assertEquals(MeterValuesSampledData.CURRENT_IMPORT, sampledValue.getMeasurand());
     // For CURRENT_IMPORT, the unit is set to A
     assertEquals(UnitOfMeasure.A, sampledValue.getUnit());

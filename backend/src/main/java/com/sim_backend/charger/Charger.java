@@ -99,11 +99,11 @@ public class Charger {
 
       // Create the Charger's components
       stateMachine = new ChargerStateMachine();
-      elec = new ElectricalTransition(stateMachine);
       wsClient =
           new OCPPWebSocketClient(
               URI.create(config.getCentralSystemUrl()), statusNotificationObserver);
       transactionHandler = new TransactionHandler(this);
+      elec = new ElectricalTransition(stateMachine, transactionHandler, wsClient);
 
       // Create Observers
       BootNotificationObserver bootObserver = new BootNotificationObserver(wsClient, stateMachine);
