@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.JsonObject;
 import com.sim_backend.websockets.enums.ErrorCode;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
+import com.sim_backend.websockets.events.OnPushOCPPMessageListener;
 import com.sim_backend.websockets.messages.Heartbeat;
 import com.sim_backend.websockets.messages.HeartbeatResponse;
 import com.sim_backend.websockets.types.OCPPMessageError;
@@ -11,6 +12,8 @@ import com.sim_backend.websockets.types.OCPPRepeatingTimedTask;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.Getter;
@@ -36,28 +39,45 @@ public class OCPPTime implements AutoCloseable {
   /** The client we are listening on. */
   private OCPPWebSocketClient client = null;
 
+  /** A list of sent OCPP Messages */
+  @VisibleForTesting Set<String> heartbeats = ConcurrentHashMap.newKeySet();
+
+  /** Our last sent heartbeat. */
+  @VisibleForTesting String lastHeartbeat = "";
+
+  @VisibleForTesting
+  final OnPushOCPPMessageListener pushListener =
+      message -> {
+        Heartbeat beat = (Heartbeat) message.getMessage();
+        this.heartbeats.add(beat.getMessageID());
+        lastHeartbeat = beat.getMessageID();
+      };
+
   /** Our stored OCPPMessageListener. */
   @VisibleForTesting
   final OnOCPPMessageListener listener =
       message -> {
         HeartbeatResponse response = (HeartbeatResponse) message.getMessage();
-        if (this.heartbeat == null) {
-          log.error("Received HeartbeatResponse with no Heartbeat.");
+        String responseMessageId = response.getMessageID();
+
+        if (!this.heartbeats.contains(responseMessageId)) {
+          log.error(
+              String.format("Heartbeat listener received old message ID %s", responseMessageId));
+          OCPPMessageError error =
+              new OCPPMessageError(
+                  response,
+                  ErrorCode.ProtocolError,
+                  "Received HeartbeatResponse with an old message ID",
+                  new JsonObject());
+
+          client.pushMessage(error);
           return;
         }
 
-        if (!this.heartbeat.message.getMessageID().equals(response.getMessageID())) {
-          log.error(
-              String.format(
-                  "Heartbeat listener received old message ID %s", response.getMessageID()));
-          client.pushMessage(
-              new OCPPMessageError(
-                  ErrorCode.ProtocolError,
-                  "Received HeartbeatResponse with an old message ID",
-                  new JsonObject()));
-          return;
+        if (responseMessageId.equals(lastHeartbeat)) {
+          this.heartbeats.remove(responseMessageId);
+          setOffset(response.getCurrentTime());
         }
-        setOffset(response.getCurrentTime());
       };
 
   /**
@@ -72,6 +92,7 @@ public class OCPPTime implements AutoCloseable {
 
     this.client = currClient;
     this.client.onReceiveMessage(HeartbeatResponse.class, listener);
+    this.client.onPushMessage(Heartbeat.class, pushListener);
   }
 
   /**
@@ -127,9 +148,11 @@ public class OCPPTime implements AutoCloseable {
   public OCPPRepeatingTimedTask setHeartbeatInterval(Long interval, TimeUnit unit) {
     if (this.heartbeat != null) {
       this.client.getScheduler().killJob(this.heartbeat);
+      this.heartbeat = null;
     }
 
     this.heartbeat = this.client.getScheduler().periodicJob(0, interval, unit, new Heartbeat());
+
     return this.heartbeat;
   }
 }

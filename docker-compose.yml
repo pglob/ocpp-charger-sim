@@ -17,6 +17,8 @@ services:
       - unit_test
     networks:
       - core-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   backend-test:
     depends_on:

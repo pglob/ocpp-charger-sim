@@ -501,6 +501,8 @@ public class OCPPWebSocketClientTest {
     client.pushMessage(beat2);
     assert client.size() == 2;
 
+    this.client.getScheduler().getTime().heartbeats.add(beat.getMessageID());
+
     client.popAllMessages();
     assertFalse(client.isEmpty());
     verify(client, times(1)).send(anyString());

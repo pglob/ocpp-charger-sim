@@ -87,9 +87,11 @@ public class OCPPTimeTest {
   void testTimeSynchronization() {
     // Arrange
     HeartbeatResponse heartbeatResponse = mock(HeartbeatResponse.class);
+    when(heartbeatResponse.getMessageID()).thenReturn("abc");
     ZonedDateTime currentTime = ZonedDateTime.now(ZoneId.of("UTC")); // Ensure UTC time
     when(heartbeatResponse.getCurrentTime()).thenReturn(currentTime);
 
+    this.ocppTime.heartbeats.add(heartbeatResponse.getMessageID());
     // Simulate receiving a heartbeat response
     ocppTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse, client));
 
@@ -114,6 +116,7 @@ public class OCPPTimeTest {
     when(heartbeatResponse1.getCurrentTime()).thenReturn(currentTime1);
     when(heartbeatResponse1.getMessageID())
         .thenReturn(ocppTime.heartbeat.getMessage().getMessageID());
+    this.client.getScheduler().getTime().heartbeats.add(heartbeatResponse1.getMessageID());
     ocppTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse1, client));
 
     ZonedDateTime synchronizedTime1 = ocppTime.getSynchronizedTime();
@@ -126,6 +129,9 @@ public class OCPPTimeTest {
     when(heartbeatResponse2.getCurrentTime()).thenReturn(currentTime2);
     when(heartbeatResponse2.getMessageID())
         .thenReturn(ocppTime.heartbeat.getMessage().getMessageID());
+    ocppTime.heartbeats.add(heartbeatResponse2.getMessageID());
+    ocppTime.lastHeartbeat = heartbeatResponse2.getMessageID();
+
     ocppTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse2, client));
 
     ZonedDateTime synchronizedTime2 = ocppTime.getSynchronizedTime();
@@ -142,10 +148,13 @@ public class OCPPTimeTest {
     ZonedDateTime currentTime = ZonedDateTime.now(UTC); // Ensure UTC time
     ZonedDateTime heartbeatTime = currentTime.minusSeconds(30); // 30 seconds behind
     HeartbeatResponse heartbeatResponse = mock(HeartbeatResponse.class);
+    when(heartbeatResponse.getMessageID()).thenReturn("abc");
     when(heartbeatResponse.getCurrentTime()).thenReturn(heartbeatTime);
     when(heartbeatResponse.getMessageID())
         .thenReturn(ocppTime.heartbeat.getMessage().getMessageID());
 
+    this.ocppTime.heartbeats.add(heartbeatResponse.getMessageID());
+    this.ocppTime.lastHeartbeat = heartbeatResponse.getMessageID();
     ocppTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse, client));
 
     ZonedDateTime synchronizedTime = ocppTime.getSynchronizedTime(currentTime);
@@ -175,13 +184,31 @@ public class OCPPTimeTest {
     OCPPRepeatingTimedTask heartbeat = ocppTime.setHeartbeatInterval(20L, TimeUnit.SECONDS);
     heartbeatResponse.setMessageID(heartbeat.getMessage().getMessageID());
 
-    client.addPreviousMessage(heartbeat.message);
+    client.addPreviousMessage(heartbeat.getMessage());
 
-    heartbeat.message = heartbeat.message.cloneMessage();
+    heartbeat.setMessage(heartbeat.getMessage().cloneMessage());
     spyTime.listener.onMessageReceived(new OnOCPPMessage(heartbeatResponse, client));
 
     OCPPMessageError error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
     assertEquals(error.getErrorCode(), ErrorCode.ProtocolError);
+  }
+
+  @Test
+  public void testOCPPLatestTime() throws InterruptedException, OCPPMessageFailure {
+    doNothing().when(client).send(anyString());
+    Heartbeat beat = new Heartbeat();
+    HeartbeatResponse response = new HeartbeatResponse(beat, ZonedDateTime.now().minusSeconds(24));
+    client.addPreviousMessage(beat);
+
+    ocppTime.setOffset(ZonedDateTime.now().minusSeconds(20));
+
+    ocppTime.lastHeartbeat = "abc";
+    ocppTime.heartbeats.add(response.getMessageID());
+
+    client.onMessage(response.toJsonString());
+
+    Duration duration = Duration.between(ocppTime.getSynchronizedTime(), ZonedDateTime.now());
+    assertEquals(20, duration.getSeconds());
   }
 }
