@@ -60,7 +60,8 @@ public final class StatusNotification extends OCPPMessageRequest implements Clon
     this.status = status;
     this.timestamp = timestamp;
     this.vendorId = (vendorId == null || vendorId.isEmpty()) ? null : vendorId;
-    this.vendorErrorCode = (vendorErrorCode == null || vendorErrorCode.isEmpty()) ? null : vendorErrorCode;
+    this.vendorErrorCode =
+        (vendorErrorCode == null || vendorErrorCode.isEmpty()) ? null : vendorErrorCode;
   }
 
   @Override
