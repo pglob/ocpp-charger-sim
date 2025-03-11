@@ -851,4 +851,43 @@ public class OCPPWebSocketClientTest {
     verify(listener, times(1)).onTimeout();
     assertTrue(beat.isErrored());
   }
+
+  @Test
+  public void testrecordTxMessage() throws Exception {
+    String message =
+        "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
+    client.rxRequestName = "GetConfiguration";
+    client.recordTxMessage(message);
+    assertTrue(client.getSentMessages().get(0).contains("GetConfiguration"));
+    assertTrue(client.getSentMessages().get(0).contains("configurationKey"));
+    assertEquals(1, client.getSentMessages().size());
+  }
+
+  @Test
+  public void testrecordTxMessage_rxRequestName_null() throws Exception {
+    String message =
+        "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
+    client.rxRequestName = null;
+    client.recordTxMessage(message);
+    assertEquals(0, client.getSentMessages().size());
+  }
+
+  @Test
+  public void testrecordRxMessage() throws Exception {
+    String message = "[2,\"12345\",\"GetConfiguration\",{\"key\":[\"MeterValueSampleInterval\"]}]";
+    String messageName = "GetConfiguration";
+
+    client.recordRxMessage(message, messageName);
+    assertEquals(1, client.getReceivedMessages().size());
+    assertTrue(client.getReceivedMessages().get(0).contains("GetConfiguration"));
+    assertTrue(client.getReceivedMessages().get(0).contains("MeterValueSampleInterval"));
+  }
+
+  @Test
+  public void testrecordRxMessage_WithemptyMsg() throws Exception {
+    String message = null;
+    String messageName = "GetConfiguration";
+    client.recordRxMessage(message, messageName);
+    assertEquals(0, client.getReceivedMessages().size());
+  }
 }

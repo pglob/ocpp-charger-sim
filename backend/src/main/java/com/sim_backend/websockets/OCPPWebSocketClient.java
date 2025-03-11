@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
 import com.sim_backend.websockets.enums.ErrorCode;
@@ -104,6 +105,31 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** List to store received messages. */
   private final List<String> rxMessages = new CopyOnWriteArrayList<>();
 
+  /** Store Rx CallRequest message name. */
+  public String rxRequestName = null;
+
+  /**
+   * Inserts a JsonElement at the specified index in the JsonArray.
+   *
+   * @param jsonArray The original JsonArray.
+   * @param index The index at which to insert the new element.
+   * @param element The JsonElement to insert.
+   * @return A new JsonArray with the element inserted at the specified index.
+   */
+  public static JsonArray insertElementAt(JsonArray jsonArray, int index, JsonElement element) {
+    JsonArray newArray = new JsonArray();
+    for (int i = 0; i < jsonArray.size(); i++) {
+      if (i == index) {
+        newArray.add(element);
+      }
+      newArray.add(jsonArray.get(i));
+    }
+    if (index >= jsonArray.size()) {
+      newArray.add(element);
+    }
+    return newArray;
+  }
+
   /** StatusNotification Observer */
   private final StatusNotificationObserver statusNotificationObserver;
 
@@ -116,8 +142,34 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message The transmitted message.
    */
   public void recordTxMessage(String message) {
+    if (message == null) {
+      log.error("Sent null message");
+      return;
+    }
+
+    Gson gson = GsonUtilities.getGson();
+    JsonArray array = gson.fromJson(message, JsonArray.class);
+    if (array == null) {
+      log.error("Failed to parse message: " + message);
+      return;
+    }
+
+    String result;
+    String messageName;
+    if (array.get(0).getAsInt() == 3) {
+      if (rxRequestName == null) {
+        log.error("Failed to find the CallRequest Name");
+        return;
+      }
+      messageName = rxRequestName;
+      JsonElement MsgName = new JsonPrimitive(messageName);
+      JsonArray newArray = insertElementAt(array, 2, MsgName);
+      result = gson.toJson(newArray);
+    } else {
+      result = message;
+    }
     String timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
-    String messageWithTimestamp = message.replaceFirst("\\[", "[\"" + timestamp + "\", ");
+    String messageWithTimestamp = result.replaceFirst("\\[", "[\"" + timestamp + "\", ");
     txMessages.add(messageWithTimestamp);
     if (txMessages.size() > 50) {
       txMessages.removeFirst();
@@ -130,9 +182,33 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param message The received message.
    */
   public void recordRxMessage(String message, String messageName) {
+    if (message == null) {
+      log.error("Received null message");
+      return;
+    }
+
+    if (messageName == null) {
+      messageName = "Unknown";
+    }
+
+    Gson gson = GsonUtilities.getGson();
+    JsonArray array = gson.fromJson(message, JsonArray.class);
+    if (array == null) {
+      log.error("Failed to parse message: " + message);
+      return;
+    }
+
+    String result;
+    if (array.get(0).getAsInt() == 2) { // remove the extra Message name
+      array.remove(NAME_INDEX);
+      result = gson.toJson(array);
+    } else {
+      result = message;
+    }
+
     String timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
     String modifiedMessage =
-        message.replaceFirst("\\[", "[\"" + messageName + "\", \"" + timestamp + "\", ");
+        result.replaceFirst("\\[", "[\"" + messageName + "\", \"" + timestamp + "\", ");
     rxMessages.add(modifiedMessage);
     if (rxMessages.size() > 50) {
       rxMessages.removeFirst();
@@ -255,13 +331,14 @@ public class OCPPWebSocketClient extends WebSocketClient {
       this.receivedIDs.add(msgId);
 
       ParseResults results;
-
       int callId = array.get(CALL_ID_INDEX).getAsInt();
       switch (callId) {
-        case OCPPMessage.CALL_ID_REQUEST -> results = this.parseOCPPRequest(json, msgId, array);
-
+        case OCPPMessage.CALL_ID_REQUEST -> {
+          results = this.parseOCPPRequest(json, msgId, array);
+          String RequestName = array.get(NAME_INDEX).getAsString();
+          rxRequestName = RequestName;
+        }
         case OCPPMessage.CALL_ID_RESPONSE -> results = this.parseOCPPResponse(json, msgId, array);
-
         case OCPPMessage.CALL_ID_ERROR -> {
           this.handleOCPPMessageError(json, msgId, array);
           return;
@@ -335,6 +412,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
 
     String messageName = array.get(NAME_INDEX).getAsString();
+    this.recordRxMessage(json, messageName);
     return new ParseResults(messageName, array.get(PAYLOAD_INDEX).getAsJsonObject());
   }
 

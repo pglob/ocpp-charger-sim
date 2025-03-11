@@ -107,7 +107,22 @@ const ShowLogMessages = ({ chargerID }) => {
   const parseMessage = (message) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
-      const [TimeStamp, NumId, messageId, messageName, payload] = parsedMessage;
+      let TimeStamp, NumId, messageId, messageName, payload, description;
+      let NotError = true;
+      let isEmpty = false; // check payload in CallError
+      // check if it's a CallError or not
+      if (parsedMessage[1] === 4) {
+        [TimeStamp, NumId, messageId, messageName, description, payload] =
+          parsedMessage;
+        NotError = false;
+        if (Object.keys(payload).length === 0) {
+          isEmpty = true;
+        }
+      } else {
+        [TimeStamp, NumId, messageId, messageName, payload] = parsedMessage;
+        NotError = true;
+      }
+
       const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
@@ -140,11 +155,27 @@ const ShowLogMessages = ({ chargerID }) => {
               <p>
                 <strong>Message ID:</strong> {messageId}
               </p>
-              {Object.entries(payload).map(([key, value]) => (
-                <p key={key}>
-                  <strong>{key}:</strong> {renderDeep(value)}
-                </p>
-              ))}
+
+              {NotError ? (
+                // Render all payload entries
+                Object.entries(payload).map(([key, value]) => (
+                  <p key={key}>
+                    <strong>{key}:</strong> {renderDeep(value)}
+                  </p>
+                ))
+              ) : (
+                <>
+                  <p>
+                    <strong>Description:</strong> {description}
+                  </p>
+                  {!isEmpty &&
+                    Object.entries(payload).map(([key, value]) => (
+                      <p key={key}>
+                        <strong>{key}:</strong> {renderDeep(value)}
+                      </p>
+                    ))}
+                </>
+              )}
             </div>
           )}
         </div>
@@ -158,14 +189,30 @@ const ShowLogMessages = ({ chargerID }) => {
   const parseReceivedMessage = (message) => {
     try {
       const parsedMessage = JSON.parse(message); // Parse the string into an array
-      const [messageName, TimeStamp, NumId, messageId, payload] = parsedMessage;
+      let messageName, TimeStamp, NumId, messageId, type, description, payload;
+
+      let NotError = true;
+      let isEmpty = false; // check payload in CallError
+      // check if it's a CallError or not
+      if (parsedMessage[2] === 4) {
+        [messageName, TimeStamp, NumId, messageId, type, description, payload] =
+          parsedMessage;
+        NotError = false;
+        if (Object.keys(payload).length === 0) {
+          isEmpty = true;
+        }
+        console.log('Message Type: ', type);
+      } else {
+        [messageName, TimeStamp, NumId, messageId, payload] = parsedMessage;
+        NotError = true;
+      }
+
       const formattedTime = new Date(TimeStamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         second: '2-digit',
         hour12: true,
       });
-
       const numIdLabel = getNumIdLabel(NumId);
       const numIdStyle = getNumIdStyle(NumId); // Apply dynamic styling
 
@@ -191,16 +238,30 @@ const ShowLogMessages = ({ chargerID }) => {
               <p>
                 <strong>Message ID:</strong> {messageId}
               </p>
-              {Object.entries(payload).map(([key, value]) => (
-                <p key={key}>
-                  <strong>{key}:</strong>{' '}
-                  {key === 'interval' ? (
-                    <>{renderDeep(value)} seconds</>
-                  ) : (
-                    renderDeep(value)
-                  )}
-                </p>
-              ))}
+              {NotError ? (
+                Object.entries(payload).map(([key, value]) => (
+                  <p key={key}>
+                    <strong>{key}:</strong>{' '}
+                    {key === 'interval' ? (
+                      <>{renderDeep(value)} seconds</>
+                    ) : (
+                      renderDeep(value)
+                    )}
+                  </p>
+                ))
+              ) : (
+                <>
+                  <p>
+                    <strong>Description:</strong> {description}
+                  </p>
+                  {!isEmpty &&
+                    Object.entries(payload).map(([key, value]) => (
+                      <p key={key}>
+                        <strong>{key}:</strong> {renderDeep(value)}
+                      </p>
+                    ))}
+                </>
+              )}
             </div>
           )}
         </div>
