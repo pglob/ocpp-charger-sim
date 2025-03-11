@@ -193,4 +193,22 @@ public class OCPPTimeTest {
     assertNotNull(error);
     assertEquals(error.getErrorCode(), ErrorCode.ProtocolError);
   }
+
+  @Test
+  public void testOCPPLatestTime() throws InterruptedException, OCPPMessageFailure {
+    doNothing().when(client).send(anyString());
+    Heartbeat beat = new Heartbeat();
+    HeartbeatResponse response = new HeartbeatResponse(beat, ZonedDateTime.now().minusSeconds(24));
+    client.addPreviousMessage(beat);
+
+    ocppTime.setOffset(ZonedDateTime.now().minusSeconds(20));
+
+    ocppTime.lastHeartbeat = "abc";
+    ocppTime.heartbeats.add(response.getMessageID());
+
+    client.onMessage(response.toJsonString());
+
+    Duration duration = Duration.between(ocppTime.getSynchronizedTime(), ZonedDateTime.now());
+    assertEquals(20, duration.getSeconds());
+  }
 }
