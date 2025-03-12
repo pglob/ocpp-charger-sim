@@ -211,11 +211,7 @@ public class MessageSchedulerTest {
     // Create a repeating task
     OCPPRepeatingTimedTask repeatingTask =
         new OCPPRepeatingTimedTask(
-            fixedTime.minusSeconds(1),
-            repeatDelay,
-            ChronoUnit.SECONDS,
-            new Heartbeat(),
-            client);
+            fixedTime.minusSeconds(1), repeatDelay, ChronoUnit.SECONDS, new Heartbeat(), client);
 
     // Add the task manually
     scheduler.tasks.add(repeatingTask);
