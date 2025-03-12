@@ -41,50 +41,6 @@ strong {
 h1 {
   font-weight: 700;
 }
-/* =====================================================
-   Upper-level containers
-   ===================================================== */
-
-.charger-frames-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: left;
-  padding: 10px;
-}
-
-.charger-container {
-  flex: 1;
-  box-sizing: border-box;
-}
-
-.header-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.header-container h1 {
-  margin: 10px;
-}
-
-/* =====================================================
-   ChargerFrame Component & Sub-Components Styles
-   ===================================================== */
-
-/* Style for the ChargerFrame component */
-.charger-frame {
-  width: 300px;
-  border: 2px solid var(--border-black);
-  border-radius: 8px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  background-color: var(--frame-white);
-  position: relative; /* This allows absolute positioning of child elements */
-}
 
 /* Adapt Different Screen Sizes*/
 @media (min-width: 2201px) {
@@ -241,7 +197,7 @@ h1 {
   }
 
   .message-list-container {
-    max-height: 233px !important;
+    max-height: 190px !important;
     width: 495px !important;
   }
 
@@ -259,56 +215,56 @@ h1 {
 
 @media (min-width: 1360px) and (max-width: 1680px) {
   .charger-frame {
-    width: 338px !important;
-    height: 281px !important;
+    width: 300px !important;
+    height: 243px !important;
   }
 
   * {
-    font-weight: 340 !important;
+    font-weight: 300 !important;
   }
 
   strong {
-    font-weight: 640 !important;
+    font-weight: 600 !important;
   }
 
   .header-container {
-    font-size: 24px !important;
+    font-size: 22px !important;
   }
 
   .header-container h1 {
-    margin: 16px !important;
+    margin: 13px !important;
   }
 
   .charger-name {
-    font-size: 18px !important;
+    font-size: 16px !important;
   }
 
   .text-content p {
-    font-size: 15px !important;
+    font-size: 13px !important;
   }
 
   .square-button {
-    width: 90px !important;
-    height: 90px !important;
-    font-size: 15px !important;
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 13px !important;
   }
 
   .button {
-    width: 225px !important;
-    height: 45px !important;
-    font-size: 15px !important;
+    width: 200px !important;
+    height: 35px !important;
+    font-size: 13px !important;
   }
 
   .other-buttons {
-    width: 98px !important;
-    height: 23px !important;
-    font-size: 14px !important;
+    width: 88px !important;
+    height: 18px !important;
+    font-size: 12px !important;
   }
 
   .dropdown-button {
-    width: 98px !important;
-    height: 23px !important;
-    font-size: 14px !important;
+    width: 88px !important;
+    height: 18px !important;
+    font-size: 12px !important;
   }
 
   .config-button {
@@ -316,30 +272,74 @@ h1 {
   }
 
   .error-menu-container .dropdown-toggle {
-    width: 214px !important;
-    height: 45px !important;
-    font-size: 15px !important;
+    width: 190px !important;
+    height: 33px !important;
+    font-size: 13px !important;
   }
 
   .round-rect-container {
-    font-size: 18px !important;
+    font-size: 15px !important;
   }
 
   .message-list-container {
-    max-height: 175px !important;
-    width: 371px !important;
+    max-height: 135px !important;
+    width: 320px !important;
   }
 
   .log-message-header {
-    font-size: 15px !important;
+    font-size: 13px !important;
   }
   .message-list {
-    font-size: 13px !important;
+    font-size: 12px !important;
   }
 
   .no-messages {
     font-size: 15px !important;
   }
+}
+/* =====================================================
+   Upper-level containers
+   ===================================================== */
+
+.charger-frames-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: left;
+  padding: 10px;
+}
+
+.charger-container {
+  flex: 1;
+  box-sizing: border-box;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-container h1 {
+  margin: 10px;
+}
+
+/* =====================================================
+   ChargerFrame Component & Sub-Components Styles
+   ===================================================== */
+
+/* Style for the ChargerFrame component */
+.charger-frame {
+  width: 300px;
+  border: 2px solid var(--border-black);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: var(--frame-white);
+  position: relative; /* This allows absolute positioning of child elements */
 }
 
 /* Style for the Charger Name */
