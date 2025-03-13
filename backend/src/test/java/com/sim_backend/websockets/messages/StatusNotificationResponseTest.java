@@ -33,7 +33,7 @@ public class StatusNotificationResponseTest {
     StatusNotificationResponse response = new StatusNotificationResponse(request);
     JsonArray messageStructure = response.generateMessage();
     assertEquals(3, messageStructure.size(), "OCPP response array should have 3 elements");
-    JsonElement payload = messageStructure.get(3);
+    JsonElement payload = messageStructure.get(2);
     String payloadJson = GsonUtilities.toString(payload);
     JsonSchema schema = JsonSchemaHelper.getJsonSchema("schemas/StatusNotificationResponse.json");
     Set<ValidationMessage> errors = schema.validate(payloadJson, InputFormat.JSON);
