@@ -291,6 +291,13 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
     try {
       this.handleMessage(s);
+    } catch (JsonParseException
+        | OCPPBadMessage
+        | OCPPCannotProcessMessage
+        | OCPPBadClass
+        | OCPPBadCallID
+        | OCPPUnsupportedMessage ignored) {
+      // these get their call errors pushed elsewhere
     } catch (Exception exception) {
       log.error("Received Bad OCPP Message: ", exception);
       this.pushCallError(
@@ -651,16 +658,19 @@ public class OCPPWebSocketClient extends WebSocketClient {
       throw new IllegalArgumentException(MessageValidator.log_message(message));
     }
 
-    Optional.ofNullable(this.onPushMessage.get(message.getClass()))
-        .ifPresent(
-            listeners ->
-                listeners.forEach(
-                    listener -> {
-                      listener.onPush(new OnPushOCPPMessage(message, this));
-                    }));
+    boolean success = queue.pushMessage(message);
+    if (success) {
+      Optional.ofNullable(this.onPushMessage.get(message.getClass()))
+          .ifPresent(
+              listeners ->
+                  listeners.forEach(
+                      listener -> {
+                        listener.onPush(new OnPushOCPPMessage(message, this));
+                      }));
 
-    recordTxMessage(message.toJsonString()); // Record transmitted message
-    return queue.pushMessage(message);
+      recordTxMessage(message.toJsonString()); // Record transmitted message
+    }
+    return success;
   }
 
   /**
@@ -669,8 +679,12 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param prioMessage the message to be sent.
    */
   public boolean pushPriorityMessage(final OCPPMessage prioMessage) {
-    recordTxMessage(prioMessage.toJsonString());
-    return queue.pushPriorityMessage(prioMessage);
+    boolean success = queue.pushPriorityMessage(prioMessage);
+    if (success) {
+      recordTxMessage(prioMessage.toJsonString());
+    }
+
+    return success;
   }
 
   /**
