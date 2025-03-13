@@ -69,12 +69,9 @@ public class Charger {
 
   /** Constructs a new Charger instance */
   public Charger() {
-    String networkHost = System.getenv("NETWORK_HOST") != null ? System.getenv("NETWORK_HOST") : "host.docker.internal";
-    Integer port = Integer.parseInt(
-            System.getenv("NETWORK_PORT") != null ? System.getenv("NETWORK_PORT") : "8080");
-    
-    this.config = new ConfigurationRegistry("temptag",
-            String.format("ws://%s:%d", networkHost, port));
+    String networkUri = System.getenv("NETWORK_URL") != null ? System.getenv("NETWORK_URL") : "ws://host.docker.internal:9000";
+
+    this.config = new ConfigurationRegistry("temptag", networkUri);
   }
 
   /**
