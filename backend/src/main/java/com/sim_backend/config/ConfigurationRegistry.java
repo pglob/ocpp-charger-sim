@@ -6,6 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 /**
  * Config Registry holds configuration and identification for the simulated charge point and its
  * state.
