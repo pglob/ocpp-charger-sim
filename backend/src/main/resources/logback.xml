@@ -1,7 +1,0 @@
-<configuration>
-    <logger name="org.reflections" level="WARN" additivity="false">
-        <appender-ref ref="NULL"/>
-    </logger>
-
-    <appender name="NULL" class="ch.qos.logback.core.spi.NopAppender"/>
-</configuration>
