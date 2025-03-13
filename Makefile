@@ -29,3 +29,6 @@ build_frontend:
 
 lint_frontend:
 	cd ./frontend && npm run lint
+
+run:
+	docker compose --profile core up

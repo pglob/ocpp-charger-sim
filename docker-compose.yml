@@ -4,8 +4,8 @@ services:
       context: ./backend
       target: ${DEBUG_STAGE:-run}
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
-      - "5005:5005"
+      - "127.0.0.1:${BACKEND_PORT}:${BACKEND_PORT}"
+      - "127.0.0.1:5005:5005"
     environment:
       - BACKEND_HOST=${BACKEND_HOST}
       - BACKEND_PORT=${BACKEND_PORT}
@@ -59,8 +59,8 @@ services:
     build:
       context: ./dummy_server
     ports:
-      - "9000:9000" # WebSocket port
-      - "9001:9001" # HTTP port
+      - "127.0.0.1:9000:9000" # WebSocket port
+      - "127.0.0.1:9001:9001" # HTTP port
     profiles:
       - dummy-server
       - integration-test
