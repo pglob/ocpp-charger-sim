@@ -19,16 +19,17 @@ public class ElectricalTransitionTest {
   @Test
   public void InitializedTest() {
 
-    ElectricalTransition et = null;
+    ElectricalTransition et = new ElectricalTransition(new ChargerStateMachine());
+    TransactionHandler handler = null;
+    OCPPWebSocketClient client = null;
     try {
-      et =
-          new ElectricalTransition(
-              new ChargerStateMachine(),
-              new TransactionHandler(new Charger()),
-              new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver()));
+      handler = new TransactionHandler(new Charger());
+      client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+
+    et.setChargingProfileHandler(new ChargingProfileHandler(handler, client));
 
     assert (et.getPowerActiveImport() == 0);
     assert (et.getPowerOffered() == 0);
@@ -43,16 +44,19 @@ public class ElectricalTransitionTest {
 
   @Test
   public void ChargingStateTest() {
-    ElectricalTransition et = null;
+
+    ElectricalTransition et = new ElectricalTransition(new ChargerStateMachine());
+    TransactionHandler handler = null;
+    OCPPWebSocketClient client = null;
     try {
-      et =
-          new ElectricalTransition(
-              new ChargerStateMachine(),
-              new TransactionHandler(new Charger()),
-              new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver()));
+      handler = new TransactionHandler(new Charger());
+      client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+
+    et.setChargingProfileHandler(new ChargingProfileHandler(handler, client));
+
     long beforeCreation = System.currentTimeMillis();
     et.onStateChanged(ChargerState.Charging);
     long afterCreation = System.currentTimeMillis();
@@ -71,16 +75,18 @@ public class ElectricalTransitionTest {
 
   @Test
   public void ChargingStateIntoNonCharging() {
-    ElectricalTransition et = null;
+    ElectricalTransition et = new ElectricalTransition(new ChargerStateMachine());
+    TransactionHandler handler = null;
+    OCPPWebSocketClient client = null;
     try {
-      et =
-          new ElectricalTransition(
-              new ChargerStateMachine(),
-              new TransactionHandler(new Charger()),
-              new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver()));
+      handler = new TransactionHandler(new Charger());
+      client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+
+    et.setChargingProfileHandler(new ChargingProfileHandler(handler, client));
+
     et.onStateChanged(ChargerState.Charging);
     et.onStateChanged(ChargerState.PoweredOff);
     assert (et.getPowerActiveImport() == 0);
@@ -102,16 +108,17 @@ public class ElectricalTransitionTest {
   @Test
   public void EnergyConsumptionTest() throws InterruptedException {
     final long SECONDS_PER_HOUR = 3600;
-    ElectricalTransition et = null;
+    ElectricalTransition et = new ElectricalTransition(new ChargerStateMachine());
+    TransactionHandler handler = null;
+    OCPPWebSocketClient client = null;
     try {
-      et =
-          new ElectricalTransition(
-              new ChargerStateMachine(),
-              new TransactionHandler(new Charger()),
-              new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver()));
+      handler = new TransactionHandler(new Charger());
+      client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+
+    et.setChargingProfileHandler(new ChargingProfileHandler(handler, client));
 
     // Ensure preconditions.
     assertEquals(et.getEnergyActiveImportInterval(100), 0);
@@ -144,16 +151,17 @@ public class ElectricalTransitionTest {
   /** Test that multiple charging sessions correctly accumulate lifetime energy. */
   @Test
   public void testMultipleChargingSessions() throws InterruptedException {
-    ElectricalTransition et = null;
+    ElectricalTransition et = new ElectricalTransition(new ChargerStateMachine());
+    TransactionHandler handler = null;
+    OCPPWebSocketClient client = null;
     try {
-      et =
-          new ElectricalTransition(
-              new ChargerStateMachine(),
-              new TransactionHandler(new Charger()),
-              new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver()));
+      handler = new TransactionHandler(new Charger());
+      client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+
+    et.setChargingProfileHandler(new ChargingProfileHandler(handler, client));
 
     et.onStateChanged(ChargerState.Charging);
     Thread.sleep(1000); // Simulate 1 second of charging.
@@ -174,16 +182,18 @@ public class ElectricalTransitionTest {
    */
   @Test
   public void testGetEnergyActiveImportIntervalNegativeInterval() throws InterruptedException {
-    ElectricalTransition et = null;
+    ElectricalTransition et = new ElectricalTransition(new ChargerStateMachine());
+    TransactionHandler handler = null;
+    OCPPWebSocketClient client = null;
     try {
-      et =
-          new ElectricalTransition(
-              new ChargerStateMachine(),
-              new TransactionHandler(new Charger()),
-              new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver()));
+      handler = new TransactionHandler(new Charger());
+      client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+
+    et.setChargingProfileHandler(new ChargingProfileHandler(handler, client));
+
     ElectricalTransition finalEt = et;
     assertThrows(IllegalArgumentException.class, () -> finalEt.getEnergyActiveImportInterval(-1));
     ElectricalTransition finalEt1 = et;
@@ -194,16 +204,18 @@ public class ElectricalTransitionTest {
   /** Test that a zero interval returns zero energy consumption. */
   @Test
   public void testZeroInterval() {
-    ElectricalTransition et = null;
+    ElectricalTransition et = new ElectricalTransition(new ChargerStateMachine());
+    TransactionHandler handler = null;
+    OCPPWebSocketClient client = null;
     try {
-      et =
-          new ElectricalTransition(
-              new ChargerStateMachine(),
-              new TransactionHandler(new Charger()),
-              new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver()));
+      handler = new TransactionHandler(new Charger());
+      client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+
+    et.setChargingProfileHandler(new ChargingProfileHandler(handler, client));
+
     et.onStateChanged(ChargerState.Charging);
     float energyInterval = et.getEnergyActiveImportInterval(0);
     assertEquals(0, energyInterval, "Energy consumption for a zero interval should be zero.");

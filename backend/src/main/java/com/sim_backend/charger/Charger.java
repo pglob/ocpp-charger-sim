@@ -1,6 +1,7 @@
 package com.sim_backend.charger;
 
 import com.sim_backend.config.ConfigurationRegistry;
+import com.sim_backend.electrical.ChargingProfileHandler;
 import com.sim_backend.electrical.ElectricalTransition;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
@@ -99,11 +100,13 @@ public class Charger {
 
       // Create the Charger's components
       stateMachine = new ChargerStateMachine();
+      elec = new ElectricalTransition(stateMachine);
+
       wsClient =
           new OCPPWebSocketClient(
               URI.create(config.getCentralSystemUrl()), statusNotificationObserver);
       transactionHandler = new TransactionHandler(this);
-      elec = new ElectricalTransition(stateMachine, transactionHandler, wsClient);
+      elec.setChargingProfileHandler(new ChargingProfileHandler(transactionHandler, wsClient));
 
       // Create Observers
       BootNotificationObserver bootObserver = new BootNotificationObserver(wsClient, stateMachine);

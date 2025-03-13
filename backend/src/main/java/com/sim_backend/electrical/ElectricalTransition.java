@@ -3,10 +3,8 @@ package com.sim_backend.electrical;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.StateObserver;
-import com.sim_backend.transactions.TransactionHandler;
-import com.sim_backend.websockets.OCPPWebSocketClient;
-import com.sim_backend.websockets.messages.SetChargingProfile;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * This class represents the electrical transition of a charging process, including the charging
@@ -33,13 +31,7 @@ public class ElectricalTransition implements StateObserver {
   /** Accumulated lifetime energy consumption in kWh across all sessions. */
   private float lifetimeEnergy = 0.0f;
 
-  private ChargingProfileHandler chargingProfileHandler;
-
-  private SetChargingProfile chargingProfile;
-
-  private TransactionHandler transactionHandler;
-
-  private OCPPWebSocketClient client;
+  @Setter private ChargingProfileHandler chargingProfileHandler;
 
   /** Constant representing the number of seconds in an hour. Used for energy calculations. */
   private static final long SECONDS_PER_HOUR = 3600;
@@ -50,13 +42,8 @@ public class ElectricalTransition implements StateObserver {
   /** Constant representing the number of milliseconds in a second. Used for energy calculations. */
   private static final long MILLISECONDS_PER_SECOND = 1000;
 
-  public ElectricalTransition(
-      ChargerStateMachine stateMachine,
-      TransactionHandler transactionHandler,
-      OCPPWebSocketClient client) {
+  public ElectricalTransition(ChargerStateMachine stateMachine) {
     stateMachine.addObserver(this);
-    this.transactionHandler = transactionHandler;
-    chargingProfileHandler = new ChargingProfileHandler(transactionHandler, client);
   }
 
   /**
