@@ -69,7 +69,7 @@ public class Charger {
   /** Constructs a new Charger instance */
   public Charger() {
     // TODO: Get central system URI from frontend or command line
-    this.config = new ConfigurationRegistry("temptag", "ws://host.docker.internal:9000");
+    this.config = ConfigurationRegistry.loadConfiguration();
   }
 
   /**
