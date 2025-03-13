@@ -52,7 +52,7 @@ Create the docker file
 Run the simulator (connects to the NETWORK_URL set in .env)
 
 ```bash
-make
+   make
 ```
 
 ```bash
