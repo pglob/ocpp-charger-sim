@@ -1,5 +1,7 @@
 package com.sim_backend.websockets.messages;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.networknt.schema.InputFormat;
@@ -8,12 +10,9 @@ import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
-import org.junit.jupiter.api.Test;
-
 import java.time.ZonedDateTime;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class StatusNotificationTest {
 
@@ -25,8 +24,7 @@ public class StatusNotificationTest {
         ChargePointStatus.Available,
         ZonedDateTime.now(),
         "Vendor123",
-        "VendorError456" 
-    );
+        "VendorError456");
   }
 
   @Test
@@ -45,11 +43,15 @@ public class StatusNotificationTest {
     }
     assertTrue(errors.isEmpty(), "Payload should be valid according to the JSON schema");
     assertTrue(payloadJson.contains("\"connectorId\":1"), "Should contain connectorId:1");
-    assertTrue(payloadJson.contains("\"errorCode\":\"NoError\""), "Should contain errorCode:NoError");
+    assertTrue(
+        payloadJson.contains("\"errorCode\":\"NoError\""), "Should contain errorCode:NoError");
     assertTrue(payloadJson.contains("\"info\":\"Some info\""), "Should contain info:'Some info'");
-    assertTrue(payloadJson.contains("\"status\":\"Available\""), "Should contain status:'Available'");
-    assertTrue(payloadJson.contains("\"vendorId\":\"Vendor123\""), "Should contain vendorId:'Vendor123'");
-    assertTrue(payloadJson.contains("\"vendorErrorCode\":\"VendorError456\""), 
-               "Should contain vendorErrorCode:'VendorError456'");
+    assertTrue(
+        payloadJson.contains("\"status\":\"Available\""), "Should contain status:'Available'");
+    assertTrue(
+        payloadJson.contains("\"vendorId\":\"Vendor123\""), "Should contain vendorId:'Vendor123'");
+    assertTrue(
+        payloadJson.contains("\"vendorErrorCode\":\"VendorError456\""),
+        "Should contain vendorErrorCode:'VendorError456'");
   }
 }

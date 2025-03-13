@@ -1,5 +1,7 @@
 package com.sim_backend.websockets.messages;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.networknt.schema.InputFormat;
@@ -8,12 +10,9 @@ import com.networknt.schema.ValidationMessage;
 import com.sim_backend.websockets.GsonUtilities;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
-import org.junit.jupiter.api.Test;
-
 import java.time.ZonedDateTime;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class StatusNotificationResponseTest {
 
@@ -25,8 +24,7 @@ public class StatusNotificationResponseTest {
         ChargePointStatus.Available,
         ZonedDateTime.now(),
         "Vendor123",
-        "VendorError456"
-    );
+        "VendorError456");
   }
 
   @Test
@@ -34,7 +32,7 @@ public class StatusNotificationResponseTest {
     StatusNotification request = getDefaultStatusNotificationRequest();
     StatusNotificationResponse response = new StatusNotificationResponse(request);
     JsonArray messageStructure = response.generateMessage();
-    assertEquals(4, messageStructure.size(), "OCPP response array should have 4 elements");
+    assertEquals(3, messageStructure.size(), "OCPP response array should have 3 elements");
     JsonElement payload = messageStructure.get(3);
     String payloadJson = GsonUtilities.toString(payload);
     JsonSchema schema = JsonSchemaHelper.getJsonSchema("schemas/StatusNotificationResponse.json");
@@ -44,6 +42,7 @@ public class StatusNotificationResponseTest {
       errors.forEach(System.out::println);
     }
     assertTrue(errors.isEmpty(), "Payload should be valid according to the JSON schema");
-    assertEquals("{}", payloadJson, "StatusNotificationResponse payload should be an empty JSON object");
+    assertEquals(
+        "{}", payloadJson, "StatusNotificationResponse payload should be an empty JSON object");
   }
 }
