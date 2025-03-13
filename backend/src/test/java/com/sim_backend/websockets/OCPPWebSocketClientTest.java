@@ -892,11 +892,12 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testCalErrors() throws Exception {
+  public void testCallErrors() throws Exception {
     doAnswer(invocation -> null).when(client).send(anyString());
-    BootNotification notif = new BootNotification();
-    notif.setMessageID("bad");
-    client.pushMessage(notif);
+    BootNotification notify = new BootNotification();
+    notify.setMessageID("bad");
+
+    client.pushMessage(notify);
     client.popAllMessages();
 
     client.handleMessage("[3,\"bad\", {}]");
