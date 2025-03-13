@@ -335,8 +335,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
       switch (callId) {
         case OCPPMessage.CALL_ID_REQUEST -> {
           results = this.parseOCPPRequest(json, msgId, array);
-          String RequestName = array.get(NAME_INDEX).getAsString();
-          rxRequestName = RequestName;
+          rxRequestName = array.get(NAME_INDEX).getAsString();
         }
         case OCPPMessage.CALL_ID_RESPONSE -> results = this.parseOCPPResponse(json, msgId, array);
         case OCPPMessage.CALL_ID_ERROR -> {
@@ -428,23 +427,18 @@ public class OCPPWebSocketClient extends WebSocketClient {
   private ParseResults parseOCPPResponse(String json, String msgId, JsonArray array)
       throws OCPPCannotProcessMessage {
     if (array.size() != 3) {
-      this.pushCallError(
-          ErrorCode.OccurenceConstraintViolation,
-          "Response provided wrong number of array elements",
-          msgId);
+      log.warn("Response had invalid length: {}", json);
       throw new OCPPBadMessage("Response had invalid array length");
     }
 
     OCPPMessage prevMessage = this.queue.getPreviousMessage(msgId);
     if (prevMessage == null) {
-      this.pushCallError(ErrorCode.ProtocolError, "Received Response with an unknown ID", msgId);
       log.warn("Received OCPP response message with an unknown ID {}: {}", msgId, json);
       throw new OCPPCannotProcessMessage(json, msgId);
     }
 
     if (!array.get(PAYLOAD_INDEX - 1).isJsonObject()) {
-      this.pushCallError(
-          ErrorCode.PropertyConstraintViolation, "Response details was not a json object", msgId);
+      log.warn("Response payload is not an object: {}", json);
       return null;
     }
 
