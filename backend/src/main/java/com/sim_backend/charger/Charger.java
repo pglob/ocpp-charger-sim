@@ -69,8 +69,12 @@ public class Charger {
 
   /** Constructs a new Charger instance */
   public Charger() {
-    // TODO: Get central system URI from frontend or command line
-    this.config = new ConfigurationRegistry("temptag", "ws://host.docker.internal:9000");
+    String networkHost = System.getenv("NETWORK_HOST") != null ? System.getenv("NETWORK_HOST") : "host.docker.internal";
+    Integer port = Integer.parseInt(
+            System.getenv("NETWORK_PORT") != null ? System.getenv("NETWORK_PORT") : "8080");
+    
+    this.config = new ConfigurationRegistry("temptag",
+            String.format("ws://%s:%d", networkHost, port));
   }
 
   /**
