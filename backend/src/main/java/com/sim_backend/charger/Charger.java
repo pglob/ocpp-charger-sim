@@ -69,7 +69,10 @@ public class Charger {
 
   /** Constructs a new Charger instance */
   public Charger() {
-    String networkUri = System.getenv("NETWORK_URL") != null ? System.getenv("NETWORK_URL") : "ws://host.docker.internal:9000";
+    String networkUri =
+        System.getenv("NETWORK_URL") != null
+            ? System.getenv("NETWORK_URL")
+            : "ws://host.docker.internal:9000";
 
     this.config = new ConfigurationRegistry("temptag", networkUri);
   }
