@@ -5,6 +5,7 @@ import './styles/styles.css';
 
 function App() {
   const [status, setStatus] = useState('loading');
+  const [openModalChargerID, setOpenModalChargerID] = useState(null); // Track which charger modal is open (null if none)
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/test`)
@@ -41,7 +42,12 @@ function App() {
       <div className="charger-frames-container">
         {[1, 2, 3].map((id) => (
           <div key={id} className="charger-container">
-            <ChargerFrame chargerID={id} />
+            {/* Pass down the config modal state and its setter */}
+            <ChargerFrame
+              chargerID={id}
+              openModalChargerID={openModalChargerID}
+              setOpenModalChargerID={setOpenModalChargerID}
+            />
             <ShowLogMessages chargerID={id} />
           </div>
         ))}
