@@ -129,7 +129,7 @@ h1 {
   }
 }
 
-@media (min-width: 1681px) and (max-width: 2200px) {
+@media (min-width: 1635px) and (max-width: 2200px) {
   .charger-frame {
     width: 450px !important;
     height: 375px !important;
