@@ -29,7 +29,7 @@ class RemoteStopTransactionObserverTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
     when(charger.getTransactionHandler()).thenReturn(transactionHandler);
-    observer = new RemoteStopTransactionObserver(client, charger);
+    observer = new RemoteStopTransactionObserver(client, charger.getTransactionHandler());
   }
 
   @Test

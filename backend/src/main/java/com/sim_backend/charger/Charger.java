@@ -118,9 +118,9 @@ public class Charger {
       TriggerMessageObserver triggerMessageObserver =
           new TriggerMessageObserver(wsClient, stateMachine, meterValueObserver);
       RemoteStartTransactionObserver remoteStartTransactionObserver =
-          new RemoteStartTransactionObserver(wsClient, this);
+          new RemoteStartTransactionObserver(wsClient, config, transactionHandler, stateMachine);
       RemoteStopTransactionObserver remoteStopTransactionObserver =
-          new RemoteStopTransactionObserver(wsClient, this);
+          new RemoteStopTransactionObserver(wsClient, transactionHandler);
       meterValueObserver.instantiate(wsClient, stateMachine, transactionHandler, elec, config);
       statusNotificationObserver.setClient(wsClient);
 
