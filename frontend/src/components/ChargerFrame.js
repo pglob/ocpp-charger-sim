@@ -9,7 +9,11 @@ import ErrorMenu from './ErrorMenu';
 import ConfigGear from './ConfigIdTagUrl';
 import PropTypes from 'prop-types';
 
-function ChargerFrame({ chargerID }) {
+function ChargerFrame({
+  chargerID,
+  openModalChargerID,
+  setOpenModalChargerID,
+}) {
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -61,7 +65,12 @@ function ChargerFrame({ chargerID }) {
       <RebootButton chargerID={chargerID} />
       <Button chargerID={chargerID} isOnline={isOnline} isActive={isActive} />
       <div className="config-button-container">
-        <ConfigGear chargerID={chargerID} />
+        {/* Pass the config modal state down to the gear component */}
+        <ConfigGear
+          chargerID={chargerID}
+          openModalChargerID={openModalChargerID}
+          setOpenModalChargerID={setOpenModalChargerID}
+        />
       </div>
       <ErrorMenu chargerID={chargerID} />
     </div>
@@ -70,6 +79,8 @@ function ChargerFrame({ chargerID }) {
 
 ChargerFrame.propTypes = {
   chargerID: PropTypes.number.isRequired,
+  openModalChargerID: PropTypes.number,
+  setOpenModalChargerID: PropTypes.func.isRequired,
 };
 
 export default ChargerFrame;
