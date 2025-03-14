@@ -687,7 +687,6 @@ public class OCPPWebSocketClientTest {
     assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
     assertEquals("Request provided wrong number of array elements", error.getErrorDescription());
 
-
     client.handleMessage("[2,\"heartbeat5\", \"Heartbeat\", 2]");
     error = (OCPPMessageError) client.popMessage();
     assertNotNull(error);
@@ -739,13 +738,15 @@ public class OCPPWebSocketClientTest {
     doAnswer(invocation -> null).when(client).send(anyString());
     Heartbeat beat = new Heartbeat();
     client.handleMessage(beat.toJsonString());
-    client.handleMessage(beat.toJsonString());
+    OCPPBadID exception =
+        assertThrows(
+            OCPPBadID.class,
+            () -> {
+              client.handleMessage(beat.toJsonString());
+            });
 
-    OCPPMessageError error = (OCPPMessageError) client.popMessage();
-    assertNotNull(error);
-    assertEquals(ErrorCode.OccurenceConstraintViolation, error.getErrorCode());
-    assertEquals("ID was already used", error.getErrorDescription());
-    assertEquals(error.getMessageID(), beat.getMessageID());
+    assertNotNull(exception);
+    assertEquals(beat.getMessageID(), exception.getBadID());
   }
 
   @Test

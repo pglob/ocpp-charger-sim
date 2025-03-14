@@ -16,6 +16,7 @@ import com.sim_backend.websockets.events.OnPushOCPPMessage;
 import com.sim_backend.websockets.events.OnPushOCPPMessageListener;
 import com.sim_backend.websockets.exceptions.OCPPBadCallID;
 import com.sim_backend.websockets.exceptions.OCPPBadClass;
+import com.sim_backend.websockets.exceptions.OCPPBadID;
 import com.sim_backend.websockets.exceptions.OCPPBadMessage;
 import com.sim_backend.websockets.exceptions.OCPPCannotProcessMessage;
 import com.sim_backend.websockets.exceptions.OCPPMessageFailure;
@@ -296,7 +297,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
         | OCPPCannotProcessMessage
         | OCPPBadClass
         | OCPPBadCallID
-        | OCPPUnsupportedMessage ignored) {
+        | OCPPUnsupportedMessage
+        | OCPPBadID ignored) {
       // these get their call errors pushed elsewhere
     } catch (Exception exception) {
       log.error("Received Bad OCPP Message: ", exception);
@@ -329,7 +331,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
       if (this.receivedIDs.contains(msgId)) {
         log.error("Received duplicate ID {}", msgId);
-        return;
+        throw new OCPPBadID(msgId, json);
       }
 
       this.receivedIDs.add(msgId);
