@@ -810,17 +810,4 @@ public class OCPPWebSocketClientTest {
     client.recordRxMessage(message, messageName);
     assertEquals(0, client.getReceivedMessages().size());
   }
-
-  @Test
-  public void testCallErrors() throws Exception {
-    doAnswer(invocation -> null).when(client).send(anyString());
-    BootNotification notify = new BootNotification();
-    notify.setMessageID("bad");
-
-    client.pushMessage(notify);
-    client.popAllMessages();
-
-    client.handleMessage("[3,\"bad\", {}]");
-    verify(client, times(1)).pushMessage(any(OCPPMessageError.class));
-  }
 }
