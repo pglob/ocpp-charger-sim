@@ -56,8 +56,12 @@ public class ConfigurationRegistry {
   private MeterValuesSampledData meterValuesSampledData =
       MeterValuesSampledData.ENERGY_ACTIVE_IMPORT_REGISTER;
 
+  /** Authorize data for Remote Transaction */
+  private boolean authorizeRemoteTxRequests;
+
   public ConfigurationRegistry(String idTag, String centralSystemUrl) {
     this.idTag = idTag;
     this.centralSystemUrl = centralSystemUrl;
+    this.authorizeRemoteTxRequests = true;
   }
 }
