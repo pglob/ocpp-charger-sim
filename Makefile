@@ -1,3 +1,6 @@
+run:
+	docker compose --profile core up
+
 .PHONY: build docker docker_debug integration_test dummy_server
 
 docker:
