@@ -200,17 +200,21 @@ public class MessageSchedulerTest {
 
   @Test
   void testTickExecutesRepeatingTask() {
-    ZonedDateTime initialTime = ZonedDateTime.now().plusSeconds(5);
+    // Use a fixed time to avoid drift
+    ZonedDateTime fixedTime = ZonedDateTime.parse("2025-03-12T12:00:00Z");
+    when(time.getSynchronizedTime()).thenReturn(fixedTime);
+    // Ensure that when client.getScheduler() is called, it returns our test scheduler
+    when(client.getScheduler()).thenReturn(scheduler);
+
     long repeatDelay = 10L; // Task repeats every 10 seconds
 
     // Create a repeating task
     OCPPRepeatingTimedTask repeatingTask =
         new OCPPRepeatingTimedTask(
-            initialTime, repeatDelay, ChronoUnit.SECONDS, new Heartbeat(), client);
+            fixedTime.minusSeconds(1), repeatDelay, ChronoUnit.SECONDS, new Heartbeat(), client);
 
     // Add the task manually
     scheduler.tasks.add(repeatingTask);
-    when(time.getSynchronizedTime()).thenReturn(ZonedDateTime.now().plusSeconds(15));
 
     // Perform a tick
     scheduler.tick();
@@ -218,10 +222,10 @@ public class MessageSchedulerTest {
     // Verify that the task was executed
     verify(client, times(1)).pushMessage(any(OCPPMessage.class));
 
-    // Verify that the task is rescheduled with the repeat delay
-    assertTrue(
-        scheduler.tasks.stream()
-            .anyMatch(t -> t.time.isEqual(initialTime.plusSeconds(repeatDelay))));
+    // Verify that the task is rescheduled with the repeat delay from the fixed time
+    ZonedDateTime expectedNextExecutionTime = fixedTime.plusSeconds(repeatDelay);
+    ZonedDateTime actualNextExecutionTime = scheduler.tasks.get(0).time;
+    assertEquals(expectedNextExecutionTime, actualNextExecutionTime);
   }
 
   @Test
@@ -321,7 +325,7 @@ public class MessageSchedulerTest {
     AtomicBoolean executed = new AtomicBoolean(false);
     Runnable taskRunnable = () -> executed.set(true);
     RepeatingTimedTask repeatingTask =
-        new RepeatingTimedTask(scheduledTime, 10, ChronoUnit.SECONDS, taskRunnable);
+        new RepeatingTimedTask(scheduledTime, 10, ChronoUnit.SECONDS, taskRunnable, client);
 
     // Cancel the task so it should not run
     repeatingTask.cancel();
@@ -341,7 +345,7 @@ public class MessageSchedulerTest {
     AtomicBoolean executed = new AtomicBoolean(false);
     Runnable taskRunnable = () -> executed.set(true);
     RepeatingTimedTask repeatingTask =
-        new RepeatingTimedTask(scheduledTime, 10, ChronoUnit.SECONDS, taskRunnable);
+        new RepeatingTimedTask(scheduledTime, 10, ChronoUnit.SECONDS, taskRunnable, client);
 
     // Cancel the task so that repeatTask() returns null
     repeatingTask.cancel();
