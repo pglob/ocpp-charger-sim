@@ -1,6 +1,5 @@
 package com.sim_backend.websockets.observers;
 
-import com.sim_backend.charger.Charger;
 import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.enums.Reason;
@@ -13,11 +12,12 @@ import com.sim_backend.websockets.messages.RemoteStopTransactionResponse;
 public class RemoteStopTransactionObserver implements OnOCPPMessageListener {
 
   private final OCPPWebSocketClient client;
-  private final Charger charger;
+  private final TransactionHandler transactionHandler;
 
-  public RemoteStopTransactionObserver(OCPPWebSocketClient client, Charger charger) {
+  public RemoteStopTransactionObserver(
+      OCPPWebSocketClient client, TransactionHandler transactionHandler) {
     this.client = client;
-    this.charger = charger;
+    this.transactionHandler = transactionHandler;
 
     client.onReceiveMessage(RemoteStopTransaction.class, this);
   }
@@ -35,7 +35,6 @@ public class RemoteStopTransactionObserver implements OnOCPPMessageListener {
     }
 
     String status = "Rejected";
-    TransactionHandler transactionHandler = charger.getTransactionHandler();
 
     if (transactionHandler.getTransactionId().get() == request.getTransactionId()) {
       transactionHandler.stopCharging(null, Reason.REMOTE);

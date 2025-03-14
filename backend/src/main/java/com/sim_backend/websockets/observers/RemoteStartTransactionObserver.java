@@ -1,6 +1,9 @@
 package com.sim_backend.websockets.observers;
 
-import com.sim_backend.charger.Charger;
+import com.sim_backend.config.ConfigurationRegistry;
+import com.sim_backend.state.ChargerState;
+import com.sim_backend.state.ChargerStateMachine;
+import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
@@ -11,11 +14,19 @@ import com.sim_backend.websockets.messages.RemoteStartTransactionResponse;
 public class RemoteStartTransactionObserver implements OnOCPPMessageListener {
 
   private OCPPWebSocketClient client;
-  private Charger charger;
+  private ConfigurationRegistry configurationRegistry;
+  private TransactionHandler transactionHandler;
+  private ChargerStateMachine stateMachine;
 
-  public RemoteStartTransactionObserver(OCPPWebSocketClient client, Charger charger) {
+  public RemoteStartTransactionObserver(
+      OCPPWebSocketClient client,
+      ConfigurationRegistry configurationRegistry,
+      TransactionHandler transactionHandler,
+      ChargerStateMachine stateMachine) {
     this.client = client;
-    this.charger = charger;
+    this.configurationRegistry = configurationRegistry;
+    this.transactionHandler = transactionHandler;
+    this.stateMachine = stateMachine;
 
     client.onReceiveMessage(RemoteStartTransaction.class, this);
   }
@@ -31,16 +42,22 @@ public class RemoteStartTransactionObserver implements OnOCPPMessageListener {
     if (!(message.getMessage() instanceof RemoteStartTransaction request)) {
       throw new ClassCastException("Message is not an RemoteStartTransaction Request");
     }
-    if (charger.getConfig().isAuthorizeRemoteTxRequests()) {
+
+    if (stateMachine.getCurrentState() != ChargerState.Available) {
       System.out.println(
-          "RemoteStartTransaction Authorization Required, Sending Authorization Request...");
-      charger
-          .getTransactionHandler()
-          .preAuthorize(request.getConnectorId(), request.getIdTag(), null);
-      charger.getConfig().setAuthorizeRemoteTxRequests(false);
+          "Invalid State Detected... Current State: " + stateMachine.getCurrentState());
     } else {
-      System.out.println("RemoteStartTransaction Request Received... Starting Transaction...");
-      charger.getTransactionHandler().startCharging(request.getConnectorId(), request.getIdTag());
+
+      if (configurationRegistry.isAuthorizeRemoteTxRequests()) {
+
+        System.out.println(
+            "RemoteStartTransaction Authorization Required, Sending Authorization Request...");
+        transactionHandler.startCharging(request.getConnectorId(), request.getIdTag());
+      } else {
+        System.out.println("RemoteStartTransaction Request Received... Starting Transaction...");
+        stateMachine.checkAndTransition(ChargerState.Available, ChargerState.Preparing);
+        stateMachine.checkAndTransition(ChargerState.Preparing, ChargerState.Charging);
+      }
     }
 
     // Send response
