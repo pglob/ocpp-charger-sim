@@ -40,13 +40,17 @@ class SetChargingProfileObserverTest {
     OnOCPPMessage mockMessage = mock(OnOCPPMessage.class);
     when(mockMessage.getMessage()).thenReturn(mockRequest);
 
+    // Simulate a successful addChargingProfile call
+    when(mockChargingProfileHandler.addChargingProfile(mockRequest.getCsChargingProfiles()))
+        .thenReturn(true);
+
     observer.onMessageReceived(mockMessage);
 
     verify(mockChargingProfileHandler).addChargingProfile(mockRequest.getCsChargingProfiles());
 
     ArgumentCaptor<SetChargingProfileResponse> responseCaptor =
         ArgumentCaptor.forClass(SetChargingProfileResponse.class);
-    verify(mockClient).pushMessage(responseCaptor.capture());
+    verify(mockClient, times(1)).pushMessage(responseCaptor.capture());
 
     SetChargingProfileResponse response = responseCaptor.getValue();
     assert response.getStatus() == ChargingProfileStatus.ACCEPTED;
@@ -75,5 +79,32 @@ class SetChargingProfileObserverTest {
     } catch (NullPointerException e) {
       assert e.getMessage().equals("ChargingProfileHandler is null");
     }
+  }
+
+  @Test
+  void testOnMessageReceived_FailedProcessing() {
+    SetChargingProfile mockRequest = mock(SetChargingProfile.class);
+    OnOCPPMessage mockMessage = mock(OnOCPPMessage.class);
+    when(mockMessage.getMessage()).thenReturn(mockRequest);
+
+    // Simulate a failed addChargingProfile call
+    when(mockChargingProfileHandler.addChargingProfile(mockRequest.getCsChargingProfiles()))
+        .thenReturn(false);
+
+    observer.onMessageReceived(mockMessage);
+
+    verify(mockChargingProfileHandler).addChargingProfile(mockRequest.getCsChargingProfiles());
+
+    ArgumentCaptor<SetChargingProfileResponse> responseCaptor =
+        ArgumentCaptor.forClass(SetChargingProfileResponse.class);
+    verify(mockClient, times(2)).pushMessage(responseCaptor.capture());
+
+    // The first response should be REJECTED
+    SetChargingProfileResponse firstResponse = responseCaptor.getAllValues().get(0);
+    assert firstResponse.getStatus() == ChargingProfileStatus.REJECTED;
+
+    // The second response should be ACCEPTED
+    SetChargingProfileResponse secondResponse = responseCaptor.getAllValues().get(1);
+    assert secondResponse.getStatus() == ChargingProfileStatus.ACCEPTED;
   }
 }

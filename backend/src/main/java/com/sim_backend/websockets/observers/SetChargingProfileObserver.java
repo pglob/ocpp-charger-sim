@@ -39,9 +39,11 @@ public class SetChargingProfileObserver implements OnOCPPMessageListener {
     if (electricalTransition.getChargingProfileHandler() == null)
       throw new NullPointerException("ChargingProfileHandler is null");
 
-    electricalTransition
+    if (!electricalTransition
         .getChargingProfileHandler()
-        .addChargingProfile(request.getCsChargingProfiles());
+        .addChargingProfile(request.getCsChargingProfiles())) {
+      client.pushMessage(new SetChargingProfileResponse(request, ChargingProfileStatus.REJECTED));
+    }
 
     client.pushMessage(new SetChargingProfileResponse(request, ChargingProfileStatus.ACCEPTED));
   }

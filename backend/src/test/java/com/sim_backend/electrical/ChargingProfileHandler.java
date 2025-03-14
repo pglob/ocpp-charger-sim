@@ -57,11 +57,12 @@ class ChargingProfileHandlerTest {
   @Test
   void testAddChargingProfile() {
     ChargingProfile chargingProfile =
-        createChargingProfile(1, 0, ChargingProfilePurpose.TX_PROFILE);
+        createChargingProfile(1, 0, ChargingProfilePurpose.TX_DEFAULT_PROFILE);
     chargingProfileHandler.addChargingProfile(chargingProfile);
 
-    assertEquals(1, chargingProfileHandler.getChargingTuplesTx().size());
-    assertEquals(chargingProfile, chargingProfileHandler.getChargingTuplesTx().get(0).profile());
+    assertEquals(1, chargingProfileHandler.getChargingTuplesTxDefault().size());
+    assertEquals(
+        chargingProfile, chargingProfileHandler.getChargingTuplesTxDefault().getFirst().profile());
     assertEquals(
         40,
         chargingProfile.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
@@ -70,9 +71,9 @@ class ChargingProfileHandlerTest {
   @Test
   void testAddDuplicateChargingProfile() {
     ChargingProfile chargingProfile1 =
-        createChargingProfile(1, 0, ChargingProfilePurpose.TX_PROFILE);
+        createChargingProfile(1, 0, ChargingProfilePurpose.TX_DEFAULT_PROFILE);
     ChargingProfile chargingProfile2 =
-        createChargingProfile(2, 0, ChargingProfilePurpose.TX_PROFILE);
+        createChargingProfile(2, 0, ChargingProfilePurpose.TX_DEFAULT_PROFILE);
 
     chargingProfileHandler.addChargingProfile(chargingProfile1);
     chargingProfileHandler.addChargingProfile(chargingProfile2);
@@ -85,16 +86,17 @@ class ChargingProfileHandlerTest {
         40,
         chargingProfile2.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
 
-    assertEquals(1, chargingProfileHandler.getChargingTuplesTx().size());
-    assertEquals(chargingProfile2, chargingProfileHandler.getChargingTuplesTx().get(0).profile());
+    assertEquals(1, chargingProfileHandler.getChargingTuplesTxDefault().size());
+    assertEquals(
+        chargingProfile2, chargingProfileHandler.getChargingTuplesTxDefault().getFirst().profile());
   }
 
   @Test
   void testAddDifferentStackLevels() {
     ChargingProfile chargingProfile1 =
-        createChargingProfile(1, 0, ChargingProfilePurpose.TX_PROFILE);
+        createChargingProfile(1, 0, ChargingProfilePurpose.TX_DEFAULT_PROFILE);
     ChargingProfile chargingProfile2 =
-        createChargingProfile(2, 1, ChargingProfilePurpose.TX_PROFILE);
+        createChargingProfile(2, 1, ChargingProfilePurpose.TX_DEFAULT_PROFILE);
 
     chargingProfileHandler.addChargingProfile(chargingProfile1);
     chargingProfileHandler.addChargingProfile(chargingProfile2);
@@ -107,13 +109,13 @@ class ChargingProfileHandlerTest {
         40,
         chargingProfile2.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
 
-    assertEquals(2, chargingProfileHandler.getChargingTuplesTx().size());
+    assertEquals(2, chargingProfileHandler.getChargingTuplesTxDefault().size());
   }
 
   @Test
   void testAddProfilesWithDifferentPurposes() {
     ChargingProfile chargingProfile1 =
-        createChargingProfile(1, 0, ChargingProfilePurpose.TX_PROFILE);
+        createChargingProfile(1, 0, ChargingProfilePurpose.TX_DEFAULT_PROFILE);
     ChargingProfile chargingProfile2 =
         createChargingProfile(2, 0, ChargingProfilePurpose.CHARGE_POINT_MAX_PROFILE);
 
@@ -128,7 +130,7 @@ class ChargingProfileHandlerTest {
         40,
         chargingProfile2.getChargingSchedule().getChargingSchedulePeriod().getFirst().getLimit());
 
-    assertEquals(1, chargingProfileHandler.getChargingTuplesTx().size());
+    assertEquals(1, chargingProfileHandler.getChargingTuplesTxDefault().size());
     assertEquals(1, chargingProfileHandler.getChargingTuplesMax().size());
   }
 
