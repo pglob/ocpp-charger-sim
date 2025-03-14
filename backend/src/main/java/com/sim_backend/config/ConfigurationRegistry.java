@@ -123,7 +123,7 @@ public class ConfigurationRegistry {
         meterValueSampleInterval =
             Integer.parseInt(
                 props.getProperty(
-                   PROP_METER_VALUE_SAMPLE_INTERVAL, String.valueOf(meterValueSampleInterval)));
+                    PROP_METER_VALUE_SAMPLE_INTERVAL, String.valueOf(meterValueSampleInterval)));
         String fileSampledData =
             props.getProperty(PROP_METER_VALUES_SAMPLED_DATA, meterValuesSampledData.name());
         try {
