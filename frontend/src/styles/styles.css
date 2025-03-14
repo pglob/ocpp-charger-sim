@@ -63,6 +63,7 @@ h1 {
 
   .header-container h1 {
     margin: 20px !important;
+    font-weight: 700 !important;
   }
 
   .charger-name {
@@ -148,6 +149,7 @@ h1 {
 
   .header-container h1 {
     margin: 20px !important;
+    font-weight: 700 !important;
   }
 
   .charger-name {
@@ -213,90 +215,6 @@ h1 {
   }
 }
 
-@media (min-width: 1360px) and (max-width: 1680px) {
-  .charger-frame {
-    width: 300px !important;
-    height: 243px !important;
-  }
-
-  * {
-    font-weight: 300 !important;
-  }
-
-  strong {
-    font-weight: 600 !important;
-  }
-
-  .header-container {
-    font-size: 22px !important;
-  }
-
-  .header-container h1 {
-    margin: 13px !important;
-  }
-
-  .charger-name {
-    font-size: 16px !important;
-  }
-
-  .text-content p {
-    font-size: 13px !important;
-  }
-
-  .square-button {
-    width: 80px !important;
-    height: 80px !important;
-    font-size: 13px !important;
-  }
-
-  .button {
-    width: 200px !important;
-    height: 35px !important;
-    font-size: 13px !important;
-  }
-
-  .other-buttons {
-    width: 88px !important;
-    height: 18px !important;
-    font-size: 12px !important;
-  }
-
-  .dropdown-button {
-    width: 88px !important;
-    height: 18px !important;
-    font-size: 12px !important;
-  }
-
-  .config-button {
-    font-size: 23px !important;
-  }
-
-  .error-menu-container .dropdown-toggle {
-    width: 190px !important;
-    height: 33px !important;
-    font-size: 13px !important;
-  }
-
-  .round-rect-container {
-    font-size: 15px !important;
-  }
-
-  .message-list-container {
-    max-height: 135px !important;
-    width: 320px !important;
-  }
-
-  .log-message-header {
-    font-size: 13px !important;
-  }
-  .message-list {
-    font-size: 12px !important;
-  }
-
-  .no-messages {
-    font-size: 15px !important;
-  }
-}
 /* =====================================================
    Upper-level containers
    ===================================================== */
