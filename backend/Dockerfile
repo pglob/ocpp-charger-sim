@@ -23,7 +23,7 @@ COPY --from=build /app/target/ocpp-charger-sim-backend-1.0-SNAPSHOT.jar /app/app
 EXPOSE ${BACKEND_PORT}
 
 # Set command line arguments
-ENV ID_TAG=temptag
+ENV ID_TAG=test
 ENV CENTRAL_SYSTEM_URL=ws://host.docker.internal:9000
 ENV METER_VALUE_SAMPLE_INTERVAL=30
 ENV METER_VALUES_SAMPLED_DATA=ENERGY_ACTIVE_IMPORT_REGISTER

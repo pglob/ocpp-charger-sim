@@ -74,7 +74,7 @@ public class ConfigurationRegistry {
     boolean updatedFromCmd = false;
 
     // Default values
-    String idTag = "temptag";
+    String idTag = "defaultidtag";
     String centralSystemUrl = "ws://host.docker.internal:9000";
     int meterValueSampleInterval = 30;
     MeterValuesSampledData meterValuesSampledData =
