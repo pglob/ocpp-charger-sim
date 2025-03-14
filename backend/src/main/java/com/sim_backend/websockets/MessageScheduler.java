@@ -93,7 +93,8 @@ public class MessageScheduler {
             getTime().getSynchronizedTime().plus(initialDelay, timeUnit.toChronoUnit()),
             delay,
             timeUnit.toChronoUnit(),
-            task);
+            task,
+            client);
     tasks.add(repeatingTask);
     return repeatingTask;
   }

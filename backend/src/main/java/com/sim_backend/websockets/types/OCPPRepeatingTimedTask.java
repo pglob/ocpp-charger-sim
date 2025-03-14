@@ -22,7 +22,8 @@ public class OCPPRepeatingTimedTask extends OCPPTimedTask implements RepeatingTa
 
   @Override
   public TimedTask repeatTask() {
-    ZonedDateTime nextExecutionTime = time.plus(this.repeatDelay, this.unit);
+    ZonedDateTime now = client.getScheduler().getTime().getSynchronizedTime();
+    ZonedDateTime nextExecutionTime = now.plus(this.repeatDelay, this.unit);
     return new OCPPRepeatingTimedTask(
         nextExecutionTime, this.repeatDelay, this.unit, this.message, this.client);
   }
