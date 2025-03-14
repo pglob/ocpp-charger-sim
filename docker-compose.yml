@@ -10,7 +10,6 @@ services:
       - BACKEND_HOST=${BACKEND_HOST}
       - BACKEND_PORT=${BACKEND_PORT}
       - FRONTEND_URL=http://${FRONTEND_HOST}:${FRONTEND_PORT}
-      - NETWORK_URL=${NETWORK_URL}
       - DEBUG_PORT=5005
     profiles:
       - core
