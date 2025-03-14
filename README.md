@@ -49,7 +49,7 @@ Makefile can be used from the root directory for ease-of-use commands.
 
 Create the docker file
 
-Run the simulator (connects to the NETWORK_URL set in .env)
+Run the simulator
 
 ```bash
    make
