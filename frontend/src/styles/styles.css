@@ -502,6 +502,23 @@ button:active {
   color: var(--config-grey);
 }
 
+.config-button.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: default;
+}
+
+.config-button.disabled:hover {
+  background-color: transparent;
+}
+
+/* Mark the currently active gear icon */
+.config-button.highlight {
+  background-color: var(--light-grey);
+  border: 2px solid var(--config-grey);
+  border-radius: 4px;
+}
+
 /* Modal overlay (background) */
 .config-modal-overlay {
   position: fixed;

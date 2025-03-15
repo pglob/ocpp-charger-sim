@@ -3,8 +3,7 @@ import { FaCog, FaTimes } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import '../styles/styles.css';
 
-function ConfigGear({ chargerID }) {
-  const [showConfigModal, setShowConfigModal] = useState(false);
+function ConfigGear({ chargerID, openModalChargerID, setOpenModalChargerID }) {
   const [idTag, setIdTag] = useState('');
   const [centralSystemUrl, setCentralSystemUrl] = useState('');
   const [message, setMessage] = useState('');
@@ -23,7 +22,7 @@ function ConfigGear({ chargerID }) {
         }
       );
       if (!response.ok) {
-        setMessage('Failed to fetch configration values.');
+        setMessage('Failed to fetch configuration values.');
         setMessageType('error');
         throw new Error('Failed to fetch configuration');
       }
@@ -64,8 +63,10 @@ function ConfigGear({ chargerID }) {
 
   // Handle modal opening and fetching config
   const handleClick = async () => {
+    // Allow opening only if no config modal is open or it’s already open on this charger
+    if (openModalChargerID && openModalChargerID !== chargerID) return;
     await fetchConfig();
-    setShowConfigModal(true);
+    setOpenModalChargerID(chargerID);
   };
 
   // Handle update action
@@ -77,7 +78,8 @@ function ConfigGear({ chargerID }) {
     }
     try {
       await updateConfig();
-      setShowConfigModal(false); // Close modal immediately after success
+      // Close modal by clearing the shared state
+      setOpenModalChargerID(null);
       setMessage('');
     } catch (error) {
       console.error('Error updating configuration:', error);
@@ -86,12 +88,19 @@ function ConfigGear({ chargerID }) {
 
   return (
     <div>
-      <div onClick={handleClick} className="config-button">
+      <div
+        onClick={
+          openModalChargerID === null || openModalChargerID === chargerID
+            ? handleClick
+            : null
+        }
+        className={`config-button ${openModalChargerID === chargerID ? 'highlight' : ''} ${openModalChargerID && openModalChargerID !== chargerID ? 'disabled' : ''}`}
+      >
         <FaCog /> {/* Gear icon */}
       </div>
 
       {/* Modal for configuration */}
-      {showConfigModal && (
+      {openModalChargerID === chargerID && (
         <div className="config-modal-overlay">
           <div className="config-modal-content">
             <h2 className="config-heading">Update Configuration</h2>
@@ -134,7 +143,7 @@ function ConfigGear({ chargerID }) {
               Update
             </button>
             <button
-              onClick={() => setShowConfigModal(false)}
+              onClick={() => setOpenModalChargerID(null)}
               className="config-button-exit"
             >
               Exit
@@ -148,6 +157,8 @@ function ConfigGear({ chargerID }) {
 
 ConfigGear.propTypes = {
   chargerID: PropTypes.number.isRequired,
+  openModalChargerID: PropTypes.number,
+  setOpenModalChargerID: PropTypes.func.isRequired,
 };
 
 export default ConfigGear;

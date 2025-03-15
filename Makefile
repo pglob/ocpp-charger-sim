@@ -12,6 +12,9 @@ docker_debug:
 integration_test:
 	docker-compose --env-file .env.internal --profile integration-test up --build
 
+unit_test:
+	docker-compose --profile unit_test up --build
+
 dummy_server:
 	NORMAL_MODE=enabled docker compose --profile core --profile dummy-server up --build
 
