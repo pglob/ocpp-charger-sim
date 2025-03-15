@@ -62,7 +62,7 @@ public class ChargingProfileHandler {
     // Case where purpose set to TxProfile
     else {
       // Not possible to set a ChargingProfile with this purpose without an active transaction.
-      if (!transactionHandler.getStartInProgress().get()) {
+      if (transactionHandler.getTransactionId().get() == -1) {
         return false;
       }
 
