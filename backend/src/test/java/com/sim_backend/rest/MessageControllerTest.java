@@ -184,7 +184,7 @@ class MessageControllerTest {
     InOrder inOrder = inOrder(mockContext, mockWsClient);
     inOrder.verify(mockContext).status(503);
     inOrder.verify(mockContext).result("Charger is booting");
-    
+
     inOrder.verify(mockWsClient).goOffline();
     inOrder.verify(mockContext).result("OK");
   }
@@ -430,8 +430,7 @@ class MessageControllerTest {
     // Arrange
     String longIdTag = "thisisaverylongidtagexceedinglimit";
     String requestBody =
-        String.format(
-            "{\"idTag\": \"%s\", \"centralSystemUrl\": \"ws://newurl.com\"}", longIdTag);
+        String.format("{\"idTag\": \"%s\", \"centralSystemUrl\": \"ws://newurl.com\"}", longIdTag);
     when(mockContext.body()).thenReturn(requestBody);
 
     // Act
