@@ -11,6 +11,10 @@ services:
       - BACKEND_PORT=${BACKEND_PORT}
       - FRONTEND_URL=http://${FRONTEND_HOST}:${FRONTEND_PORT}
       - DEBUG_PORT=5005
+      - ID_TAG=${ID_TAG:-test}
+      - CENTRAL_SYSTEM_URL=${CENTRAL_SYSTEM_URL:-ws://host.docker.internal:9000}
+      - METER_VALUE_SAMPLE_INTERVAL=${METER_VALUE_SAMPLE_INTERVAL:-30}
+      - METER_VALUES_SAMPLED_DATA=${METER_VALUES_SAMPLED_DATA:-ENERGY_ACTIVE_IMPORT_REGISTER}
     profiles:
       - core
       - integration-test
