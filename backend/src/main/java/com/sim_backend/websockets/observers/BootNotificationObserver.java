@@ -71,9 +71,13 @@ public class BootNotificationObserver implements OnOCPPMessageListener, StateObs
         scheduler.getTime().setHeartbeatInterval(interval, TimeUnit.SECONDS);
         stateMachine.transition(ChargerState.Available);
         scheduler.synchronizeTime(response.getCurrentTime());
+        webSocketClient.deleteOnReceiveMessage(BootNotificationResponse.class, this);
         break;
 
-      case PENDING, REJECTED:
+      case PENDING:
+        // Do nothing
+        break;
+      case REJECTED:
         // Central system is pending or rejected the request, set minimum wait time before next
         // BootNotification request
         if (interval < 0) {
