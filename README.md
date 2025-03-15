@@ -47,13 +47,13 @@ npm run format
 
 Makefile can be used from the root directory for ease-of-use commands.
 
-Create the docker file
-
 Run the simulator
 
 ```bash
    make
 ```
+
+Create the docker file
 
 ```bash
    make docker
