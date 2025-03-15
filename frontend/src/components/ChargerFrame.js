@@ -63,7 +63,7 @@ function ChargerFrame({ chargerID }) {
       <div className="config-button-container">
         <ConfigGear chargerID={chargerID} />
       </div>
-      <ErrorMenu chargerID={chargerID} />
+      <ErrorMenu chargerID={chargerID} isActive={isActive} />
     </div>
   );
 }

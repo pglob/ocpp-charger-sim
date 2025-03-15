@@ -16,7 +16,7 @@ public class ChargerStateMachine {
           ChargerState.PoweredOff,
           Set.of(ChargerState.BootingUp),
           ChargerState.BootingUp,
-          Set.of(ChargerState.Available, ChargerState.Faulted, ChargerState.Unavailable),
+          Set.of(ChargerState.Available, ChargerState.Unavailable),
           ChargerState.Available,
           Set.of(ChargerState.Preparing, ChargerState.Faulted, ChargerState.Unavailable),
           ChargerState.Preparing,
