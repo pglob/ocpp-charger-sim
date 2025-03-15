@@ -49,7 +49,7 @@ public class ChargingProfileHandler {
    * Adds a new charging profile to the appropriate list based on its purpose. Ensures profiles with
    * the same stack level and purpose do not duplicate.
    */
-  public void addChargingProfile(ChargingProfile chargingProfile) {
+  public boolean addChargingProfile(ChargingProfile chargingProfile) {
     ChargingProfilePurpose purpose = chargingProfile.getChargingProfilePurpose();
     List<ChargingTuple> chargingTuples;
 
@@ -57,13 +57,22 @@ public class ChargingProfileHandler {
       chargingTuples = chargingTuplesMax;
     } else if (purpose.equals(ChargingProfilePurpose.TX_DEFAULT_PROFILE)) {
       chargingTuples = chargingTuplesTxDefault;
-    } else {
+    }
+
+    // Case where purpose set to TxProfile
+    else {
+      // Not possible to set a ChargingProfile with this purpose without an active transaction.
+      if (transactionHandler.getTransactionId().get() == -1) {
+        return false;
+      }
+
       chargingTuples = chargingTuplesTx;
     }
 
     removeDuplicate(chargingProfile, chargingTuples);
     chargingTuples.add(new ChargingTuple(chargingProfile, chargingProfile.getStackLevel()));
     Collections.sort(chargingTuples);
+    return true;
   }
 
   /** Removes duplicate charging profiles with the same stack level and purpose. */
