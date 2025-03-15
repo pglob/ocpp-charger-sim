@@ -11,6 +11,7 @@ package com.sim_backend.rest.controllers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sim_backend.charger.Charger;
+import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.websockets.enums.ChargePointErrorCode;
 import com.sim_backend.websockets.enums.ChargePointStatus;
@@ -123,8 +124,7 @@ public class MessageController extends ControllerBase {
   public void state(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
-    if (!checkWsClient(charger, ctx)) return;
-    if (!checkStateMachine(charger, ctx)) return;
+
     ChargerStateMachine stateMachine = charger.getStateMachine();
     if (stateMachine == null) {
       ctx.result("PoweredOff");
@@ -163,6 +163,11 @@ public class MessageController extends ControllerBase {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
     if (!checkWsClient(charger, ctx)) return;
+    if (!checkStateMachine(charger, ctx)) return;
+
+    if (charger.getStateMachine().getCurrentState() == ChargerState.BootingUp) {
+      ctx.status(503).result("Charger is booting");
+    }
 
     charger.getWsClient().goOffline();
     ctx.result("OK");

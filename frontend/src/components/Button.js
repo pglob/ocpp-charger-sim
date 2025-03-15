@@ -50,9 +50,11 @@ function Button({ chargerID, isOnline, isActive }) {
       )}
 
       {/* Bring Online/Take Offline button */}
-      <button onClick={handleOnlineOffline} className="dropdown-button">
-        {isOnline ? 'Take Offline' : 'Bring Online'}
-      </button>
+      {isActive && (
+        <button onClick={handleOnlineOffline} className="dropdown-button">
+          {isOnline ? 'Take Offline' : 'Bring Online'}
+        </button>
+      )}
     </div>
   );
 }

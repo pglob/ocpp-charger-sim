@@ -13,6 +13,8 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.enums.ChargePointErrorCode;
+import com.sim_backend.websockets.enums.ChargePointStatus;
 import com.sim_backend.websockets.messages.Authorize;
 import com.sim_backend.websockets.messages.BootNotification;
 import com.sim_backend.websockets.messages.Heartbeat;
@@ -20,8 +22,10 @@ import com.sim_backend.websockets.messages.StatusNotification;
 import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -169,6 +173,23 @@ class MessageControllerTest {
   }
 
   @Test
+  void testOfflineBooting() {
+    // Arrange
+    when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.BootingUp);
+
+    // Act
+    messageController.offline(mockContext);
+
+    // Assert
+    InOrder inOrder = inOrder(mockContext, mockWsClient);
+    inOrder.verify(mockContext).status(503);
+    inOrder.verify(mockContext).result("Charger is booting");
+
+    inOrder.verify(mockWsClient).goOffline();
+    inOrder.verify(mockContext).result("OK");
+  }
+
+  @Test
   void testStatus() {
     // Arrange
     when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.Available);
@@ -187,6 +208,61 @@ class MessageControllerTest {
     messageController.status(mockContext);
 
     // Assert
+    verify(mockContext).result("OK");
+  }
+
+  @Test
+  void testStatus_invalidConnector() {
+    // Arrange
+    // Use an invalid connectorId to trigger an exception
+    String requestBody = "{" + "\"connectorId\": \"2\"," + "\"errorCode\": \"NoError\"" + "}";
+    when(mockContext.body()).thenReturn(requestBody);
+
+    // Act
+    messageController.status(mockContext);
+
+    // Assert
+    verify(mockContext).status(400);
+    verify(mockContext).result("Invalid values for connectorId, errorCode");
+  }
+
+  @Test
+  void testStatusWithFault() {
+    // Arrange
+    String requestBody =
+        "{"
+            + "\"connectorId\": \"0\","
+            + "\"errorCode\": \"HighTemperature\","
+            + "\"info\": \"Error occurred\","
+            + "\"vendorId\": \"Vendor\","
+            + "\"vendorErrorCode\": \"VError\""
+            + "}";
+    when(mockContext.body()).thenReturn(requestBody);
+    when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.Available);
+
+    // When fault() is called, simulate that the charger state becomes Faulted
+    doAnswer(
+            invocation -> {
+              when(mockStateMachine.getCurrentState()).thenReturn(ChargerState.Faulted);
+              return null;
+            })
+        .when(mockCharger)
+        .fault(any());
+
+    // Act
+    messageController.status(mockContext);
+
+    // Assert
+    verify(mockCharger).fault(ChargePointErrorCode.HighTemperature);
+    verify(mockStatusNotificationObserver)
+        .sendStatusNotification(
+            eq(0),
+            eq(ChargePointErrorCode.HighTemperature),
+            eq("Error occurred"),
+            eq(ChargePointStatus.Faulted),
+            eq(null),
+            eq("Vendor"),
+            eq("VError"));
     verify(mockContext).result("OK");
   }
 
@@ -264,6 +340,108 @@ class MessageControllerTest {
   }
 
   @Test
+  void testGetSentMessages() {
+    // Arrange
+    List<String> sentMessages = List.of("1", "2", "3");
+    when(mockWsClient.getSentMessages()).thenReturn(sentMessages);
+
+    // Act
+    messageController.getSentMessages(mockContext);
+
+    // Assert
+    verify(mockContext).json(sentMessages);
+  }
+
+  @Test
+  void testGetReceivedMessages() {
+    // Arrange
+    List<String> receivedMessages = List.of("4", "5", "6");
+    when(mockWsClient.getReceivedMessages()).thenReturn(receivedMessages);
+
+    // Act
+    messageController.getReceivedMessages(mockContext);
+
+    // Assert
+    verify(mockContext).json(receivedMessages);
+  }
+
+  @Test
+  void testGetIdTagCSurl() {
+    // Arrange
+    when(mockConfig.getIdTag()).thenReturn("testTag");
+    when(mockConfig.getCentralSystemUrl()).thenReturn("ws://example.com");
+
+    // Act
+    messageController.getIdTagCSurl(mockContext);
+
+    // Assert
+    String expectedJson = "{\"idTag\":\"testTag\", \"centralSystemUrl\":\"ws://example.com\"}";
+    verify(mockContext).json(expectedJson);
+  }
+
+  @Test
+  void testUpdateIdTagCSurl_valid() {
+    // Arrange
+    String requestBody = "{\"idTag\": \"newTag\", \"centralSystemUrl\": \"ws://newurl.com\"}";
+    when(mockContext.body()).thenReturn(requestBody);
+
+    // Act
+    messageController.updateIdTagCSurl(mockContext);
+
+    // Assert
+    verify(mockConfig).setIdTag("newTag");
+    verify(mockConfig).setCentralSystemUrl("ws://newurl.com");
+    String expectedMessage =
+        "Config updated successfully. idTag: newTag, centralSystemUrl: ws://newurl.com";
+    verify(mockContext).status(200);
+    verify(mockContext).result(expectedMessage);
+  }
+
+  @Test
+  void testUpdateIdTagCSurl_missingIdTag() {
+    // Arrange
+    String requestBody = "{\"centralSystemUrl\": \"ws://newurl.com\"}";
+    when(mockContext.body()).thenReturn(requestBody);
+
+    // Act
+    messageController.updateIdTagCSurl(mockContext);
+
+    // Assert
+    verify(mockContext).status(400);
+    verify(mockContext).result("Error: Missing idTag or centralSystemUrl.");
+  }
+
+  @Test
+  void testUpdateIdTagCSurl_missingCentralSystemUrl() {
+    // Arrange
+    String requestBody = "{\"idTag\": \"newTag\"}";
+    when(mockContext.body()).thenReturn(requestBody);
+
+    // Act
+    messageController.updateIdTagCSurl(mockContext);
+
+    // Assert
+    verify(mockContext).status(400);
+    verify(mockContext).result("Error: Missing idTag or centralSystemUrl.");
+  }
+
+  @Test
+  void testUpdateIdTagCSurl_idTagTooLong() {
+    // Arrange
+    String longIdTag = "thisisaverylongidtagexceedinglimit";
+    String requestBody =
+        String.format("{\"idTag\": \"%s\", \"centralSystemUrl\": \"ws://newurl.com\"}", longIdTag);
+    when(mockContext.body()).thenReturn(requestBody);
+
+    // Act
+    messageController.updateIdTagCSurl(mockContext);
+
+    // Assert
+    verify(mockContext).status(400);
+    verify(mockContext).result("Error: idTag cannot exceed 20 characters.");
+  }
+
+  @Test
   void testRegisterRoutes() {
     // Act
     messageController.registerRoutes(mockApp);
@@ -283,5 +461,7 @@ class MessageControllerTest {
     verify(mockApp).get(eq("/api/{chargerId}/electrical/meter-value"), any());
     verify(mockApp).get(eq("/api/{chargerId}/electrical/max-current"), any());
     verify(mockApp).get(eq("/api/{chargerId}/electrical/current-import"), any());
+    verify(mockApp).get(eq("/api/{chargerId}/get-idtag-csurl"), any());
+    verify(mockApp).post(eq("/api/{chargerId}/update-idtag-csurl"), any());
   }
 }

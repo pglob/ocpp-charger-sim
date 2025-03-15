@@ -21,7 +21,7 @@ const errorCodes = [
   'WeakSignal',
 ];
 
-const ErrorMenu = ({ chargerID }) => {
+const ErrorMenu = ({ chargerID, isActive }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [feedbacktype, setFeedbackType] = useState(false);
@@ -111,9 +111,11 @@ const ErrorMenu = ({ chargerID }) => {
 
   return (
     <div className="error-menu-container">
-      <button className="dropdown-toggle" onClick={openMenu}>
-        Simulate exceptions
-      </button>
+      {isActive && (
+        <button className="dropdown-toggle" onClick={openMenu}>
+          Simulate exceptions
+        </button>
+      )}
       {isOpen && (
         <div className="modal-overlay" onClick={closeMenu}>
           <div className="modal-content" onClick={stopPropagation}>
@@ -212,6 +214,7 @@ const ErrorMenu = ({ chargerID }) => {
 
 ErrorMenu.propTypes = {
   chargerID: PropTypes.number.isRequired, // 'chargerID' should be a number
+  isActive: PropTypes.bool.isRequired, // 'isActive' should be a boolean
 };
 
 export default ErrorMenu;
