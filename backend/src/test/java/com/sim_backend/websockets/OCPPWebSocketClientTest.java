@@ -781,26 +781,26 @@ public class OCPPWebSocketClientTest {
 
   @Test
   public void testRecordTxMessageWithStoredRequestName() throws Exception {
-      String message = "[3,\"63301\",{\"status\":\"Accepted\"}]";
-  
-      // Simulate previously storing a request name for this message ID
-      client.rxRequestNames.put("63301", "GetConfiguration");
-  
-      client.recordTxMessage(message);
-  
-      assertEquals(1, client.getSentMessages().size());
-      String recordedMessage = client.getSentMessages().get(0);
-      assertTrue(recordedMessage.contains("GetConfiguration"));
-      assertTrue(recordedMessage.contains("status"));
+    String message = "[3,\"63301\",{\"status\":\"Accepted\"}]";
+
+    // Simulate previously storing a request name for this message ID
+    client.rxRequestNames.put("63301", "GetConfiguration");
+
+    client.recordTxMessage(message);
+
+    assertEquals(1, client.getSentMessages().size());
+    String recordedMessage = client.getSentMessages().get(0);
+    assertTrue(recordedMessage.contains("GetConfiguration"));
+    assertTrue(recordedMessage.contains("status"));
   }
-  
+
   @Test
   public void testRecordTxMessageWithoutStoredRequestName() {
-      String message = "[3,\"unknown_id\",{\"status\":\"Accepted\"}]";
-  
-      client.recordTxMessage(message);
-  
-      assertEquals(0, client.getSentMessages().size());
+    String message = "[3,\"unknown_id\",{\"status\":\"Accepted\"}]";
+
+    client.recordTxMessage(message);
+
+    assertEquals(0, client.getSentMessages().size());
   }
 
   @Test

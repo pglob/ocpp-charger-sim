@@ -163,9 +163,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
       if (rxRequestName == null) {
         log.error("Failed to find the CallRequest Name for message ID: " + msgId);
         return;
-    }
-    JsonElement MsgName = new JsonPrimitive(rxRequestName);
-    JsonArray newArray = insertElementAt(array, 2, MsgName);
+      }
+      JsonElement MsgName = new JsonPrimitive(rxRequestName);
+      JsonArray newArray = insertElementAt(array, 2, MsgName);
       result = gson.toJson(newArray);
     } else {
       result = message;
