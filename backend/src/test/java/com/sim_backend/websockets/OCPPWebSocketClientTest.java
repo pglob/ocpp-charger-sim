@@ -83,10 +83,17 @@ public class OCPPWebSocketClientTest {
         .when(client)
         .send(anyString());
 
+    int initialTxMessages = client.getSentMessages().size();
+
     Heartbeat beat = new Heartbeat();
     client.pushMessage(beat);
     client.popMessage();
     verify(client, times(1)).send(anyString());
+    // Verify that the message was recorded in the transmitted messages list
+    assertEquals(
+        initialTxMessages + 1,
+        client.getSentMessages().size(),
+        "A transmitted message should be recorded");
   }
 
   @Test
@@ -95,6 +102,8 @@ public class OCPPWebSocketClientTest {
 
     Heartbeat beat = new Heartbeat();
     HeartbeatResponse beat2 = new HeartbeatResponse(new Heartbeat());
+
+    int initialTxMessages = client.getSentMessages().size();
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -105,6 +114,11 @@ public class OCPPWebSocketClientTest {
     assert client.isEmpty();
 
     verify(client, times(2)).send(anyString());
+    // Verify that 1 message was recorded in the transmitted messages list
+    assertEquals(
+        initialTxMessages + 1,
+        client.getSentMessages().size(),
+        "A transmitted message should be recorded");
   }
 
   @Test
@@ -581,7 +595,6 @@ public class OCPPWebSocketClientTest {
     // Start the queue with a single message
     client.pushMessage(new BootNotification());
 
-    int initialTxMessages = client.getSentMessages().size();
     Heartbeat heartbeat = new Heartbeat();
 
     // Push a priority message; should return true
@@ -597,12 +610,6 @@ public class OCPPWebSocketClientTest {
     assertTrue(
         client.queue.getQueueSet().contains(heartbeat),
         "Queue set should contain the pushed message");
-
-    // Verify that the message was recorded in the transmitted messages list
-    assertEquals(
-        initialTxMessages + 1,
-        client.getSentMessages().size(),
-        "A transmitted message should be recorded");
   }
 
   @Test
@@ -773,22 +780,26 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testrecordTxMessage() throws Exception {
-    String message =
-        "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
-    client.rxRequestName = "GetConfiguration";
+  public void testRecordTxMessageWithStoredRequestName() throws Exception {
+    String message = "[3,\"63301\",{\"status\":\"Accepted\"}]";
+
+    // Simulate previously storing a request name for this message ID
+    client.rxRequestNames.put("63301", "GetConfiguration");
+
     client.recordTxMessage(message);
-    assertTrue(client.getSentMessages().get(0).contains("GetConfiguration"));
-    assertTrue(client.getSentMessages().get(0).contains("configurationKey"));
+
     assertEquals(1, client.getSentMessages().size());
+    String recordedMessage = client.getSentMessages().get(0);
+    assertTrue(recordedMessage.contains("GetConfiguration"));
+    assertTrue(recordedMessage.contains("status"));
   }
 
   @Test
-  public void testrecordTxMessage_rxRequestName_null() throws Exception {
-    String message =
-        "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
-    client.rxRequestName = null;
+  public void testRecordTxMessageWithoutStoredRequestName() {
+    String message = "[3,\"unknown_id\",{\"status\":\"Accepted\"}]";
+
     client.recordTxMessage(message);
+
     assertEquals(0, client.getSentMessages().size());
   }
 

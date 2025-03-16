@@ -119,6 +119,7 @@ public class MessageQueue {
 
       try {
         message.sendMessage(client);
+        client.recordTxMessage(message.toJsonString());
         queueSet.remove(message);
       } catch (WebsocketNotConnectedException ex) {
         if (message.incrementTries() >= MAX_REATTEMPTS) {
