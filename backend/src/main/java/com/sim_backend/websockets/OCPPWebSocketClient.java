@@ -343,8 +343,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
       switch (callId) {
         case OCPPMessage.CALL_ID_REQUEST -> {
           results = this.parseOCPPRequest(json, msgId, array);
-          String messageName = array.get(NAME_INDEX).getAsString();
-          rxRequestNames.put(msgId, messageName);
         }
         case OCPPMessage.CALL_ID_RESPONSE -> results = this.parseOCPPResponse(json, msgId, array);
         case OCPPMessage.CALL_ID_ERROR -> {
@@ -426,6 +424,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
 
     String messageName = array.get(NAME_INDEX).getAsString();
     this.recordRxMessage(json, messageName);
+    rxRequestNames.put(msgId, messageName);
     return new ParseResults(messageName, array.get(PAYLOAD_INDEX).getAsJsonObject());
   }
 
