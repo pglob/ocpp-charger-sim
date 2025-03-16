@@ -17,11 +17,13 @@ public final class Main {
     // Start Javalin server
     Javalin app = initializeFrontendAPI(config);
 
-    // Create the charger
-    Charger charger1 = new Charger();
-    Charger charger2 = new Charger();
-    Charger charger3 = new Charger();
-    Charger[] chargers = new Charger[] {charger1, charger2, charger3};
+    int numberOfChargers = 3;
+
+    // Create chargers
+    Charger[] chargers = new Charger[numberOfChargers];
+    for (int i = 0; i < numberOfChargers; i++) {
+      chargers[i] = new Charger(i + 1); // id starts at 1
+    }
 
     // Register REST API controllers and routes
     registerRoutes(app, chargers);
@@ -72,7 +74,7 @@ public final class Main {
    * Register API routes with the Javalin app.
    *
    * @param app the Javalin app
-   * @param wsClient the WebSocket client
+   * @param chargers the array of Charger instances
    */
   private static void registerRoutes(Javalin app, Charger[] chargers) {
     ControllerBase messageController = new MessageController(app, chargers);

@@ -26,7 +26,7 @@ class ChargingProfileHandlerTest {
 
   @BeforeEach
   void setUp() {
-    transactionHandler = new TransactionHandler(new Charger());
+    transactionHandler = new TransactionHandler(new Charger(0));
     try {
       client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {

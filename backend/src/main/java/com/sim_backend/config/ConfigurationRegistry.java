@@ -61,11 +61,6 @@ public class ConfigurationRegistry {
   private MeterValuesSampledData meterValuesSampledData =
       MeterValuesSampledData.ENERGY_ACTIVE_IMPORT_REGISTER;
 
-  private static final String PROP_ID_TAG = "idTag";
-  private static final String PROP_CENTRAL_SYSTEM_URL = "centralSystemUrl";
-  private static final String PROP_METER_VALUE_SAMPLE_INTERVAL = "meterValueSampleInterval";
-  private static final String PROP_METER_VALUES_SAMPLED_DATA = "meterValuesSampledData";
-
   public ConfigurationRegistry(String idTag, String centralSystemUrl) {
     this.idTag = idTag;
     this.centralSystemUrl = centralSystemUrl;
@@ -73,7 +68,17 @@ public class ConfigurationRegistry {
 
   private static final String CONFIG_FILE_PATH = "config.properties";
 
-  public static ConfigurationRegistry loadConfiguration() {
+  /**
+   * Load configurations from the command line as environment variables, or from a file.
+   *
+   * @param id The simulator's id for this charger. Used to determine environment variable suffixes.
+   */
+  public static ConfigurationRegistry loadConfiguration(int id) {
+    String PROP_ID_TAG = "idTag_" + String.valueOf(id);
+    String PROP_CENTRAL_SYSTEM_URL = "centralSystemUrl_" + String.valueOf(id);
+    String PROP_METER_VALUE_SAMPLE_INTERVAL = "meterValueSampleInterval_" + String.valueOf(id);
+    String PROP_METER_VALUES_SAMPLED_DATA = "meterValuesSampledData_" + String.valueOf(id);
+
     Properties props = new Properties();
     File configFile = new File(CONFIG_FILE_PATH);
     boolean updatedFromCmd = false;

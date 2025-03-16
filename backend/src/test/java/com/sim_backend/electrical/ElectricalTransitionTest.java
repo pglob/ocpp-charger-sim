@@ -23,7 +23,7 @@ public class ElectricalTransitionTest {
     TransactionHandler handler = null;
     OCPPWebSocketClient client = null;
     try {
-      handler = new TransactionHandler(new Charger());
+      handler = new TransactionHandler(new Charger(0));
       client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
@@ -49,7 +49,7 @@ public class ElectricalTransitionTest {
     TransactionHandler handler = null;
     OCPPWebSocketClient client = null;
     try {
-      handler = new TransactionHandler(new Charger());
+      handler = new TransactionHandler(new Charger(0));
       client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
@@ -79,7 +79,7 @@ public class ElectricalTransitionTest {
     TransactionHandler handler = null;
     OCPPWebSocketClient client = null;
     try {
-      handler = new TransactionHandler(new Charger());
+      handler = new TransactionHandler(new Charger(0));
       client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
@@ -112,7 +112,7 @@ public class ElectricalTransitionTest {
     TransactionHandler handler = null;
     OCPPWebSocketClient client = null;
     try {
-      handler = new TransactionHandler(new Charger());
+      handler = new TransactionHandler(new Charger(0));
       client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
@@ -155,7 +155,7 @@ public class ElectricalTransitionTest {
     TransactionHandler handler = null;
     OCPPWebSocketClient client = null;
     try {
-      handler = new TransactionHandler(new Charger());
+      handler = new TransactionHandler(new Charger(0));
       client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
@@ -186,7 +186,7 @@ public class ElectricalTransitionTest {
     TransactionHandler handler = null;
     OCPPWebSocketClient client = null;
     try {
-      handler = new TransactionHandler(new Charger());
+      handler = new TransactionHandler(new Charger(0));
       client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
@@ -208,7 +208,7 @@ public class ElectricalTransitionTest {
     TransactionHandler handler = null;
     OCPPWebSocketClient client = null;
     try {
-      handler = new TransactionHandler(new Charger());
+      handler = new TransactionHandler(new Charger(0));
       client = new OCPPWebSocketClient(new URI(""), new StatusNotificationObserver());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);

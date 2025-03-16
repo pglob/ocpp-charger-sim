@@ -22,13 +22,22 @@ COPY --from=build /app/target/ocpp-charger-sim-backend-1.0-SNAPSHOT.jar /app/app
 # Expose the backend port
 EXPOSE ${BACKEND_PORT}
 
-# Set command line arguments
-ENV ID_TAG=test
-ENV CENTRAL_SYSTEM_URL=ws://host.docker.internal:9000
-ENV METER_VALUE_SAMPLE_INTERVAL=30
-ENV METER_VALUES_SAMPLED_DATA=ENERGY_ACTIVE_IMPORT_REGISTER
-
-CMD ["sh", "-c", "java -DidTag=${ID_TAG} -DcentralSystemUrl=${CENTRAL_SYSTEM_URL} -DmeterValueSampleInterval=${METER_VALUE_SAMPLE_INTERVAL} -DmeterValuesSampledData=${METER_VALUES_SAMPLED_DATA} -jar /app/app.jar"]
+CMD ["sh", "-c", "exec java \
+    -DidTag_1=${ID_TAG_1} \
+    -DcentralSystemUrl_1=${CENTRAL_SYSTEM_URL_1} \
+    -DmeterValueSampleInterval_1=${METER_VALUE_SAMPLE_INTERVAL_1} \
+    -DmeterValuesSampledData_1=${METER_VALUES_SAMPLED_DATA_1} \
+\
+    -DidTag_2=${ID_TAG_2} \
+    -DcentralSystemUrl_2=${CENTRAL_SYSTEM_URL_2} \
+    -DmeterValueSampleInterval_2=${METER_VALUE_SAMPLE_INTERVAL_2} \
+    -DmeterValuesSampledData_2=${METER_VALUES_SAMPLED_DATA_2} \
+\
+    -DidTag_3=${ID_TAG_3} \
+    -DcentralSystemUrl_3=${CENTRAL_SYSTEM_URL_3} \
+    -DmeterValueSampleInterval_3=${METER_VALUE_SAMPLE_INTERVAL_3} \
+    -DmeterValuesSampledData_3=${METER_VALUES_SAMPLED_DATA_3} \
+    -jar /app/app.jar"]
 
 # Stage 3: Run with debugging
 FROM build AS run-debug
