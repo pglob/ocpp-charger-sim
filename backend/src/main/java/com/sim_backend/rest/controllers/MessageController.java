@@ -85,7 +85,7 @@ public class MessageController extends ControllerBase {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
     if (!checkWsClient(charger, ctx)) return;
-    Authorize msg = new Authorize();
+    Authorize msg = new Authorize(charger.getConfig().getIdTag());
 
     charger.getWsClient().pushMessage(msg);
     ctx.result("OK");

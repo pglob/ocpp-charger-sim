@@ -655,8 +655,6 @@ public class OCPPWebSocketClient extends WebSocketClient {
                       listener -> {
                         listener.onPush(new OnPushOCPPMessage(message, this));
                       }));
-
-      recordTxMessage(message.toJsonString()); // Record transmitted message
     }
     return success;
   }
@@ -667,12 +665,7 @@ public class OCPPWebSocketClient extends WebSocketClient {
    * @param prioMessage the message to be sent.
    */
   public boolean pushPriorityMessage(final OCPPMessage prioMessage) {
-    boolean success = queue.pushPriorityMessage(prioMessage);
-    if (success) {
-      recordTxMessage(prioMessage.toJsonString());
-    }
-
-    return success;
+    return queue.pushPriorityMessage(prioMessage);
   }
 
   /**

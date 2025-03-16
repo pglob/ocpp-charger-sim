@@ -83,10 +83,17 @@ public class OCPPWebSocketClientTest {
         .when(client)
         .send(anyString());
 
+    int initialTxMessages = client.getSentMessages().size();
+
     Heartbeat beat = new Heartbeat();
     client.pushMessage(beat);
     client.popMessage();
     verify(client, times(1)).send(anyString());
+    // Verify that the message was recorded in the transmitted messages list
+    assertEquals(
+      initialTxMessages + 1,
+      client.getSentMessages().size(),
+      "A transmitted message should be recorded");
   }
 
   @Test
@@ -95,6 +102,8 @@ public class OCPPWebSocketClientTest {
 
     Heartbeat beat = new Heartbeat();
     HeartbeatResponse beat2 = new HeartbeatResponse(new Heartbeat());
+
+    int initialTxMessages = client.getSentMessages().size();
 
     client.pushMessage(beat);
     assert client.size() == 1;
@@ -105,6 +114,11 @@ public class OCPPWebSocketClientTest {
     assert client.isEmpty();
 
     verify(client, times(2)).send(anyString());
+    // Verify that 1 message was recorded in the transmitted messages list
+    assertEquals(
+      initialTxMessages + 1,
+      client.getSentMessages().size(),
+      "A transmitted message should be recorded");
   }
 
   @Test
@@ -581,7 +595,6 @@ public class OCPPWebSocketClientTest {
     // Start the queue with a single message
     client.pushMessage(new BootNotification());
 
-    int initialTxMessages = client.getSentMessages().size();
     Heartbeat heartbeat = new Heartbeat();
 
     // Push a priority message; should return true
@@ -597,12 +610,6 @@ public class OCPPWebSocketClientTest {
     assertTrue(
         client.queue.getQueueSet().contains(heartbeat),
         "Queue set should contain the pushed message");
-
-    // Verify that the message was recorded in the transmitted messages list
-    assertEquals(
-        initialTxMessages + 1,
-        client.getSentMessages().size(),
-        "A transmitted message should be recorded");
   }
 
   @Test
