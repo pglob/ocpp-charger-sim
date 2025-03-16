@@ -91,9 +91,9 @@ public class OCPPWebSocketClientTest {
     verify(client, times(1)).send(anyString());
     // Verify that the message was recorded in the transmitted messages list
     assertEquals(
-      initialTxMessages + 1,
-      client.getSentMessages().size(),
-      "A transmitted message should be recorded");
+        initialTxMessages + 1,
+        client.getSentMessages().size(),
+        "A transmitted message should be recorded");
   }
 
   @Test
@@ -116,9 +116,9 @@ public class OCPPWebSocketClientTest {
     verify(client, times(2)).send(anyString());
     // Verify that 1 message was recorded in the transmitted messages list
     assertEquals(
-      initialTxMessages + 1,
-      client.getSentMessages().size(),
-      "A transmitted message should be recorded");
+        initialTxMessages + 1,
+        client.getSentMessages().size(),
+        "A transmitted message should be recorded");
   }
 
   @Test
