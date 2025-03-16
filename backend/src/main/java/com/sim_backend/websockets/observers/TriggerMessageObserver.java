@@ -123,7 +123,7 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
       case Available:
         return ChargePointStatus.Available;
       case BootingUp:
-        return ChargePointStatus.Preparing;
+        return ChargePointStatus.Unavailable;
       case Preparing:
         return ChargePointStatus.Preparing;
       case Charging:
@@ -131,7 +131,7 @@ public class TriggerMessageObserver implements OnOCPPMessageListener {
       case PoweredOff:
         return ChargePointStatus.Unavailable;
       default:
-        return ChargePointStatus.Available;
+        return ChargePointStatus.Unavailable;
     }
   }
 }

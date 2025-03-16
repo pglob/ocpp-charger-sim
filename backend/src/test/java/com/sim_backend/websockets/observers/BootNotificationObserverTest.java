@@ -66,10 +66,11 @@ class BootNotificationObserverTest {
   @Test
   void onMessageReceived_WhenStatusAccepted_SetsHeartbeatAndTransitionsState() {
     // Arrange
+    ZonedDateTime currentTime = ZonedDateTime.now();
     BootNotificationResponse response =
         Mockito.spy(
             new BootNotificationResponse(
-                new BootNotification(), RegistrationStatus.ACCEPTED, ZonedDateTime.now(), 20));
+                new BootNotification(), RegistrationStatus.ACCEPTED, currentTime, 20));
 
     MessageScheduler messageScheduler = mock(MessageScheduler.class);
     OCPPTime time = mock(OCPPTime.class);
@@ -87,10 +88,12 @@ class BootNotificationObserverTest {
     // Assert
     verify(time).setHeartbeatInterval(20L, TimeUnit.SECONDS);
     verify(stateMachine).transition(ChargerState.Available);
+    verify(messageScheduler).synchronizeTime(currentTime);
+    verify(webSocketClient).deleteOnReceiveMessage(BootNotificationResponse.class, observer);
   }
 
   @Test
-  void onMessageReceived_WhenStatusPending_RegistersJob() {
+  void onMessageReceived_WhenStatusPending_DoesNothing() {
     // Arrange
     BootNotificationResponse response =
         Mockito.spy(
@@ -108,7 +111,9 @@ class BootNotificationObserverTest {
     observer.onMessageReceived(message);
 
     // Assert
-    verify(messageScheduler).registerJob(eq(20L), eq(TimeUnit.SECONDS), isBootNotification());
+    verify(messageScheduler, never()).registerJob(anyLong(), any(), any());
+    verify(stateMachine, never()).transition(any());
+    verify(webSocketClient, never()).deleteOnReceiveMessage(any(), any());
   }
 
   @Test
@@ -130,9 +135,7 @@ class BootNotificationObserverTest {
     observer.onMessageReceived(message);
 
     // Assert
-    verify(messageScheduler)
-        .registerJob(
-            eq(OCPPTime.getHEARTBEAT_INTERVAL()), eq(TimeUnit.SECONDS), isBootNotification());
+    verify(messageScheduler).registerJob(eq(240L), eq(TimeUnit.SECONDS), isBootNotification());
   }
 
   @Test
