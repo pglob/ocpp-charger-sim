@@ -780,23 +780,27 @@ public class OCPPWebSocketClientTest {
   }
 
   @Test
-  public void testrecordTxMessage() throws Exception {
-    String message =
-        "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
-    client.rxRequestName = "GetConfiguration";
-    client.recordTxMessage(message);
-    assertTrue(client.getSentMessages().get(0).contains("GetConfiguration"));
-    assertTrue(client.getSentMessages().get(0).contains("configurationKey"));
-    assertEquals(1, client.getSentMessages().size());
+  public void testRecordTxMessageWithStoredRequestName() throws Exception {
+      String message = "[3,\"63301\",{\"status\":\"Accepted\"}]";
+  
+      // Simulate previously storing a request name for this message ID
+      client.rxRequestNames.put("63301", "GetConfiguration");
+  
+      client.recordTxMessage(message);
+  
+      assertEquals(1, client.getSentMessages().size());
+      String recordedMessage = client.getSentMessages().get(0);
+      assertTrue(recordedMessage.contains("GetConfiguration"));
+      assertTrue(recordedMessage.contains("status"));
   }
-
+  
   @Test
-  public void testrecordTxMessage_rxRequestName_null() throws Exception {
-    String message =
-        "[3,\"633428f1-5b68-4a44-8a43-a7fee463be62\",{\"configurationKey\":[{\"key\":\"MeterValueSampleInterval\",\"value\":\"30\",\"readonly\":false}],\"unknownKey\":[]}]";
-    client.rxRequestName = null;
-    client.recordTxMessage(message);
-    assertEquals(0, client.getSentMessages().size());
+  public void testRecordTxMessageWithoutStoredRequestName() {
+      String message = "[3,\"unknown_id\",{\"status\":\"Accepted\"}]";
+  
+      client.recordTxMessage(message);
+  
+      assertEquals(0, client.getSentMessages().size());
   }
 
   @Test

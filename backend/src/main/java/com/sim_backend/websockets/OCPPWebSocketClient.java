@@ -106,8 +106,9 @@ public class OCPPWebSocketClient extends WebSocketClient {
   /** List to store received messages. */
   private final List<String> rxMessages = new CopyOnWriteArrayList<>();
 
-  /** Store Rx CallRequest message name. */
-  public String rxRequestName = null;
+  /** Store Rx CallRequest message names. */
+  @VisibleForTesting
+  public final ConcurrentHashMap<String, String> rxRequestNames = new ConcurrentHashMap<>();
 
   /**
    * Inserts a JsonElement at the specified index in the JsonArray.
@@ -156,15 +157,15 @@ public class OCPPWebSocketClient extends WebSocketClient {
     }
 
     String result;
-    String messageName;
     if (array.get(0).getAsInt() == 3) {
+      String msgId = array.get(MESSAGE_ID_INDEX).getAsString();
+      String rxRequestName = rxRequestNames.get(msgId);
       if (rxRequestName == null) {
-        log.error("Failed to find the CallRequest Name");
+        log.error("Failed to find the CallRequest Name for message ID: " + msgId);
         return;
-      }
-      messageName = rxRequestName;
-      JsonElement MsgName = new JsonPrimitive(messageName);
-      JsonArray newArray = insertElementAt(array, 2, MsgName);
+    }
+    JsonElement MsgName = new JsonPrimitive(rxRequestName);
+    JsonArray newArray = insertElementAt(array, 2, MsgName);
       result = gson.toJson(newArray);
     } else {
       result = message;
@@ -342,7 +343,8 @@ public class OCPPWebSocketClient extends WebSocketClient {
       switch (callId) {
         case OCPPMessage.CALL_ID_REQUEST -> {
           results = this.parseOCPPRequest(json, msgId, array);
-          rxRequestName = array.get(NAME_INDEX).getAsString();
+          String messageName = array.get(NAME_INDEX).getAsString();
+          rxRequestNames.put(msgId, messageName);
         }
         case OCPPMessage.CALL_ID_RESPONSE -> results = this.parseOCPPResponse(json, msgId, array);
         case OCPPMessage.CALL_ID_ERROR -> {
