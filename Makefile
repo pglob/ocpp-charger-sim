@@ -1,5 +1,11 @@
 run:
+	docker-compose --profile core start
+
+run_load:
 	docker compose --profile core up
+
+stop:
+	docker-compose --profile core stop
 
 .PHONY: build docker docker_debug integration_test dummy_server
 

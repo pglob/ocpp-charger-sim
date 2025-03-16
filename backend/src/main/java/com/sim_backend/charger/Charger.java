@@ -28,7 +28,10 @@ import lombok.Setter;
 @Getter
 public class Charger {
 
-  /** The WebSocket client used to communicate with the central syste. */
+  /** The simulator's ID for this charger. */
+  private int id;
+
+  /** The WebSocket client used to communicate with the central system. */
   private OCPPWebSocketClient wsClient;
 
   /** The state machine representing the current state of the charger */
@@ -68,9 +71,9 @@ public class Charger {
   private MeterValuesObserver meterValueObserver;
 
   /** Constructs a new Charger instance */
-  public Charger() {
-    // TODO: Get central system URI from frontend or command line
-    this.config = ConfigurationRegistry.loadConfiguration();
+  public Charger(int id) {
+    this.id = id;
+    this.config = ConfigurationRegistry.loadConfiguration(id);
   }
 
   /**

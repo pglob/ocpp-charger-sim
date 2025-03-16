@@ -73,7 +73,7 @@ class ChargerTest {
                   .run();
             });
 
-    Charger charger = new Charger();
+    Charger charger = new Charger(0);
     charger.boot();
 
     // Verify that the WebSocket client was constructed
@@ -124,7 +124,7 @@ class ChargerTest {
             });
 
     // Start the charger
-    Charger charger = new Charger();
+    Charger charger = new Charger(0);
     charger.boot();
 
     // Verify that the components were created
@@ -195,7 +195,7 @@ class ChargerTest {
             });
 
     // Start the charger
-    Charger charger = new Charger();
+    Charger charger = new Charger(0);
     charger.boot();
 
     // Save references to the current components
@@ -254,7 +254,7 @@ class ChargerTest {
 
   @Test
   void testIsRebootInProgress() throws Exception {
-    Charger charger = new Charger();
+    Charger charger = new Charger(0);
     // Ensure the charger is not in reboot mode
     assertFalse(charger.isRebootInProgress(), "Reboot should not be in progress initially");
 
@@ -273,7 +273,7 @@ class ChargerTest {
   @Test
   void testFault_TransitionToFaulted() throws Exception {
     // Test fault() when current state is not Faulted
-    Charger charger = new Charger();
+    Charger charger = new Charger(0);
     charger.boot();
 
     ChargerStateMachine mockStateMachine = mock(ChargerStateMachine.class);
@@ -294,7 +294,7 @@ class ChargerTest {
   @Test
   void testFault_AlreadyFaulted() throws Exception {
     // Test fault() when current state is already Faulted
-    Charger charger = new Charger();
+    Charger charger = new Charger(0);
     charger.boot();
 
     ChargerStateMachine mockStateMachine = mock(ChargerStateMachine.class);
@@ -313,7 +313,7 @@ class ChargerTest {
   @Test
   void testClearFault() throws Exception {
     // Test that clearFault() transitions the charger state to Available
-    Charger charger = new Charger();
+    Charger charger = new Charger(0);
     charger.boot();
 
     ChargerStateMachine mockStateMachine = mock(ChargerStateMachine.class);
