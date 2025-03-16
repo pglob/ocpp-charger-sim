@@ -5,59 +5,52 @@ This project is for the RangerEV sponsor.
 
 ## How to build and run
 
+Make can be used from the root directory for ease-of-use commands.
+
 1. Docker must be installed (see here https://docs.docker.com/engine/install/)
 2. Ensure Docker is running on your system.
-3. In `ocpp-charger-sim/` run `docker-compose up --build`
+3. In `ocpp-charger-sim/`, run `make`
 4. After it is done building, it will run automatically
    - The frontend will default to http://localhost:3030
    - The backend will default to http://localhost:8080
    - Port numbers and URLs are defined in `ocpp-charger-sim/.env`
 
-## Frontend
+To start an already built container: use `make` \
+To stop a running container: use `make stop` \
+To load in configuration variables: use `make run_load` \
+If changes were made to the Simulator code: use `make docker`
 
-### Testing
+### Loading configuration variables
+
+Certain configurations can be loaded from the command line for ease of use. Supported configurations are found in `ocpp-charger-sim/backend/Dockerfile` and `ocpp-charger-sim/docker-compose.yml`. Use the suffix "_n", where n is the number of the charger you want. If you do not provide any from the command line, they can be modified when the simulatir is running.
+
+Example:
+```
+ID_TAG_1=charger1 CENTRAL_SYSTEM_URL_1=ws://example.com \
+ID_TAG_2=charger2 CENTRAL_SYSTEM_URL_2=ws://example.com \
+ID_TAG_3=charger3 CENTRAL_SYSTEM_URL_3=ws://example.com \
+make run_load
+```
+
+## Frontend
 
 ### Linting
 
 Use ESLint to check the code’s quality and style, and Prettier to adjust code formatting.
 
-Before running the linter, install the required dependencies by running the following command in the `frontend` directory:
+Before running the linter, install the required dependencies by running the following command in the `ocpp-charger-sim/frontend` directory:
 
 ```bash
 npm install
 ```
 
-View formatting and style issues in all .js and .jsx files:
+To automatically fix formatting and style issues in all .js and .jsx files:
 
 ```bash
 npm run lint
 ```
 
-to automatically fix code formatting issues:
-
-```bash
-npm run format
-```
-
 ## Backend
-
-### Testing
-
-### Linting
-
-Makefile can be used from the root directory for ease-of-use commands.
-
-Run the simulator
-
-```bash
-   make
-```
-
-Create the docker file
-
-```bash
-   make docker
-```
 
 Build backend
 
@@ -71,19 +64,11 @@ Build backend and skip tests
    make build_backend_fast
 ```
 
-Use the linter on the backend
+Use the linter on the backend (using spotless). Ensure current directory is at backend.
 
 ```bash
-   lint_backend
+   make lint_backend
 ```
-
-Compose and run docker file
-
-```bash
-   make docker
-```
-
-Use spotless for backend code formatting. Ensure current directory is at backend.
 
 View formatting and style issues in all .java files:
 
@@ -96,3 +81,30 @@ Automatically fix code formatting issues:
 ```bash
    mvn spotless:apply
 ```
+
+## Testing
+
+Unit tests can be ran with:
+
+```
+   make unit_test
+```
+
+Integration tests can be ran with:
+
+```
+   make integration_test
+```
+
+The simulator can be ran with a dummy central system with:
+
+```
+   make dummy_server
+```
+
+## Debugging
+The following commands open up port 5005 for backend debugging:
+* `docker_debug`
+* `dummy_server_debug`
+
+For Visual Studio Code users, a `launch.json` is provided for connecting to the debugger.
