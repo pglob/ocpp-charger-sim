@@ -1,6 +1,6 @@
 import "cypress-wait-until";
 import { pollMessages, getNextMessage, deleteMessages, sendResponseFile } from "../../helpers/DummyServerHelper";
-import { verifyCiStringField, verifyCallFields } from "../../helpers/AssertionHelper";
+import { verifyTimestampField, verifyEnumField, verifyIntegerField, verifyCiStringField, verifyCallFields } from "../../helpers/AssertionHelper";
 
 let INTERVAL = 5;
 
@@ -23,6 +23,13 @@ describe("OCPP boot sequence test", () => {
     verifyCiStringField(payload, "imsi", 20);
     verifyCiStringField(payload, "meterType", 25);
     verifyCiStringField(payload, "meterSerialNumber", 25);
+  };
+
+  const verifyStatusNotificationPayload = (payload) => {
+    verifyIntegerField(payload, "connectorId", 1);
+    verifyEnumField(payload, "errorCode", "NoError");
+    verifyEnumField(payload, "status", "Available");
+    verifyTimestampField(payload, "timestamp", 60);
   };
 
   const verifyMessagesWithInterval = (messageType, iterations) => {
@@ -70,6 +77,15 @@ describe("OCPP boot sequence test", () => {
       verifyBootNotificationPayload(messageArray[3]);
     });
 
+    // Wait until the StatusNotification message is received
+    pollMessages(10000, 100);
+
+    // Verify the StatusNotification message
+    getNextMessage().then((messageArray) => {
+      verifyCallFields(messageArray, "StatusNotification");
+      verifyStatusNotificationPayload(messageArray[3]);
+    });
+
     // Check Heartbeat messages with 5-second intervals
     verifyMessagesWithInterval("Heartbeat", 5);
   });
@@ -91,6 +107,15 @@ describe("OCPP boot sequence test", () => {
 
     // Check BootNotification messages with 5-second retry times
     verifyMessagesWithInterval("BootNotification", 3);
+
+    // Wait until the StatusNotification message is received
+    pollMessages(10000, 100);
+
+    // Verify the StatusNotification message
+    getNextMessage().then((messageArray) => {
+      verifyCallFields(messageArray, "StatusNotification");
+      verifyStatusNotificationPayload(messageArray[3]);
+    });
 
     // Check Heartbeat messages with 10-second intervals
     verifyMessagesWithInterval("Heartbeat", 3);

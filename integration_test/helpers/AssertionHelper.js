@@ -20,6 +20,17 @@ function verifyCiStringField(payload, fieldName, maxLength, optional = false) {
   }
 }
 
+// Helper function to verify fields with enum types
+function verifyEnumField(payload, fieldName, expectedValue, optional = false) {
+  if (!optional) {
+    expect(payload).to.have.property(fieldName); // Fail if field is missing
+  }
+  if (payload[fieldName] !== undefined) {
+    expect(payload[fieldName]).to.be.a("string");
+    expect(payload[fieldName]).to.equal(expectedValue);
+  }
+}
+
 // Helper function to verify fields with integer types
 function verifyIntegerField(payload, fieldName, expectedValue, optional = false, customCompareFn = null) {
   if (!optional) {
@@ -38,6 +49,28 @@ function verifyIntegerField(payload, fieldName, expectedValue, optional = false,
   }
 }
 
+// Helper function to verify fields with string decimals
+function verifyDecimalStringField(payload, fieldName, expectedValue, optional = false, customCompareFn = null) {
+  if (!optional) {
+    expect(payload).to.have.property(fieldName); // Fail if field is missing
+  }
+
+  if (payload[fieldName] !== undefined) {
+    // Check that the value is a string
+    expect(payload[fieldName]).to.be.a("string");
+
+    // Attempt to parse the string as a float (decimal)
+    const decimalValue = parseFloat(payload[fieldName]);
+    expect(isNaN(decimalValue)).to.be.false; // Ensure it's a valid number
+
+    if (customCompareFn != null) {
+      expect(customCompareFn(decimalValue)).to.be.true;
+    } else {
+      expect(decimalValue).to.equal(parseFloat(expectedValue));
+    }
+  }
+}
+
 // Helper function to verify timestamp fields
 function verifyTimestampField(payload, fieldName, allowedDiffSeconds, optional = false, customCompareFn = null) {
   if (!optional) {
@@ -48,7 +81,7 @@ function verifyTimestampField(payload, fieldName, allowedDiffSeconds, optional =
     const timestamp = payload[fieldName];
 
     // Verify the format using a regular expression
-    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
     expect(timestamp).to.match(isoRegex);
 
     // Convert the timestamp to a Date object and check validity
@@ -73,4 +106,4 @@ function verifyCallFields(messageArray, action) {
   expect(messageArray[2]).to.eq(action);
 }
 
-export { validateMessage, verifyCiStringField, verifyIntegerField, verifyTimestampField, verifyCallFields };
+export { validateMessage, verifyCiStringField, verifyEnumField, verifyIntegerField, verifyDecimalStringField, verifyTimestampField, verifyCallFields };

@@ -68,7 +68,6 @@ public class StartTransactionHandler {
     StartTransaction startTransactionMessage =
         new StartTransaction(connectorId, idTag, meterStart, timestamp);
     client.pushMessage(startTransactionMessage);
-    meter.sendMeterValues(ReadingContext.TRANSACTION_BEGIN);
 
     final OnOCPPMessageListener listener =
         new OnOCPPMessageListener() {
@@ -82,6 +81,7 @@ public class StartTransactionHandler {
               transactionId.set(response.getTransactionId());
               System.out.println(
                   "Start Transaction Completed... Transaction Id : " + response.getTransactionId());
+              meter.sendMeterValues(ReadingContext.TRANSACTION_BEGIN);
               stateMachine.checkAndTransition(ChargerState.Preparing, ChargerState.Charging);
             } else {
               System.err.println("Transaction Failed to Start...");

@@ -16,6 +16,8 @@ docker_debug:
 	DEBUG_STAGE=suspend-debug docker-compose --profile core up --build
 
 integration_test:
+	ID_TAG_2=invalid \
+	ID_TAG_3=invalid \
 	docker-compose --env-file .env.internal --profile integration-test up --build
 
 dummy_server:

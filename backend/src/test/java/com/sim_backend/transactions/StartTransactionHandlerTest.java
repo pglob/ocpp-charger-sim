@@ -91,9 +91,6 @@ public class StartTransactionHandlerTest {
     // Verify that a StartTransaction message was pushed
     verify(client).pushMessage(any(StartTransaction.class));
 
-    // Verify that a MeterValues message was triggered
-    verify(meter, times(1)).sendMeterValues(ReadingContext.TRANSACTION_BEGIN);
-
     // Verify that onTimeout() resulted in the state machine transitioning to Available
     verify(stateMachine).checkAndTransition(ChargerState.Preparing, ChargerState.Available);
 
