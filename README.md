@@ -29,7 +29,7 @@ Example:
 ID_TAG_1=charger1 CENTRAL_SYSTEM_URL_1=ws://example.com \
 ID_TAG_2=charger2 CENTRAL_SYSTEM_URL_2=ws://example.com \
 ID_TAG_3=charger3 CENTRAL_SYSTEM_URL_3=ws://example.com \
-make run_load
+ make run_load
 ```
 
 ## Frontend
