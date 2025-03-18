@@ -7,7 +7,7 @@ app.use(express.urlencoded({ extended: true }));
 const receivedMessages = [];
 let responseData = null;  // Store the response content
 
-// Endpoint to retrieve received WebSocket messages
+// Endpoint to retrieve the number of received WebSocket messages
 app.get("/api/messageLength", (req, res) => {
   res.json({ message: receivedMessages.length });
 });

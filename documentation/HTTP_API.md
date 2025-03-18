@@ -86,10 +86,10 @@ This document describes the purpose and functionality of each HTTP endpoint in t
 
 ### GET `/api/{chargerId}/get-idtag-csurl`
 
-- **Functionality**: Retrieves the configuration parameters of the charging station.
+- **Functionality**: Retrieves the idTag and Central System Url parameters of the charging station.
 - **Response**: Returns a JSON-formatted string.
 
 ### POST `/api/{chargerId}/update-idtag-csurl`
 
-- **Functionality**: Updates the configuration parameters of the charging station.
+- **Functionality**: Updates the idTag and Central System Url parameters of the charging station.
 - **Response**: Returns a success message on success.

@@ -24,13 +24,26 @@ import lombok.Getter;
 @Getter
 public class MessageController extends ControllerBase {
 
+  /** Array holding the charger instances managed by this controller */
   private final Charger[] chargers;
 
+  /**
+   * Constructor that initializes the controller with the Javalin app and the array of chargers.
+   *
+   * @param app      the Javalin application instance
+   * @param chargers the array of Charger objects
+   */
   public MessageController(Javalin app, Charger[] chargers) {
     super(app);
     this.chargers = chargers;
   }
 
+  /**
+   * Retrieves the Charger instance based on the "chargerId" path parameter.
+   *
+   * @param ctx the Javalin HTTP context containing the request parameters
+   * @return the Charger instance if found and valid; otherwise, returns null after setting an error response
+   */
   private Charger getChargerID(Context ctx) {
     String chargerIdStr = ctx.pathParam("chargerId");
     int chargerId;
@@ -44,11 +57,17 @@ public class MessageController extends ControllerBase {
       ctx.status(404).result("Charger not found");
       return null;
     }
+    // Return the charger from the array (adjusting for 0-based index)
     return chargers[chargerId - 1];
   }
 
-  // Helper methods to check if components are available
-
+  /**
+   * Checks if the OCPPWebSocketClient is available for the given charger.
+   *
+   * @param charger the Charger instance to check
+   * @param ctx     the HTTP context used to return an error message if not available
+   * @return true if the OCPPWebSocketClient is available; false otherwise
+   */
   private boolean checkWsClient(Charger charger, Context ctx) {
     if (charger.getWsClient() == null) {
       ctx.status(503).result("Charger is rebooting");
@@ -57,6 +76,13 @@ public class MessageController extends ControllerBase {
     return true;
   }
 
+  /**
+   * Checks if the TransactionHandler is available for the given charger.
+   *
+   * @param charger the Charger instance to check
+   * @param ctx     the HTTP context used to return an error message if not available
+   * @return true if the TransactionHandler is available; false otherwise
+   */
   private boolean checkTransactionHandler(Charger charger, Context ctx) {
     if (charger.getTransactionHandler() == null) {
       ctx.status(503).result("Charger is rebooting");
@@ -65,6 +91,13 @@ public class MessageController extends ControllerBase {
     return true;
   }
 
+  /**
+   * Checks if the ChargerStateMachine is available for the given charger.
+   *
+   * @param charger the Charger instance to check
+   * @param ctx     the HTTP context used to return an error message if not available
+   * @return true if the ChargerStateMachine is available; false otherwise
+   */
   private boolean checkStateMachine(Charger charger, Context ctx) {
     if (charger.getStateMachine() == null) {
       ctx.status(503).result("Charger is rebooting");
@@ -73,6 +106,13 @@ public class MessageController extends ControllerBase {
     return true;
   }
 
+  /**
+   * Checks if the ElectricalTransition is available for the given charger.
+   *
+   * @param charger the Charger instance to check
+   * @param ctx     the HTTP context used to return an error message if not available
+   * @return true if the ElectricalTransition is available; false otherwise
+   */
   private boolean checkElec(Charger charger, Context ctx) {
     if (charger.getElec() == null) {
       ctx.status(503).result("Charger is rebooting");
@@ -81,6 +121,11 @@ public class MessageController extends ControllerBase {
     return true;
   }
 
+  /**
+   * Processes the "authorize" request by sending an Authorize message via the WebSocket client.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void authorize(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -91,6 +136,11 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
+  /**
+   * Processes the "boot" request by sending a BootNotification message to the backend.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void boot(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -111,6 +161,11 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
+  /**
+   * Processes the "heartbeat" request by sending a Heartbeat message to the backend. This will result in the simulator clock synchronizing.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void heartbeat(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -121,6 +176,11 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
+  /**
+   * Returns the current state of the charger. If the charger is offline, appends " (offline)"".
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void state(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -130,11 +190,18 @@ public class MessageController extends ControllerBase {
       ctx.result("PoweredOff");
       return;
     }
+
     String offlineState = charger.getWsClient().isOnline() ? "" : " (Offline)";
 
     ctx.result(stateMachine.getCurrentState().toString() + offlineState);
   }
 
+  /**
+   * Initiates a reboot sequence for the charger. It checks that no reboot is already in progress
+   * and that all necessary components are available.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void reboot(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -150,6 +217,11 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
+  /**
+   * Processes the "online" request, which marks the charger as online.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void online(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -159,6 +231,12 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
+  /**
+   * Processes the "offline" request, marking the charger as offline. It also checks the state machine
+   * to ensure the charger is not in the booting state.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void offline(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -173,6 +251,12 @@ public class MessageController extends ControllerBase {
     ctx.result("OK");
   }
 
+  /**
+   * Processes a status update request. It reads the JSON payload for "connectorId", "errorCode", and
+   * additional optional fields, and then sends a status notification.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void status(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -182,29 +266,35 @@ public class MessageController extends ControllerBase {
     String requestBody = ctx.body();
     JsonObject json = JsonParser.parseString(requestBody).getAsJsonObject();
 
+    // Validate that required fields are present
     if (!json.has("connectorId") || !json.has("errorCode")) {
       ctx.status(400).result("Missing required fields: connectorId, errorCode");
       return;
     }
 
     try {
+      // Parse and validate the connectorId value
       int connectorId = json.get("connectorId").getAsInt();
       if (connectorId != 0 && connectorId != 1) {
         throw new IllegalArgumentException();
       }
 
+      // Parse the errorCode and trim any whitespace
       String errorCodeStr = json.get("errorCode").getAsString().trim();
       ChargePointErrorCode errorCode =
           ChargePointErrorCode.valueOf(errorCodeStr); // if not valid, it will throw exception
 
+      // Optionally parse the "info" field
       String info = json.has("info") ? json.get("info").getAsString().trim() : null;
       if (info != null && info.isEmpty()) info = null;
 
+      // Parse timestamp if provided; otherwise set as null
       ZonedDateTime timestamp =
           json.has("timestamp")
               ? charger.getWsClient().getScheduler().getTime().getSynchronizedTime()
               : null;
 
+      // Parse vendor-specific information if provided
       String vendorId = json.has("vendorId") ? json.get("vendorId").getAsString().trim() : null;
       if (vendorId != null && vendorId.isEmpty()) vendorId = null;
 
@@ -212,13 +302,16 @@ public class MessageController extends ControllerBase {
           json.has("vendorErrorCode") ? json.get("vendorErrorCode").getAsString().trim() : null;
       if (vendorErrorCode != null && vendorErrorCode.isEmpty()) vendorErrorCode = null;
 
+      // If there is an error (other than NoError), mark the charger as faulted
       if (errorCode != ChargePointErrorCode.NoError) {
         charger.fault(errorCode);
       }
 
+      // Determine the current status based on the state machine
       ChargePointStatus status =
           ChargePointStatus.fromString(charger.getStateMachine().getCurrentState().toString());
 
+      // Send the status notification with all the parsed parameters
       charger
           .getStatusNotificationObserver()
           .sendStatusNotification(
@@ -227,10 +320,16 @@ public class MessageController extends ControllerBase {
       ctx.result("OK");
 
     } catch (Exception e) {
+      // If any parsing or validation fails, return a bad request error
       ctx.status(400).result("Invalid values for connectorId, errorCode");
     }
   }
 
+  /**
+   * Clears any fault condition on the charger.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void clearFault(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -241,6 +340,11 @@ public class MessageController extends ControllerBase {
     }
   }
 
+  /**
+   * Returns a JSON list of messages sent by the charger via the WebSocket client.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void getSentMessages(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -248,6 +352,11 @@ public class MessageController extends ControllerBase {
     ctx.json(charger.getWsClient().getSentMessages()); // Return sent messages as JSON
   }
 
+  /**
+   * Returns a JSON list of messages received by the charger via the WebSocket client.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void getReceivedMessages(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -255,22 +364,40 @@ public class MessageController extends ControllerBase {
     ctx.json(charger.getWsClient().getReceivedMessages()); // Return received messages as JSON
   }
 
+  /**
+   * Starts a charging transaction on the charger.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void startCharge(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
     if (!checkTransactionHandler(charger, ctx)) return;
+    // Start the charging process using a hard-coded connector (1) and the configured idTag
     charger.getTransactionHandler().startCharging(1, charger.getConfig().getIdTag());
     ctx.result("OK");
   }
 
+  /**
+   * Stops the current charging transaction on the charger.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void stopCharge(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
     if (!checkTransactionHandler(charger, ctx)) return;
+    // Stop charging using the configured idTag and no specified Reason
     charger.getTransactionHandler().stopCharging(charger.getConfig().getIdTag(), null);
     ctx.result("OK");
   }
 
+  /**
+   * Retrieves the current meter value (energy active import register) and returns it formatted
+   * to 4 significant digits.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void meterValue(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -279,6 +406,11 @@ public class MessageController extends ControllerBase {
     ctx.result(String.format("%.4g", charger.getElec().getEnergyActiveImportRegister()));
   }
 
+  /**
+   * Returns the maximum current value available from the charger.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void maxCurrent(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -286,6 +418,11 @@ public class MessageController extends ControllerBase {
     ctx.result(String.valueOf(charger.getElec().getMaxCurrent()));
   }
 
+  /**
+   * Returns the current import value from the charger.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void currentImport(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -293,6 +430,12 @@ public class MessageController extends ControllerBase {
     ctx.result(String.valueOf(charger.getElec().getCurrentImport()));
   }
 
+  /**
+   * Retrieves the current idTag and central system URL from the charger's configuration and returns
+   * them as a JSON object.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void getIdTagCSurl(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -303,6 +446,11 @@ public class MessageController extends ControllerBase {
     ctx.json(configString);
   }
 
+  /**
+   * Updates the idTag and central system URL in the charger configuration.
+   *
+   * @param ctx the HTTP context representing the request/response
+   */
   public void updateIdTagCSurl(Context ctx) {
     Charger charger = getChargerID(ctx);
     if (charger == null) return;
@@ -336,31 +484,44 @@ public class MessageController extends ControllerBase {
     ctx.status(200).result(successMessage);
   }
 
+  /**
+   * Registers all the API routes/endpoints with the Javalin app.
+   *
+   * @param app the Javalin application instance
+   */
   @Override
   public void registerRoutes(Javalin app) {
+    // Message related endpoints
     app.post("/api/{chargerId}/message/authorize", this::authorize);
     app.post("/api/{chargerId}/message/boot", this::boot);
     app.post("/api/{chargerId}/message/heartbeat", this::heartbeat);
 
+    // Charger state endpoint
     app.get("/api/{chargerId}/state", this::state);
 
+    // Charger control endpoints
     app.post("/api/{chargerId}/charger/reboot", this::reboot);
     app.post("/api/{chargerId}/charger/clear-fault", this::clearFault);
 
+    // Charger online/offline endpoints
     app.post("/api/{chargerId}/state/online", this::online);
     app.post("/api/{chargerId}/state/offline", this::offline);
     app.post("/api/{chargerId}/state/status", this::status);
 
+    // Log endpoints for sent and received messages
     app.get("/api/{chargerId}/log/sentmessage", this::getSentMessages);
     app.get("/api/{chargerId}/log/receivedmessage", this::getReceivedMessages);
 
+    // Transaction control endpoints
     app.post("/api/{chargerId}/transaction/start-charge", this::startCharge);
     app.post("/api/{chargerId}/transaction/stop-charge", this::stopCharge);
 
+    // Electrical measurements endpoints
     app.get("/api/{chargerId}/electrical/meter-value", this::meterValue);
     app.get("/api/{chargerId}/electrical/max-current", this::maxCurrent);
     app.get("/api/{chargerId}/electrical/current-import", this::currentImport);
 
+    // Configuration endpoints for idTag and central system URL
     app.get("/api/{chargerId}/get-idtag-csurl", this::getIdTagCSurl);
     app.post("/api/{chargerId}/update-idtag-csurl", this::updateIdTagCSurl);
   }

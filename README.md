@@ -20,9 +20,13 @@ To stop a running container: use `make stop` \
 To load in configuration variables: use `make run_load` \
 If changes were made to the Simulator code: use `make docker`
 
+`make run_load` and `make docker` will revert unspecified configurations to their default.
+
 ### Loading configuration variables
 
-Certain configurations can be loaded from the command line for ease of use. Supported configurations are found in `ocpp-charger-sim/backend/Dockerfile` and `ocpp-charger-sim/docker-compose.yml`. Use the suffix "_n", where n is the number of the charger you want. If you do not provide any from the command line, they can be modified when the simulatir is running.
+Certain configurations can be loaded from the command line for ease of use. Supported configurations are found in `ocpp-charger-sim/backend/Dockerfile` and `ocpp-charger-sim/docker-compose.yml`. Use the suffix "_n", where n is the number of the charger you want. If you do not provide any from the command line, they can be modified when the simulator is running.
+
+Once configurations are loaded in, they will persist as long as the backend container is not recreated. That is, if you do not run `make run_load`, or `make docker`, the configuration will persist.
 
 Example:
 ```
