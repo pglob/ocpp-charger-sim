@@ -30,7 +30,7 @@ public class MessageController extends ControllerBase {
   /**
    * Constructor that initializes the controller with the Javalin app and the array of chargers.
    *
-   * @param app      the Javalin application instance
+   * @param app the Javalin application instance
    * @param chargers the array of Charger objects
    */
   public MessageController(Javalin app, Charger[] chargers) {
@@ -42,7 +42,8 @@ public class MessageController extends ControllerBase {
    * Retrieves the Charger instance based on the "chargerId" path parameter.
    *
    * @param ctx the Javalin HTTP context containing the request parameters
-   * @return the Charger instance if found and valid; otherwise, returns null after setting an error response
+   * @return the Charger instance if found and valid; otherwise, returns null after setting an error
+   *     response
    */
   private Charger getChargerID(Context ctx) {
     String chargerIdStr = ctx.pathParam("chargerId");
@@ -65,7 +66,7 @@ public class MessageController extends ControllerBase {
    * Checks if the OCPPWebSocketClient is available for the given charger.
    *
    * @param charger the Charger instance to check
-   * @param ctx     the HTTP context used to return an error message if not available
+   * @param ctx the HTTP context used to return an error message if not available
    * @return true if the OCPPWebSocketClient is available; false otherwise
    */
   private boolean checkWsClient(Charger charger, Context ctx) {
@@ -80,7 +81,7 @@ public class MessageController extends ControllerBase {
    * Checks if the TransactionHandler is available for the given charger.
    *
    * @param charger the Charger instance to check
-   * @param ctx     the HTTP context used to return an error message if not available
+   * @param ctx the HTTP context used to return an error message if not available
    * @return true if the TransactionHandler is available; false otherwise
    */
   private boolean checkTransactionHandler(Charger charger, Context ctx) {
@@ -95,7 +96,7 @@ public class MessageController extends ControllerBase {
    * Checks if the ChargerStateMachine is available for the given charger.
    *
    * @param charger the Charger instance to check
-   * @param ctx     the HTTP context used to return an error message if not available
+   * @param ctx the HTTP context used to return an error message if not available
    * @return true if the ChargerStateMachine is available; false otherwise
    */
   private boolean checkStateMachine(Charger charger, Context ctx) {
@@ -110,7 +111,7 @@ public class MessageController extends ControllerBase {
    * Checks if the ElectricalTransition is available for the given charger.
    *
    * @param charger the Charger instance to check
-   * @param ctx     the HTTP context used to return an error message if not available
+   * @param ctx the HTTP context used to return an error message if not available
    * @return true if the ElectricalTransition is available; false otherwise
    */
   private boolean checkElec(Charger charger, Context ctx) {
@@ -162,7 +163,8 @@ public class MessageController extends ControllerBase {
   }
 
   /**
-   * Processes the "heartbeat" request by sending a Heartbeat message to the backend. This will result in the simulator clock synchronizing.
+   * Processes the "heartbeat" request by sending a Heartbeat message to the backend. This will
+   * result in the simulator clock synchronizing.
    *
    * @param ctx the HTTP context representing the request/response
    */
@@ -232,8 +234,8 @@ public class MessageController extends ControllerBase {
   }
 
   /**
-   * Processes the "offline" request, marking the charger as offline. It also checks the state machine
-   * to ensure the charger is not in the booting state.
+   * Processes the "offline" request, marking the charger as offline. It also checks the state
+   * machine to ensure the charger is not in the booting state.
    *
    * @param ctx the HTTP context representing the request/response
    */
@@ -252,8 +254,8 @@ public class MessageController extends ControllerBase {
   }
 
   /**
-   * Processes a status update request. It reads the JSON payload for "connectorId", "errorCode", and
-   * additional optional fields, and then sends a status notification.
+   * Processes a status update request. It reads the JSON payload for "connectorId", "errorCode",
+   * and additional optional fields, and then sends a status notification.
    *
    * @param ctx the HTTP context representing the request/response
    */
@@ -393,8 +395,8 @@ public class MessageController extends ControllerBase {
   }
 
   /**
-   * Retrieves the current meter value (energy active import register) and returns it formatted
-   * to 4 significant digits.
+   * Retrieves the current meter value (energy active import register) and returns it formatted to 4
+   * significant digits.
    *
    * @param ctx the HTTP context representing the request/response
    */
