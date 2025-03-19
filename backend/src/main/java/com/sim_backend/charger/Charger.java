@@ -14,6 +14,7 @@ import com.sim_backend.websockets.observers.ChangeAvailabilityObserver;
 import com.sim_backend.websockets.observers.ChangeConfigurationObserver;
 import com.sim_backend.websockets.observers.GetConfigurationObserver;
 import com.sim_backend.websockets.observers.MeterValuesObserver;
+import com.sim_backend.websockets.observers.SetChargingProfileObserver;
 import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.observers.TriggerMessageObserver;
 import java.net.URI;
@@ -103,12 +104,12 @@ public class Charger {
 
       // Create the Charger's components
       stateMachine = new ChargerStateMachine();
-      elec = new ElectricalTransition(stateMachine);
 
       wsClient =
           new OCPPWebSocketClient(
               URI.create(config.getCentralSystemUrl() + "/" + config.getIdTag()),
               statusNotificationObserver);
+      elec = new ElectricalTransition(stateMachine, wsClient);
       transactionHandler = new TransactionHandler(this);
       elec.setChargingProfileHandler(new ChargingProfileHandler(transactionHandler, wsClient));
 
@@ -122,6 +123,9 @@ public class Charger {
           new ChangeAvailabilityObserver(wsClient, this);
       TriggerMessageObserver triggerMessageObserver =
           new TriggerMessageObserver(wsClient, stateMachine, meterValueObserver);
+      SetChargingProfileObserver setChargingProfileObserver =
+          new SetChargingProfileObserver(elec.getChargingProfileHandler(), elec, wsClient);
+
       meterValueObserver.instantiate(wsClient, stateMachine, transactionHandler, elec, config);
       statusNotificationObserver.setClient(wsClient);
 

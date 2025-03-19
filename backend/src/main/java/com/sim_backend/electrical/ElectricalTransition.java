@@ -3,6 +3,7 @@ package com.sim_backend.electrical;
 import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.state.StateObserver;
+import com.sim_backend.websockets.OCPPWebSocketClient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,6 +33,7 @@ public class ElectricalTransition implements StateObserver {
   private float lifetimeEnergy = 0.0f;
 
   @Setter private ChargingProfileHandler chargingProfileHandler;
+  OCPPWebSocketClient wsClient;
 
   /** Constant representing the number of seconds in an hour. Used for energy calculations. */
   private static final long SECONDS_PER_HOUR = 3600;
@@ -42,8 +44,9 @@ public class ElectricalTransition implements StateObserver {
   /** Constant representing the number of milliseconds in a second. Used for energy calculations. */
   private static final long MILLISECONDS_PER_SECOND = 1000;
 
-  public ElectricalTransition(ChargerStateMachine stateMachine) {
+  public ElectricalTransition(ChargerStateMachine stateMachine, OCPPWebSocketClient wsClient) {
     stateMachine.addObserver(this);
+    this.wsClient = wsClient;
   }
 
   /**
@@ -74,7 +77,9 @@ public class ElectricalTransition implements StateObserver {
     if (interval < 0) throw new IllegalArgumentException("interval must be nonnegative");
 
     long timeChargingSeconds =
-        (System.currentTimeMillis() - this.initialChargeTimestamp) / MILLISECONDS_PER_SECOND;
+        (wsClient.getScheduler().getTime().getSynchronizedTime().toInstant().toEpochMilli()
+                - this.initialChargeTimestamp)
+            / MILLISECONDS_PER_SECOND;
 
     // If the requested interval exceeds the actual charging time, adjust accordingly
     if (timeChargingSeconds < interval) {
@@ -92,7 +97,9 @@ public class ElectricalTransition implements StateObserver {
   public float getEnergyActiveImportRegister() {
     float currentSessionEnergy = 0.0f;
     if (initialChargeTimestamp > 0) {
-      long timeCharging = System.currentTimeMillis() - this.initialChargeTimestamp;
+      long timeCharging =
+          wsClient.getScheduler().getTime().getSynchronizedTime().toInstant().toEpochMilli()
+              - this.initialChargeTimestamp;
       currentSessionEnergy =
           getPowerActiveImport() * ((float) timeCharging / MILLISECONDS_PER_HOUR);
     }
@@ -130,7 +137,9 @@ public class ElectricalTransition implements StateObserver {
     // If we're leaving the Charging state, accumulate the current session energy.
     if (chargerState != ChargerState.Charging) {
       if (initialChargeTimestamp != 0) { // Only if there was an active charging session.
-        long timeCharging = System.currentTimeMillis() - this.initialChargeTimestamp;
+        long timeCharging =
+            wsClient.getScheduler().getTime().getSynchronizedTime().toInstant().toEpochMilli()
+                - this.initialChargeTimestamp;
         float sessionEnergy =
             getPowerActiveImport() * ((float) timeCharging / MILLISECONDS_PER_HOUR);
         lifetimeEnergy += sessionEnergy;
@@ -146,7 +155,8 @@ public class ElectricalTransition implements StateObserver {
       isCharging = true;
       this.voltage = this.nominalVoltage;
       // Set a new start time for this charging session.
-      this.initialChargeTimestamp = System.currentTimeMillis();
+      this.initialChargeTimestamp =
+          wsClient.getScheduler().getTime().getSynchronizedTime().toInstant().toEpochMilli();
     }
   }
 }

@@ -1,5 +1,6 @@
 package com.sim_backend.websockets.enums;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -7,8 +8,13 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ChargingProfileKind {
+  @SerializedName("Absolute")
   ABSOLUTE("Absolute"),
+
+  @SerializedName("Recurring")
   RECURRING("Recurring"),
+
+  @SerializedName("Relative")
   RELATIVE("Relative");
 
   private final String value;

@@ -1,5 +1,6 @@
 package com.sim_backend.websockets.enums;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,9 +10,11 @@ import lombok.RequiredArgsConstructor;
 public enum RecurrencyKind {
 
   /** Daily recurrency type. */
+  @SerializedName("Daily")
   DAILY("Daily"),
 
   /** Weekly recurrency type. */
+  @SerializedName("Weekly")
   WEEKLY("Weekly");
 
   // String value associated with each enum constant

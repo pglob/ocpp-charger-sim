@@ -13,6 +13,45 @@ import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 
+/* TODO: This class is a work in progress. The following is what is missing.
+
+Profile Kind Handling
+- The OCPP 1.6 spec defines a chargingProfileKind (Absolute, Recurring, or 
+Relative) that determines how the schedule is interpreted. This implementation
+does not distinguish between these kinds or implement logic to handle recurring
+or relative profiles.
+
+Recurring Charging Profiles
+- There is no support for recurring profiles (e.g. daily or weekly recurrences).
+The implementation only considers one‐off validFrom/validTo time windows and
+does not support the recurring logic defined in the standard.
+
+Connectors
+- In OCPP 1.6, a charging profile may apply to a specific connector (or even
+to all connectors). The current implementation does not account for a
+connectorId or any filtering based on which connector a profile should control.
+
+Charging Profile ID's
+- Charging profile Id uniqueness is not enforced.
+
+Profile Removal
+- The only profile management is via adding new profiles. There is no facility
+for removing an existing charging profile as required by OCPP.
+
+Validation and Ordering of Schedule Periods
+- The implementation assumes that the list of chargingSchedulePeriod entries
+is already ordered and contiguous. It does not enforce or validate that the
+schedule periods cover the intended time span without gaps or conflicts.
+
+Additional Schedule Parameters
+- Some optional fields such as minChargingRate are not handled.
+
+Error Handling and Profile Maintenance
+- Some fields defined by OCPP (like chargingProfileId, transactionId in
+non‐TX_PROFILE contexts, and proper handling of validFrom/validTo) are either
+assumed to be correct or not fully verified.
+- TxProfiles are not removed after a transaction is ended.
+*/
 @Getter
 public class ChargingProfileHandler {
   TransactionHandler transactionHandler;
@@ -148,11 +187,11 @@ public class ChargingProfileHandler {
       for (int j = 0; j < schedule.getChargingSchedulePeriod().size(); j++) {
         long startPeriod =
             schedule.getChargingSchedulePeriod().get(j).getStartPeriod() * 1000L + startReference;
-        if (startReference + startPeriod < convertedTime) {
+        if (startPeriod < convertedTime) {
           limit = schedule.getChargingSchedulePeriod().get(j).getLimit();
         }
 
-        if (startReference + startPeriod > convertedTime) {
+        if (startPeriod > convertedTime) {
           break;
         }
       }
