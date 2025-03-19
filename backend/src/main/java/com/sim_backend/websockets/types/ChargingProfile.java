@@ -8,9 +8,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 /** Represents a charging profile that defines how a vehicle should be charged. */
 @Getter
+@Setter
 @AllArgsConstructor
 public class ChargingProfile {
 

@@ -5,10 +5,12 @@ import com.sim_backend.state.ChargerState;
 import com.sim_backend.state.ChargerStateMachine;
 import com.sim_backend.transactions.TransactionHandler;
 import com.sim_backend.websockets.OCPPWebSocketClient;
+import com.sim_backend.websockets.enums.ChargingProfilePurpose;
 import com.sim_backend.websockets.events.OnOCPPMessage;
 import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.RemoteStartTransaction;
 import com.sim_backend.websockets.messages.RemoteStartTransactionResponse;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Observer that handles Getting RemoteStartTransaction requests and response. */
 public class RemoteStartTransactionObserver implements OnOCPPMessageListener {
@@ -43,9 +45,13 @@ public class RemoteStartTransactionObserver implements OnOCPPMessageListener {
       throw new ClassCastException("Message is not an RemoteStartTransaction Request");
     }
 
-    if (stateMachine.getCurrentState() != ChargerState.Available) {
+    if (checkState(stateMachine.getCurrentState(), transactionHandler.getStartInProgress())) {
       System.out.println(
           "Invalid State Detected... Current State: " + stateMachine.getCurrentState());
+      RemoteStartTransactionResponse response =
+          new RemoteStartTransactionResponse(request, "Rejected");
+      client.pushMessage(response);
+
     } else {
 
       if (configurationRegistry.isAuthorizeRemoteTxRequests()) {
@@ -54,15 +60,39 @@ public class RemoteStartTransactionObserver implements OnOCPPMessageListener {
             "RemoteStartTransaction Authorization Required, Sending Authorization Request...");
         transactionHandler.startCharging(request.getConnectorId(), request.getIdTag());
       } else {
-        System.out.println("RemoteStartTransaction Request Received... Starting Transaction...");
-        stateMachine.checkAndTransition(ChargerState.Available, ChargerState.Preparing);
-        stateMachine.checkAndTransition(ChargerState.Preparing, ChargerState.Charging);
+        transactionHandler
+            .getStartHandler()
+            .initiateStartTransaction(
+                request.getConnectorId(),
+                request.getIdTag(),
+                transactionHandler.getTransactionId(),
+                transactionHandler.getElec(),
+                transactionHandler.getStartInProgress());
+        transactionHandler.setIdTag(request.getIdTag());
       }
     }
+
+    request.getChargingProfile().setChargingProfilePurpose(ChargingProfilePurpose.TX_PROFILE);
+    transactionHandler
+        .getElec()
+        .getChargingProfileHandler()
+        .addChargingProfile(request.getChargingProfile());
 
     // Send response
     RemoteStartTransactionResponse response =
         new RemoteStartTransactionResponse(request, "Accepted");
     client.pushMessage(response);
+  }
+
+  // Check if it's okay to start transaction
+  public boolean checkState(ChargerState state, AtomicBoolean startinprogress) {
+    if (state != ChargerState.Available || startinprogress.get()) {
+      return false;
+    }
+    if (!startinprogress.compareAndSet(false, true)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

@@ -14,6 +14,7 @@ import com.sim_backend.websockets.messages.AuthorizeResponse;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Manages transaction operations for the Charger, including the initiation of start and stop
@@ -21,6 +22,7 @@ import lombok.Getter;
  * stopping a transaction
  */
 @Getter
+@Setter
 public class TransactionHandler {
   /** Handler for initiating a StartTransaction operation */
   private StartTransactionHandler startHandler;

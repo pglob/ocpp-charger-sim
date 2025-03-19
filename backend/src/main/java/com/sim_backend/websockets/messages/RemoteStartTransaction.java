@@ -2,7 +2,7 @@ package com.sim_backend.websockets.messages;
 
 import com.google.gson.annotations.SerializedName;
 import com.sim_backend.websockets.annotations.OCPPMessageInfo;
-import com.sim_backend.websockets.messages.SetChargingProfile.*;
+import com.sim_backend.websockets.types.ChargingProfile;
 import com.sim_backend.websockets.types.OCPPMessage;
 import com.sim_backend.websockets.types.OCPPMessageRequest;
 import jakarta.validation.constraints.Min;
