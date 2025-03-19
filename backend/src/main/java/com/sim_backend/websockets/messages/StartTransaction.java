@@ -18,7 +18,6 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @OCPPMessageInfo(messageCallID = OCPPMessage.CALL_ID_REQUEST, messageName = "StartTransaction")
 public class StartTransaction extends OCPPMessageRequest implements Cloneable {
-
   @SerializedName("connectorId")
   private int connectorId;
 
