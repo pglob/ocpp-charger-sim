@@ -16,7 +16,7 @@ import lombok.Getter;
 /* TODO: This class is a work in progress. The following is what is missing.
 
 Profile Kind Handling
-- The OCPP 1.6 spec defines a chargingProfileKind (Absolute, Recurring, or 
+- The OCPP 1.6 spec defines a chargingProfileKind (Absolute, Recurring, or
 Relative) that determines how the schedule is interpreted. This implementation
 does not distinguish between these kinds or implement logic to handle recurring
 or relative profiles.
