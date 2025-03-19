@@ -11,7 +11,6 @@ import com.sim_backend.websockets.events.OnOCPPMessageListener;
 import com.sim_backend.websockets.messages.RemoteStartTransaction;
 import com.sim_backend.websockets.messages.RemoteStartTransactionResponse;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 /** Observer that handles Getting RemoteStartTransaction requests and response. */
 public class RemoteStartTransactionObserver implements OnOCPPMessageListener {
 
@@ -51,7 +50,6 @@ public class RemoteStartTransactionObserver implements OnOCPPMessageListener {
       RemoteStartTransactionResponse response =
           new RemoteStartTransactionResponse(request, "Rejected");
       client.pushMessage(response);
-
     } else {
 
       if (configurationRegistry.isAuthorizeRemoteTxRequests()) {
