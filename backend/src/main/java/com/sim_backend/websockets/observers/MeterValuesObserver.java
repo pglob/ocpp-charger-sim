@@ -134,7 +134,7 @@ public class MeterValuesObserver implements StateObserver {
     if (newState == ChargerState.Charging) {
       meterTask =
           scheduler.periodicFunctionJob(
-              30,
+              interval,
               interval,
               TimeUnit.SECONDS,
               () -> sendMeterValues(ReadingContext.SAMPLE_PERIODIC));

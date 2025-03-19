@@ -22,6 +22,7 @@ public class SetChargingProfileObserver implements OnOCPPMessageListener {
     this.electricalTransition = electricalTransition;
     electricalTransition.setChargingProfileHandler(chargingProfileHandler);
     this.client = client;
+    this.client.onReceiveMessage(SetChargingProfile.class, this);
   }
 
   /**

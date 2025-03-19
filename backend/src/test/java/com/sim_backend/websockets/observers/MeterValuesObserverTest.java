@@ -145,13 +145,13 @@ public class MeterValuesObserverTest {
     when(config.getMeterValueSampleInterval()).thenReturn(10);
     // Create a dummy repeating task to simulate scheduling
     RepeatingTimedTask dummyTask = mock(RepeatingTimedTask.class);
-    when(scheduler.periodicFunctionJob(eq(30L), eq(10L), eq(TimeUnit.SECONDS), any()))
+    when(scheduler.periodicFunctionJob(eq(10L), eq(10L), eq(TimeUnit.SECONDS), any()))
         .thenReturn(dummyTask);
 
     observer.onStateChanged(ChargerState.Charging);
 
     // Verify that a periodic job was scheduled
-    verify(scheduler).periodicFunctionJob(eq(30L), eq(10L), eq(TimeUnit.SECONDS), any());
+    verify(scheduler).periodicFunctionJob(eq(10L), eq(10L), eq(TimeUnit.SECONDS), any());
   }
 
   @Test
@@ -159,7 +159,7 @@ public class MeterValuesObserverTest {
     when(config.getMeterValueSampleInterval()).thenReturn(10);
     // Create a dummy repeating task
     RepeatingTimedTask dummyTask = mock(RepeatingTimedTask.class);
-    when(scheduler.periodicFunctionJob(eq(30L), eq(10L), eq(TimeUnit.SECONDS), any()))
+    when(scheduler.periodicFunctionJob(eq(10L), eq(10L), eq(TimeUnit.SECONDS), any()))
         .thenReturn(dummyTask);
 
     // Transition to Charging to schedule the task.
