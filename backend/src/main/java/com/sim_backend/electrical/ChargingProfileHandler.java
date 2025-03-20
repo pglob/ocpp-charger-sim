@@ -51,6 +51,10 @@ Error Handling and Profile Maintenance
 non‐TX_PROFILE contexts, and proper handling of validFrom/validTo) are either
 assumed to be correct or not fully verified.
 - TxProfiles are not removed after a transaction is ended.
+
+Thread Safety
+- If the charging profile lists are updated while a limit is getting checked,
+it will cause issues.
 */
 @Getter
 public class ChargingProfileHandler {
