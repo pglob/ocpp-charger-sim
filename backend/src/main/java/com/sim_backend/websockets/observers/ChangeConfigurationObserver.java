@@ -67,6 +67,17 @@ public class ChangeConfigurationObserver implements OnOCPPMessageListener {
           status = "Rejected";
         }
         break;
+      case "authorizeRemoteTxRequests":
+        try {
+          boolean value = Boolean.parseBoolean(request.getValue().toString());
+          registry.setAuthorizeRemoteTxRequests(value);
+          System.out.println("Successfully Applied Change to authorizeRemoteTxRequests.");
+          status = "Accepted";
+        } catch (Exception e) {
+          System.err.println("Invalid Value Format Detected...");
+          status = "Rejected";
+        }
+        break;
       default:
         System.err.println("Invalid Key Detected...");
         status = "NotSupported";
