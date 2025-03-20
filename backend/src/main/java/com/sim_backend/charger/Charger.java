@@ -14,6 +14,8 @@ import com.sim_backend.websockets.observers.ChangeAvailabilityObserver;
 import com.sim_backend.websockets.observers.ChangeConfigurationObserver;
 import com.sim_backend.websockets.observers.GetConfigurationObserver;
 import com.sim_backend.websockets.observers.MeterValuesObserver;
+import com.sim_backend.websockets.observers.RemoteStartTransactionObserver;
+import com.sim_backend.websockets.observers.RemoteStopTransactionObserver;
 import com.sim_backend.websockets.observers.SetChargingProfileObserver;
 import com.sim_backend.websockets.observers.StatusNotificationObserver;
 import com.sim_backend.websockets.observers.TriggerMessageObserver;
@@ -28,7 +30,6 @@ import lombok.Setter;
  */
 @Getter
 public class Charger {
-
   /** The simulator's ID for this charger. */
   private int id;
 
@@ -125,6 +126,11 @@ public class Charger {
           new TriggerMessageObserver(wsClient, stateMachine, meterValueObserver);
       SetChargingProfileObserver setChargingProfileObserver =
           new SetChargingProfileObserver(elec.getChargingProfileHandler(), elec, wsClient);
+      RemoteStartTransactionObserver remoteStartTransactionObserver =
+          new RemoteStartTransactionObserver(wsClient, config, transactionHandler, stateMachine);
+      RemoteStopTransactionObserver remoteStopTransactionObserver =
+          new RemoteStopTransactionObserver(wsClient, transactionHandler);
+      meterValueObserver.instantiate(wsClient, stateMachine, transactionHandler, elec, config);
 
       meterValueObserver.instantiate(wsClient, stateMachine, transactionHandler, elec, config);
       statusNotificationObserver.setClient(wsClient);

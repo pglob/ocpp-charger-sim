@@ -57,6 +57,9 @@ public class ConfigurationRegistry {
   /** A sample meter value interval. */
   private int MeterValueSampleInterval = 30;
 
+  /** Authorize data for Remote Transaction */
+  private boolean authorizeRemoteTxRequests;
+
   /** Sample meter value data. */
   private MeterValuesSampledData meterValuesSampledData =
       MeterValuesSampledData.ENERGY_ACTIVE_IMPORT_REGISTER;
@@ -64,6 +67,7 @@ public class ConfigurationRegistry {
   public ConfigurationRegistry(String idTag, String centralSystemUrl) {
     this.idTag = idTag;
     this.centralSystemUrl = centralSystemUrl;
+    this.authorizeRemoteTxRequests = true;
   }
 
   private static final String CONFIG_FILE_PATH = "config.properties";
