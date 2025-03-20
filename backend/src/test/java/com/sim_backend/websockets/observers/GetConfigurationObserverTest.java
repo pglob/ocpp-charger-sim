@@ -72,10 +72,12 @@ public class GetConfigurationObserverTest {
 
     System.out.println(response);
 
-    assert response.getConfigurationKey().size() == 2;
+    assert response.getConfigurationKey().size() == 3;
     assert response.getConfigurationKey().get(0).getKey().equals("MeterValueSampleInterval");
     assert response.getConfigurationKey().get(0).getValue().equals("30");
     assert response.getConfigurationKey().get(1).getKey().equals("MeterValuesSampledData");
     assert response.getConfigurationKey().get(1).getValue().equals("ENERGY_ACTIVE_IMPORT_REGISTER");
+    assert response.getConfigurationKey().get(2).getKey().equals("authorizeRemoteTxRequests");
+    assert response.getConfigurationKey().get(2).getValue().equals("true");
   }
 }

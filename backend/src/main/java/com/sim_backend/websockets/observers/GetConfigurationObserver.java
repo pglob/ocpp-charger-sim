@@ -57,6 +57,11 @@ public class GetConfigurationObserver implements OnOCPPMessageListener {
               "MeterValuesSampledData",
               String.valueOf(registry.getMeterValuesSampledData()),
               false));
+      configurationInfo.add(
+          new GetConfigurationResponse.Configuration(
+              "authorizeRemoteTxRequests",
+              String.valueOf(registry.isAuthorizeRemoteTxRequests()),
+              false));
     } else {
       int count = 0;
       for (String key : request.getKey()) {
@@ -72,6 +77,11 @@ public class GetConfigurationObserver implements OnOCPPMessageListener {
           configurationInfo.add(
               new GetConfigurationResponse.Configuration(
                   key, String.valueOf(registry.getMeterValuesSampledData()), false));
+          count++;
+        } else if ("authorizeRemoteTxRequests".equals(key)) {
+          configurationInfo.add(
+              new GetConfigurationResponse.Configuration(
+                  key, String.valueOf(registry.isAuthorizeRemoteTxRequests()), false));
           count++;
         } else {
           unknownKeys.add(key);

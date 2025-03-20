@@ -45,20 +45,22 @@ public class RemoteStartTransactionObserver implements OnOCPPMessageListener {
       throw new ClassCastException("Message is not an RemoteStartTransaction Request");
     }
 
-    if (checkState(stateMachine.getCurrentState(), transactionHandler.getStartInProgress())) {
+    if (configurationRegistry.isAuthorizeRemoteTxRequests()) {
+
       System.out.println(
-          "Invalid State Detected... Current State: " + stateMachine.getCurrentState());
-      RemoteStartTransactionResponse response =
-          new RemoteStartTransactionResponse(request, "Rejected");
-      client.pushMessage(response);
+          "RemoteStartTransaction Authorization Required, Sending Authorization Request...");
+      transactionHandler.startCharging(request.getConnectorId(), request.getIdTag());
     } else {
 
-      if (configurationRegistry.isAuthorizeRemoteTxRequests()) {
-
+      if (checkState(stateMachine.getCurrentState(), transactionHandler.getStartInProgress())) {
         System.out.println(
-            "RemoteStartTransaction Authorization Required, Sending Authorization Request...");
-        transactionHandler.startCharging(request.getConnectorId(), request.getIdTag());
+            "RemoteStartTransaction Failed, Check current state or if StartTransaction is in progress"
+                + stateMachine.getCurrentState());
+        RemoteStartTransactionResponse response =
+            new RemoteStartTransactionResponse(request, "Rejected");
+        client.pushMessage(response);
       } else {
+
         transactionHandler
             .getStartHandler()
             .initiateStartTransaction(
@@ -71,7 +73,10 @@ public class RemoteStartTransactionObserver implements OnOCPPMessageListener {
       }
     }
 
-    request.getChargingProfile().setChargingProfilePurpose(ChargingProfilePurpose.TX_PROFILE);
+    if (request.getChargingProfile() != null) {
+      request.getChargingProfile().setChargingProfilePurpose(ChargingProfilePurpose.TX_PROFILE);
+    }
+
     transactionHandler
         .getElec()
         .getChargingProfileHandler()
